@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terminal macOS — Backend Developer · Hướng dẫn toàn tập</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --acc:#c3e88d;--acc-d:#7aad3a;--acc-dim:rgba(195,232,141,.11);--acc-glow:rgba(195,232,141,.24);
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --blue:#5ba8ff;--blue-dim:rgba(91,168,255,.10);
+  --purple:#a07af4;--purple-dim:rgba(160,122,244,.10);
+  --yellow:#ffd060;--yellow-dim:rgba(255,208,96,.10);
+  --teal:#30d8c0;--teal-dim:rgba(48,216,192,.10);
+  --orange:#ff8c50;--orange-dim:rgba(255,140,80,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  --sky:#38bdf8;--sky-dim:rgba(56,189,248,.10);
+  /* Terminal topic colors */
+  --t1:#c3e88d;--t1-dim:rgba(195,232,141,.11);--t1-glow:rgba(195,232,141,.26);
+  --t2:#82aaff;--t2-dim:rgba(130,170,255,.11);--t2-glow:rgba(130,170,255,.26);
+  --t3:#ffcb6b;--t3-dim:rgba(255,203,107,.11);--t3-glow:rgba(255,203,107,.26);
+  --t4:#c792ea;--t4-dim:rgba(199,146,234,.11);--t4-glow:rgba(199,146,234,.26);
+  --t5:#f78c6c;--t5-dim:rgba(247,140,108,.11);--t5-glow:rgba(247,140,108,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--t1),var(--acc-d));display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#111;box-shadow:0 0 26px var(--t1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--t1),var(--t2),var(--t3),var(--t4),var(--t5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--t1-dim);color:var(--t1)}.ngh-2{background:var(--t2-dim);color:var(--t2)}
+.ngh-3{background:var(--t3-dim);color:var(--t3)}.ngh-4{background:var(--t4-dim);color:var(--t4)}
+.ngh-5{background:var(--t5-dim);color:var(--t5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(195,232,141,.07);border-left-color:var(--t1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;background:var(--t1-dim);color:var(--t1)}
+
+/* ── MAIN / HERO ── */
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(195,232,141,.08) 0%,transparent 62%),
+    radial-gradient(ellipse 45% 55% at 12% 82%,rgba(130,170,255,.06) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 45% at 50% 50%,rgba(255,203,107,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(195,232,141,.07) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--t1-dim);border:1px solid rgba(195,232,141,.35);color:var(--t1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--t1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--t1)}
+.h-grad{background:linear-gradient(135deg,var(--t1) 0%,var(--t2) 50%,var(--t3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--t1-dim);color:var(--t1)}.chip-2{background:var(--t2-dim);color:var(--t2)}
+.chip-3{background:var(--t3-dim);color:var(--t3)}.chip-4{background:var(--t4-dim);color:var(--t4)}
+.chip-5{background:var(--t5-dim);color:var(--t5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+.chip-b{background:var(--blue-dim);color:var(--blue)}.chip-t{background:var(--teal-dim);color:var(--teal)}
+
+/* ── CAT BANNER ── */
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--t1-dim);border:1px solid rgba(195,232,141,.28)}.cb-1::before{background:linear-gradient(90deg,var(--t1),var(--t2))}
+.cb-2{background:var(--t2-dim);border:1px solid rgba(130,170,255,.28)}.cb-2::before{background:linear-gradient(90deg,var(--t2),var(--t1))}
+.cb-3{background:var(--t3-dim);border:1px solid rgba(255,203,107,.28)}.cb-3::before{background:linear-gradient(90deg,var(--t3),var(--t5))}
+.cb-4{background:var(--t4-dim);border:1px solid rgba(199,146,234,.28)}.cb-4::before{background:linear-gradient(90deg,var(--t4),var(--t2))}
+.cb-5{background:var(--t5-dim);border:1px solid rgba(247,140,108,.28)}.cb-5::before{background:linear-gradient(90deg,var(--t5),var(--t3))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--t1-dim);color:var(--t1)}.cb-2 .cb-badge{background:var(--t2-dim);color:var(--t2)}
+.cb-3 .cb-badge{background:var(--t3-dim);color:var(--t3)}.cb-4 .cb-badge{background:var(--t4-dim);color:var(--t4)}
+.cb-5 .cb-badge{background:var(--t5-dim);color:var(--t5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+/* ── CONTENT / SECTION ── */
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--t1);background:var(--t1-dim);border:1px solid var(--t1-glow)}
+.st-2{color:var(--t2);background:var(--t2-dim);border:1px solid var(--t2-glow)}
+.st-3{color:var(--t3);background:var(--t3-dim);border:1px solid var(--t3-glow)}
+.st-4{color:var(--t4);background:var(--t4-dim);border:1px solid var(--t4-glow)}
+.st-5{color:var(--t5);background:var(--t5-dim);border:1px solid var(--t5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--t1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+
+/* ── GRIDS & CARDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--t1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── TERMINAL CODE BLOCKS ── */
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--t1-dim);color:var(--t1)}.ct-2{background:var(--t2-dim);color:var(--t2)}
+.ct-3{background:var(--t3-dim);color:var(--t3)}.ct-4{background:var(--t4-dim);color:var(--t4)}
+.ct-5{background:var(--t5-dim);color:var(--t5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.ct-b{background:var(--blue-dim);color:var(--blue)}.ct-t{background:var(--teal-dim);color:var(--teal)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+/* Terminal syntax colors */
+.tc-prompt{color:#c3e88d}         /* $ prompt */
+.tc-cmd{color:#82aaff}            /* command */
+.tc-flag{color:#ffcb6b}           /* -flag --option */
+.tc-path{color:#c3e88d}           /* paths */
+.tc-str{color:#c3e88d}            /* strings */
+.tc-arg{color:#f78c6c}            /* arguments */
+.tc-cmt{color:#546e7a;font-style:italic}  /* # comments */
+.tc-out{color:#546e7a}            /* output */
+.tc-ok{color:#40d88e}             /* success output */
+.tc-err{color:#ff6584}            /* error output */
+.tc-hl{color:#ffd060}             /* highlight */
+.tc-pipe{color:#89ddff}           /* | pipe */
+.tc-redirect{color:#c792ea}       /* > >> redirects */
+.tc-var{color:#f78c6c}            /* $VAR */
+
+/* ── SHORTCUT TABLE ── */
+.kbd-table{width:100%;border-collapse:collapse;margin:13px 0}
+.kbd-table th{background:var(--s3);padding:9px 14px;text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.kbd-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.kbd-table tr:hover td{background:rgba(255,255,255,.025)}
+.kbd-desc{font-size:13px;color:var(--muted)}
+.kbds{display:flex;gap:4px;flex-wrap:wrap}
+kbd{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--t1);background:var(--t1-dim);border:1px solid rgba(195,232,141,.3);border-radius:5px;padding:3px 8px;white-space:nowrap}
+
+/* ── INFO BOXES ── */
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:var(--green-dim);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:var(--yellow-dim);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:var(--blue-dim);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+.i-note{background:var(--purple-dim);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:var(--pink-dim);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+
+/* ── RW BOX ── */
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--t1)}.rw-2::before{background:var(--t2)}.rw-3::before{background:var(--t3)}
+.rw-4::before{background:var(--t4)}.rw-5::before{background:var(--t5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--t1)}.rw-2 .rw-label{color:var(--t2)}.rw-3 .rw-label{color:var(--t3)}
+.rw-4 .rw-label{color:var(--t4)}.rw-5 .rw-label{color:var(--t5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--t1)}
+
+/* ── STEPS ── */
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--t1);background:var(--t1-dim);border:2px solid var(--t1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── CHEAT SHEET ── */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--t1)}.h4-2{color:var(--t2)}.h4-3{color:var(--t3)}.h4-4{color:var(--t4)}.h4-5{color:var(--t5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted)}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t1)}
+
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(195,232,141,.08);color:var(--t1);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">⌘</div>
+      <div class="logo-text"><h2>Terminal macOS</h2><p>Backend Developer · Hướng dẫn</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Bắt đầu</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🚀</span> Setup iTerm2 + Zsh</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🟢 Navigation & File</div>
+    <a href="#s1" class="nav-link"><span class="ico">🧭</span> Điều hướng thư mục</a>
+    <a href="#s2" class="nav-link"><span class="ico">📁</span> Quản lý file &amp; thư mục</a>
+    <a href="#s3" class="nav-link"><span class="ico">🔍</span> Tìm kiếm &amp; grep</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🔵 Shell &amp; Productivity</div>
+    <a href="#s4" class="nav-link"><span class="ico">⌨️</span> Shortcut bàn phím</a>
+    <a href="#s5" class="nav-link"><span class="ico">📜</span> History &amp; fzf</a>
+    <a href="#s6" class="nav-link"><span class="ico">🔁</span> Alias &amp; Functions</a>
+    <a href="#s7" class="nav-link"><span class="ico">🖥️</span> Tmux &amp; Multiplexing</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Backend Dev Tools</div>
+    <a href="#s8"  class="nav-link"><span class="ico">☕</span> Java / Maven / Gradle</a>
+    <a href="#s9"  class="nav-link"><span class="ico">🐳</span> Docker &amp; Compose</a>
+    <a href="#s10" class="nav-link"><span class="ico">🐙</span> Git Workflow</a>
+    <a href="#s11" class="nav-link"><span class="ico">🌐</span> curl, httpie, APIs</a>
+    <a href="#s12" class="nav-link"><span class="ico">🗄️</span> Database CLI</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟣 Monitoring &amp; Debug</div>
+    <a href="#s13" class="nav-link"><span class="ico">📊</span> Process &amp; Resource</a>
+    <a href="#s14" class="nav-link"><span class="ico">🌊</span> Log &amp; Stream</a>
+    <a href="#s15" class="nav-link"><span class="ico">🔌</span> Network &amp; Port</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🟠 Scripts &amp; Automation</div>
+    <a href="#s16" class="nav-link"><span class="ico">📝</span> Shell Scripts thực tế</a>
+    <a href="#s17" class="nav-link"><span class="ico">🔐</span> SSH &amp; Remote Server</a>
+    <a href="#s18" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> macOS · iTerm2 · Zsh · Oh My Zsh · Backend Developer</div>
+  <h1><span class="h-acc">Terminal</span><br><span class="h-grad">MacBook Pro</span></h1>
+  <p class="hero-desc">Hướng dẫn toàn tập sử dụng Terminal trên macOS cho Backend Developer — từ setup iTerm2, Zsh, các lệnh thiết yếu, Docker, Git, đến script tự động hóa workflow hàng ngày.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">iTerm2 + Oh My Zsh</span>
+    <span class="chip chip-2">Navigation</span>
+    <span class="chip chip-3">Docker CLI</span>
+    <span class="chip chip-4">Git Workflow</span>
+    <span class="chip chip-5">Shell Scripts</span>
+    <span class="chip chip-r">fzf + ripgrep</span>
+    <span class="chip chip-b">SSH + Remote</span>
+    <span class="chip chip-t">Monitoring</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════ S0 — SETUP ════ -->
+<div class="section" id="s0">
+  <div class="sec-head">
+    <span class="sec-tag st-1">SETUP</span>
+    <div><h2 class="sec-title">Setup iTerm2 + Zsh + Oh My Zsh</h2>
+    <p class="sec-sub">Biến Terminal macOS thành môi trường làm việc chuyên nghiệp cho Backend Dev</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tại sao cần setup?</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">🪟</div><div class="card-title" style="color:var(--t1)">Split Panes</div><div class="card-desc">iTerm2 chia màn hình nhiều terminal cùng lúc — code + log + docker.</div></div>
+      <div class="card"><div class="card-icon">⚡</div><div class="card-title" style="color:var(--t2)">Autocompletion</div><div class="card-desc">Zsh + plugins gợi ý lệnh thông minh, tự hoàn thành path, git branch.</div></div>
+      <div class="card"><div class="card-icon">🎨</div><div class="card-title" style="color:var(--t3)">Themes</div><div class="card-desc">Powerlevel10k prompt đẹp, hiện git status, virtualenv, exit code ngay trên prompt.</div></div>
+      <div class="card"><div class="card-icon">🔍</div><div class="card-title" style="color:var(--t4)">Fuzzy Search</div><div class="card-desc">fzf tìm kiếm history, file, process với tốc độ chớp mắt.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bước 1 — Cài đặt Homebrew + iTerm2 + Zsh tools</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Terminal — Cài đặt toàn bộ môi trường</span><span class="cb-tag ct-1">Setup</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Bước 1: Homebrew (package manager của macOS) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">/bin/bash</span> <span class="tc-flag">-c</span> <span class="tc-str">"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</span>
+
+<span class="tc-cmt"># Sau cài đặt — thêm vào PATH (Apple Silicon)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">echo</span> <span class="tc-str">'eval "$(/opt/homebrew/bin/brew shellenv)"'</span> <span class="tc-redirect">>></span> ~/.zprofile
+
+<span class="tc-cmt"># ── Bước 2: iTerm2 ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install <span class="tc-flag">--cask</span> iterm2
+
+<span class="tc-cmt"># ── Bước 3: Oh My Zsh ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sh</span> <span class="tc-flag">-c</span> <span class="tc-str">"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"</span>
+
+<span class="tc-cmt"># ── Bước 4: Powerlevel10k theme (prompt đẹp nhất) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install romkatv/powerlevel10k/powerlevel10k
+<span class="tc-prompt">$</span> <span class="tc-cmd">echo</span> <span class="tc-str">'source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme'</span> <span class="tc-redirect">>></span> ~/.zshrc
+<span class="tc-cmt"># Khởi động lại iTerm2 → wizard sẽ hỏi cài font và cấu hình prompt</span>
+
+<span class="tc-cmt"># ── Bước 5: Zsh plugins thiết yếu ──</span>
+<span class="tc-cmt"># zsh-autosuggestions — gợi ý lệnh từ history (màu xám)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> clone https://github.com/zsh-users/zsh-autosuggestions \
+    ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+<span class="tc-cmt"># zsh-syntax-highlighting — tô màu lệnh đúng/sai ngay khi gõ</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> clone https://github.com/zsh-users/zsh-syntax-highlighting \
+    ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+<span class="tc-cmt"># ── Bước 6: Công cụ thiết yếu cho Backend Dev ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install \
+    fzf          <span class="tc-cmt"># fuzzy finder</span>
+    ripgrep      <span class="tc-cmt"># rg — grep nhanh hơn 10x</span>
+    bat          <span class="tc-cmt"># cat với syntax highlighting</span>
+    eza          <span class="tc-cmt"># ls đẹp hơn (thay thế exa)</span>
+    fd           <span class="tc-cmt"># find nhanh hơn</span>
+    jq           <span class="tc-cmt"># xử lý JSON trên terminal</span>
+    htop         <span class="tc-cmt"># process monitor đẹp</span>
+    tldr         <span class="tc-cmt"># man page ngắn gọn</span>
+    httpie       <span class="tc-cmt"># http client thân thiện</span>
+    gh           <span class="tc-cmt"># GitHub CLI</span>
+    k9s          <span class="tc-cmt"># Kubernetes UI trên terminal</span>
+
+<span class="tc-cmt"># fzf — cài thêm keybindings (Ctrl+R history, Ctrl+T file)</span>
+<span class="tc-prompt">$</span> $(brew --prefix)/opt/fzf/install</pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bước 2 — Cấu hình ~/.zshrc</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">~/.zshrc — Cấu hình tối ưu cho Backend Dev</span><span class="cb-tag ct-1">Config</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ~/.zshrc — Backend Developer config</span>
+
+<span class="tc-cmt"># ── Oh My Zsh ──</span>
+<span class="tc-var">ZSH</span>=<span class="tc-str">"$HOME/.oh-my-zsh"</span>
+<span class="tc-var">ZSH_THEME</span>=<span class="tc-str">""</span>  <span class="tc-cmt"># dùng Powerlevel10k thay</span>
+<span class="tc-var">plugins</span>=(
+    git                      <span class="tc-cmt"># git shortcuts: gst, gco, gp...</span>
+    zsh-autosuggestions      <span class="tc-cmt"># gợi ý từ history</span>
+    zsh-syntax-highlighting  <span class="tc-cmt"># highlight khi gõ</span>
+    docker                   <span class="tc-cmt"># docker autocomplete</span>
+    docker-compose
+    kubectl
+    gradle
+    mvn
+    history                  <span class="tc-cmt"># h alias cho history</span>
+    z                        <span class="tc-cmt"># jump đến thư mục hay dùng</span>
+    fzf
+)
+source <span class="tc-var">$ZSH</span>/oh-my-zsh.sh
+
+<span class="tc-cmt"># ── PATH ──</span>
+export <span class="tc-var">PATH</span>=<span class="tc-str">"/opt/homebrew/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"</span>
+export <span class="tc-var">JAVA_HOME</span>=<span class="tc-str">$(/usr/libexec/java_home -v 21)</span>
+
+<span class="tc-cmt"># ── fzf — giao diện tìm kiếm đẹp hơn ──</span>
+export <span class="tc-var">FZF_DEFAULT_COMMAND</span>=<span class="tc-str">'fd --type f --hidden --follow --exclude .git'</span>
+export <span class="tc-var">FZF_DEFAULT_OPTS</span>=<span class="tc-str">"--height 40% --layout=reverse --border --preview 'bat --color=always {}'"</span>
+
+<span class="tc-cmt"># ── Thay thế lệnh cũ bằng tools mới ──</span>
+alias <span class="tc-var">ls</span>=<span class="tc-str">'eza --icons --group-directories-first'</span>
+alias <span class="tc-var">ll</span>=<span class="tc-str">'eza -la --icons --git --group-directories-first'</span>
+alias <span class="tc-var">lt</span>=<span class="tc-str">'eza --tree --level=2 --icons'</span>
+alias <span class="tc-var">cat</span>=<span class="tc-str">'bat --style=numbers,changes'</span>
+alias <span class="tc-var">grep</span>=<span class="tc-str">'rg'</span>
+alias <span class="tc-var">find</span>=<span class="tc-str">'fd'</span>
+
+<span class="tc-cmt"># ── Git shortcuts ──</span>
+alias <span class="tc-var">gs</span>=<span class="tc-str">'git status'</span>
+alias <span class="tc-var">gl</span>=<span class="tc-str">'git log --oneline --graph --decorate --all'</span>
+alias <span class="tc-var">gd</span>=<span class="tc-str">'git diff'</span>
+alias <span class="tc-var">gds</span>=<span class="tc-str">'git diff --staged'</span>
+
+<span class="tc-cmt"># ── Docker shortcuts ──</span>
+alias <span class="tc-var">dk</span>=<span class="tc-str">'docker'</span>
+alias <span class="tc-var">dkps</span>=<span class="tc-str">'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'</span>
+alias <span class="tc-var">dkl</span>=<span class="tc-str">'docker logs -f'</span>
+alias <span class="tc-var">dc</span>=<span class="tc-str">'docker compose'</span>
+
+<span class="tc-cmt"># ── Project shortcuts ──</span>
+alias <span class="tc-var">work</span>=<span class="tc-str">'cd ~/Projects'</span>
+alias <span class="tc-var">desk</span>=<span class="tc-str">'cd ~/Desktop'</span>
+alias <span class="tc-var">zshrc</span>=<span class="tc-str">'code ~/.zshrc'</span>   <span class="tc-cmt"># mở zshrc trong VSCode</span>
+alias <span class="tc-var">reload</span>=<span class="tc-str">'source ~/.zshrc'</span>  <span class="tc-cmt"># reload config</span></pre></div>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">iTerm2 Profiles:</strong> Tạo Profile riêng cho từng project (dev, staging, prod). Gán màu title bar khác nhau để tránh nhầm lẫn production. Shortcut <kbd>⌘</kbd><kbd>O</kbd> mở Profile Switcher.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 1 BANNER ════ -->
+<div class="cat-banner cb-1">
+  <div class="cb-icon">🟢</div>
+  <div><div class="cb-badge">NAVIGATION &amp; FILE SYSTEM</div>
+  <div class="cb-title">Điều hướng &amp; Quản lý File</div>
+  <div class="cb-sub">cd · ls · find · grep · ripgrep — làm chủ filesystem từ terminal</div></div>
+</div>
+
+<!-- ════ S1 — NAVIGATION ════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-tag st-1">NAVIGATION</span>
+    <div><h2 class="sec-title">Điều hướng thư mục nhanh</h2>
+    <p class="sec-sub">cd, pushd/popd, z — di chuyển thư mục như pro</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Lệnh navigation thiết yếu</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Navigation commands</span><span class="cb-tag ct-1">Navigation</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Cơ bản ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pwd</span>                          <span class="tc-cmt"># in đường dẫn hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cd</span> <span class="tc-path">~/Projects/my-service</span>      <span class="tc-cmt"># vào thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cd</span> <span class="tc-flag">-</span>                          <span class="tc-cmt"># quay lại thư mục trước đó (toggle)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cd</span> ..                         <span class="tc-cmt"># lên 1 cấp</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cd</span> ../..                      <span class="tc-cmt"># lên 2 cấp</span>
+
+<span class="tc-cmt"># ── pushd/popd — stack thư mục ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pushd</span> <span class="tc-path">/etc</span>                   <span class="tc-cmt"># vào /etc, lưu vị trí hiện tại vào stack</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pushd</span> <span class="tc-path">/var/log</span>               <span class="tc-cmt"># vào /var/log, stack = [/etc, ~/Projects]</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dirs</span> <span class="tc-flag">-v</span>                       <span class="tc-cmt"># xem stack</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">popd</span>                          <span class="tc-cmt"># quay về /etc</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">popd</span>                          <span class="tc-cmt"># quay về ~/Projects</span>
+
+<span class="tc-cmt"># ── z — jump thông minh (học từ history) ──</span>
+<span class="tc-cmt"># Sau khi dùng ~/Projects/my-service vài lần:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">z</span> <span class="tc-arg">my-service</span>                 <span class="tc-cmt"># tự jump đến ~/Projects/my-service</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">z</span> <span class="tc-arg">proj</span>                        <span class="tc-cmt"># jump đến thư mục gần nhất khớp với "proj"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">zi</span>                            <span class="tc-cmt"># interactive mode với fzf</span>
+
+<span class="tc-cmt"># ── ls với eza ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ll</span>                            <span class="tc-cmt"># list chi tiết + git status</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ll</span> <span class="tc-flag">--sort=modified</span>            <span class="tc-cmt"># sắp theo ngày sửa</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lt</span>                            <span class="tc-cmt"># tree view 2 cấp</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">eza</span> <span class="tc-flag">--tree --level=3</span> <span class="tc-path">src/</span>    <span class="tc-cmt"># tree 3 cấp của src/</span>
+
+<span class="tc-cmt"># ── open trong Finder hoặc VSCode ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">open</span> .                        <span class="tc-cmt"># mở thư mục hiện tại trong Finder</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">open</span> <span class="tc-flag">-a</span> <span class="tc-arg">Finder</span> <span class="tc-path">~/Projects</span>   <span class="tc-cmt"># mở path cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">code</span> .                        <span class="tc-cmt"># mở VSCode tại thư mục hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">idea</span> .                        <span class="tc-cmt"># mở IntelliJ IDEA</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2 — FILE MANAGEMENT ════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-tag st-1">FILES</span>
+    <div><h2 class="sec-title">Quản lý File &amp; Thư mục</h2>
+    <p class="sec-sub">cp, mv, rm, mkdir, chmod — thao tác file an toàn và hiệu quả</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Thao tác file thường dùng</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">File operations — cp, mv, rm, mkdir, permissions</span><span class="cb-tag ct-1">Files</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">mkdir</span> <span class="tc-flag">-p</span> <span class="tc-path">src/main/java/com/company</span>   <span class="tc-cmt"># tạo cả cấu trúc nếu chưa có</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">touch</span> <span class="tc-path">application.yml</span>                 <span class="tc-cmt"># tạo file trống</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">touch</span> <span class="tc-path">{dev,test,prod}.yml</span>             <span class="tc-cmt"># tạo nhiều file cùng lúc (brace expansion)</span>
+
+<span class="tc-cmt"># ── Copy ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cp</span> <span class="tc-path">app.yml</span> <span class="tc-path">app.yml.bak</span>               <span class="tc-cmt"># backup</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cp</span> <span class="tc-flag">-r</span> <span class="tc-path">src/</span> <span class="tc-path">src_backup/</span>              <span class="tc-cmt"># copy thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cp</span> <span class="tc-flag">-rp</span> <span class="tc-path">src/</span> <span class="tc-path">dest/</span>                  <span class="tc-cmt"># giữ nguyên permissions</span>
+
+<span class="tc-cmt"># ── Move / Rename ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">mv</span> <span class="tc-path">old-name.java</span> <span class="tc-path">NewName.java</span>       <span class="tc-cmt"># rename</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">mv</span> <span class="tc-path">*.log</span> <span class="tc-path">logs/</span>                      <span class="tc-cmt"># di chuyển tất cả .log vào logs/</span>
+
+<span class="tc-cmt"># ── Xóa ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rm</span> <span class="tc-path">file.txt</span>                          <span class="tc-cmt"># xóa file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rm</span> <span class="tc-flag">-rf</span> <span class="tc-path">target/</span>                      <span class="tc-cmt"># xóa thư mục (cẩn thận!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rm</span> <span class="tc-flag">-i</span> <span class="tc-path">*.log</span>                         <span class="tc-cmt"># -i hỏi trước khi xóa từng file</span>
+<span class="tc-cmt"># Tip: alias rm='rm -i' để luôn hỏi trước khi xóa</span>
+
+<span class="tc-cmt"># ── Đọc file ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> <span class="tc-path">application.yml</span>                 <span class="tc-cmt"># in ra (bat nếu đã alias)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">less</span> <span class="tc-path">large-log.txt</span>                  <span class="tc-cmt"># xem cuộn (q để thoát)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">head</span> <span class="tc-flag">-20</span> <span class="tc-path">file.txt</span>                  <span class="tc-cmt"># 20 dòng đầu</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-50</span> <span class="tc-path">file.txt</span>                  <span class="tc-cmt"># 50 dòng cuối</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> <span class="tc-path">app.log</span>                    <span class="tc-cmt"># follow log real-time</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">wc</span> <span class="tc-flag">-l</span> <span class="tc-path">file.txt</span>                     <span class="tc-cmt"># đếm số dòng</span>
+
+<span class="tc-cmt"># ── Permissions ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">+x</span> <span class="tc-path">deploy.sh</span>                 <span class="tc-cmt"># thêm quyền execute</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">644</span> <span class="tc-path">config.yml</span>               <span class="tc-cmt"># rw-r--r--</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">755</span> <span class="tc-path">scripts/</span>                 <span class="tc-cmt"># rwxr-xr-x (thư mục scripts)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chown</span> <span class="tc-arg">user:group</span> <span class="tc-path">file.txt</span>         <span class="tc-cmt"># đổi owner</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ls</span> <span class="tc-flag">-la</span>                              <span class="tc-cmt"># xem permissions</span>
+
+<span class="tc-cmt"># ── Disk usage ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">df</span> <span class="tc-flag">-h</span>                              <span class="tc-cmt"># disk free human-readable</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">du</span> <span class="tc-flag">-sh</span> <span class="tc-path">target/</span>                    <span class="tc-cmt"># kích thước thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">du</span> <span class="tc-flag">-sh</span> <span class="tc-path">*/</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rh</span>             <span class="tc-cmt"># top thư mục lớn nhất</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ncdu</span> <span class="tc-path">.</span>                            <span class="tc-cmt"># interactive disk usage (brew install ncdu)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S3 — SEARCH & GREP ════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-tag st-1">SEARCH</span>
+    <div><h2 class="sec-title">Tìm kiếm &amp; Grep — rg nhanh hơn grep 10x</h2>
+    <p class="sec-sub">ripgrep, fd, find — tìm file và nội dung trong codebase lớn</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">ripgrep (rg) — tìm trong code</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">ripgrep + fd + fzf — search power combo</span><span class="cb-tag ct-1">Search</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── ripgrep (rg) — tìm nội dung trong file ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-str">"OrderService"</span>               <span class="tc-cmt"># tìm trong toàn project</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-flag">-i</span> <span class="tc-str">"todo"</span>                    <span class="tc-cmt"># case-insensitive</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-flag">-t</span> <span class="tc-arg">java</span> <span class="tc-str">"@Transactional"</span>   <span class="tc-cmt"># chỉ trong file .java</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-flag">-l</span> <span class="tc-str">"TODO"</span>                    <span class="tc-cmt"># -l chỉ in tên file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-flag">-n</span> <span class="tc-str">"NullPointer"</span>             <span class="tc-cmt"># -n hiện số dòng</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-str">"password"</span> <span class="tc-flag">--type-not</span> <span class="tc-arg">yaml</span>  <span class="tc-cmt"># loại trừ yaml</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-flag">-A 3 -B 3</span> <span class="tc-str">"catch.*Exception"</span> <span class="tc-cmt"># 3 dòng context trước/sau</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rg</span> <span class="tc-flag">--hidden</span> <span class="tc-str">"DB_PASSWORD"</span>       <span class="tc-cmt"># tìm trong hidden files (.env)</span>
+
+<span class="tc-cmt"># ── fd — find thông minh ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fd</span> <span class="tc-str">".java"</span>                       <span class="tc-cmt"># tìm tất cả .java</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fd</span> <span class="tc-flag">-t d</span> <span class="tc-str">"controller"</span>            <span class="tc-cmt"># tìm thư mục tên controller</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fd</span> <span class="tc-flag">--changed-within 1d</span>         <span class="tc-cmt"># file thay đổi trong 1 ngày</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fd</span> <span class="tc-flag">-e</span> <span class="tc-arg">yml</span> <span class="tc-flag">-x</span> <span class="tc-cmd">bat</span>              <span class="tc-cmt"># mở tất cả .yml với bat</span>
+
+<span class="tc-cmt"># ── fzf — fuzzy finder tương tác ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fzf</span>                             <span class="tc-cmt"># chọn file từ danh sách</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">code</span> $(fzf)                     <span class="tc-cmt"># chọn file rồi mở VSCode</span>
+
+<span class="tc-cmt"># fzf search trong history (Ctrl+R override)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">history</span> <span class="tc-pipe">|</span> <span class="tc-cmd">fzf</span>
+
+<span class="tc-cmt"># ── Tìm file lớn ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> . <span class="tc-flag">-name</span> <span class="tc-str">"*.log"</span> <span class="tc-flag">-size</span> <span class="tc-arg">+100M</span>   <span class="tc-cmt"># file .log lớn hơn 100MB</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> . <span class="tc-flag">-mtime -7</span> <span class="tc-flag">-name</span> <span class="tc-str">"*.java"</span>   <span class="tc-cmt"># java file sửa trong 7 ngày</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> . <span class="tc-flag">-name</span> <span class="tc-str">"*.class"</span> <span class="tc-flag">-delete</span>     <span class="tc-cmt"># tìm và xóa class files</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 2 BANNER ════ -->
+<div class="cat-banner cb-2">
+  <div class="cb-icon">🔵</div>
+  <div><div class="cb-badge">SHELL &amp; PRODUCTIVITY</div>
+  <div class="cb-title">Shell Shortcuts &amp; Automation</div>
+  <div class="cb-sub">Keyboard shortcuts · History · Alias · Functions · Tmux</div></div>
+</div>
+
+<!-- ════ S4 — SHORTCUTS ════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-tag st-2">SHORTCUTS</span>
+    <div><h2 class="sec-title">Shortcut bàn phím — Làm việc không cần chuột</h2>
+    <p class="sec-sub">Readline shortcuts và iTerm2 keybindings tăng tốc gõ lệnh</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Readline — điều hướng trong dòng lệnh</div>
+    <table class="kbd-table">
+      <thead><tr><th>Shortcut</th><th>Tác dụng</th><th>Dùng khi</th></tr></thead>
+      <tbody>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>A</kbd></div></td><td class="kbd-desc">Về đầu dòng (Home)</td><td class="kbd-desc">Sửa đầu lệnh dài</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>E</kbd></div></td><td class="kbd-desc">Về cuối dòng (End)</td><td class="kbd-desc">Thêm option vào cuối</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>W</kbd></div></td><td class="kbd-desc">Xóa word trước cursor</td><td class="kbd-desc">Sửa argument sai</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>U</kbd></div></td><td class="kbd-desc">Xóa từ cursor về đầu</td><td class="kbd-desc">Hủy lệnh đang gõ</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>K</kbd></div></td><td class="kbd-desc">Xóa từ cursor về cuối</td><td class="kbd-desc">Xóa phần đuôi</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>Y</kbd></div></td><td class="kbd-desc">Paste text vừa xóa (yank)</td><td class="kbd-desc">Undo xóa nhầm</td></tr>
+        <tr><td><div class="kbds"><kbd>Option</kbd><kbd>←</kbd></div></td><td class="kbd-desc">Nhảy sang word trái</td><td class="kbd-desc">Di chuyển giữa arguments</td></tr>
+        <tr><td><div class="kbds"><kbd>Option</kbd><kbd>→</kbd></div></td><td class="kbd-desc">Nhảy sang word phải</td><td class="kbd-desc">Di chuyển giữa arguments</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>R</kbd></div></td><td class="kbd-desc">Tìm kiếm history (fzf)</td><td class="kbd-desc">Tìm lại lệnh cũ</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>C</kbd></div></td><td class="kbd-desc">Hủy lệnh đang chạy</td><td class="kwd-desc">Kill process</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>Z</kbd></div></td><td class="kbd-desc">Suspend process (background)</td><td class="kbd-desc">Tạm dừng, làm việc khác</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>D</kbd></div></td><td class="kbd-desc">EOF / Đóng shell</td><td class="kbd-desc">Thoát shell/python REPL</td></tr>
+        <tr><td><div class="kbds"><kbd>Ctrl</kbd><kbd>L</kbd></div></td><td class="kbd-desc">Clear màn hình</td><td class="kbd-desc">Dọn terminal</td></tr>
+        <tr><td><div class="kbds"><kbd>Tab</kbd></div></td><td class="kbd-desc">Autocomplete</td><td class="kbd-desc">Gõ 2-3 ký tự rồi Tab</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sub">
+    <div class="sub-title">iTerm2 Shortcuts</div>
+    <table class="kbd-table">
+      <thead><tr><th>Shortcut</th><th>Tác dụng</th></tr></thead>
+      <tbody>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>D</kbd></div></td><td class="kbd-desc">Chia pane dọc (split vertical)</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>Shift</kbd><kbd>D</kbd></div></td><td class="kbd-desc">Chia pane ngang (split horizontal)</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>Option</kbd><kbd>←/→</kbd></div></td><td class="kbd-desc">Chuyển giữa các pane</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>T</kbd></div></td><td class="kbd-desc">Tab mới</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>1..9</kbd></div></td><td class="kbd-desc">Chuyển đến tab số n</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>F</kbd></div></td><td class="kbd-desc">Tìm kiếm trong terminal output</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>G</kbd></div></td><td class="kbd-desc">Tìm next match</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>K</kbd></div></td><td class="kbd-desc">Clear buffer (xóa toàn bộ)</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>;</kbd></div></td><td class="kbd-desc">Autocomplete từ history</td></tr>
+        <tr><td><div class="kbds"><kbd>⌘</kbd><kbd>Shift</kbd><kbd>H</kbd></div></td><td class="kbd-desc">Clipboard history</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ S5 — HISTORY & FZF ════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-tag st-2">HISTORY</span>
+    <div><h2 class="sec-title">History &amp; fzf — Tái sử dụng lệnh cũ</h2>
+    <p class="sec-sub">Không gõ lại lệnh phức tạp — tìm và reuse trong giây lát</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">History tricks và fzf magic</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">History commands + fzf integration</span><span class="cb-tag ct-2">History</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── History cơ bản ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">history</span>                       <span class="tc-cmt"># xem tất cả history</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">history</span> <span class="tc-arg">50</span>                    <span class="tc-cmt"># 50 lệnh cuối</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">history</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"docker"</span>      <span class="tc-cmt"># lọc history chứa "docker"</span>
+<span class="tc-prompt">$</span> !!                             <span class="tc-cmt"># chạy lại lệnh trước đó</span>
+<span class="tc-prompt">$</span> !docker                       <span class="tc-cmt"># chạy lại lệnh cuối bắt đầu bằng "docker"</span>
+<span class="tc-prompt">$</span> !123                          <span class="tc-cmt"># chạy lại lệnh số 123</span>
+<span class="tc-prompt">$</span> sudo !!                       <span class="tc-cmt"># chạy lại lệnh trước với sudo</span>
+
+<span class="tc-cmt"># ── Config history tốt hơn trong ~/.zshrc ──</span>
+<span class="tc-var">HISTSIZE</span>=<span class="tc-arg">50000</span>
+<span class="tc-var">SAVEHIST</span>=<span class="tc-arg">50000</span>
+<span class="tc-var">HISTFILE</span>=<span class="tc-str">~/.zsh_history</span>
+setopt <span class="tc-arg">HIST_IGNORE_DUPS</span>         <span class="tc-cmt"># không lưu duplicate</span>
+setopt <span class="tc-arg">HIST_IGNORE_SPACE</span>        <span class="tc-cmt"># lệnh bắt đầu bằng space không lưu (passwords!)</span>
+setopt <span class="tc-arg">SHARE_HISTORY</span>           <span class="tc-cmt"># chia sẻ history giữa các tab</span>
+setopt <span class="tc-arg">HIST_VERIFY</span>             <span class="tc-cmt"># hiện lệnh trước khi thực hiện !n</span>
+
+<span class="tc-cmt"># ── fzf magic ──</span>
+<span class="tc-cmt"># Ctrl+R → fuzzy search history (cực mạnh!)</span>
+<span class="tc-cmt"># Ctrl+T → fuzzy search file trong thư mục hiện tại</span>
+<span class="tc-cmt"># Alt+C  → fuzzy cd vào thư mục con</span>
+
+<span class="tc-cmt"># Kill process bằng fzf</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kill</span> <span class="tc-flag">-9</span> $(ps aux <span class="tc-pipe">|</span> fzf <span class="tc-pipe">|</span> awk '{print $2}')
+
+<span class="tc-cmt"># Checkout git branch bằng fzf</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> checkout $(git branch <span class="tc-pipe">|</span> fzf)
+
+<span class="tc-cmt"># Preview file khi tìm với fzf</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fzf</span> <span class="tc-flag">--preview</span> <span class="tc-str">'bat --color=always {}'</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S6 — ALIAS & FUNCTIONS ════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-tag st-2">ALIAS</span>
+    <div><h2 class="sec-title">Alias &amp; Functions — Tạo lệnh riêng</h2>
+    <p class="sec-sub">Rút gọn lệnh dài thành alias ngắn và viết function tái sử dụng</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Functions hữu ích cho Backend Developer</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">~/.zshrc — Alias và Functions thực tế</span><span class="cb-tag ct-2">Functions</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Thêm vào ~/.zshrc ──</span>
+
+<span class="tc-cmt"># mkcd — tạo thư mục rồi vào luôn</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">mkcd</span>() { <span class="tc-cmd">mkdir</span> <span class="tc-flag">-p</span> <span class="tc-var">$1</span> && <span class="tc-cmd">cd</span> <span class="tc-var">$1</span> ; }
+<span class="tc-cmt"># Dùng: mkcd ~/Projects/new-microservice</span>
+
+<span class="tc-cmt"># port — xem process nào đang dùng port</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">port</span>() { <span class="tc-cmd">lsof</span> <span class="tc-flag">-i</span> :<span class="tc-var">$1</span> ; }
+<span class="tc-cmt"># Dùng: port 8080</span>
+
+<span class="tc-cmt"># killport — kill process đang chiếm port</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">killport</span>() {
+    <span class="tc-cmd">lsof</span> <span class="tc-flag">-ti</span> :<span class="tc-var">$1</span> <span class="tc-pipe">|</span> <span class="tc-cmd">xargs</span> <span class="tc-cmd">kill</span> <span class="tc-flag">-9</span>
+    <span class="tc-cmd">echo</span> <span class="tc-str">"✅ Killed process on port $1"</span>
+}
+<span class="tc-cmt"># Dùng: killport 8080</span>
+
+<span class="tc-cmt"># jwt — decode JWT token (không cần internet)</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">jwt</span>() {
+    <span class="tc-cmd">echo</span> <span class="tc-var">$1</span> <span class="tc-pipe">|</span> <span class="tc-cmd">cut</span> <span class="tc-flag">-d.</span> <span class="tc-flag">-f2</span> <span class="tc-pipe">|</span> <span class="tc-cmd">base64</span> <span class="tc-flag">-d</span> 2>/dev/null <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> .
+}
+<span class="tc-cmt"># Dùng: jwt "eyJhbGci..."  → in payload JSON đẹp</span>
+
+<span class="tc-cmt"># envload — load .env file</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">envload</span>() {
+    export $(grep <span class="tc-flag">-v</span> <span class="tc-str">'^#'</span> ${<span class="tc-var">1:-.env</span>} <span class="tc-pipe">|</span> xargs)
+    <span class="tc-cmd">echo</span> <span class="tc-str">"✅ Loaded ${1:-.env}"</span>
+}
+<span class="tc-cmt"># Dùng: envload .env.local</span>
+
+<span class="tc-cmt"># gclone — clone và cd vào luôn</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">gclone</span>() {
+    <span class="tc-cmd">git</span> clone <span class="tc-var">$1</span> && <span class="tc-cmd">cd</span> $(basename <span class="tc-var">$1</span> .git)
+}
+<span class="tc-cmt"># Dùng: gclone https://github.com/company/service.git</span>
+
+<span class="tc-cmt"># backup — tạo backup nhanh</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">backup</span>() {
+    <span class="tc-cmd">cp</span> <span class="tc-var">$1</span> <span class="tc-str">"${1}.bak.$(date +%Y%m%d_%H%M%S)"</span>
+    <span class="tc-cmd">echo</span> <span class="tc-str">"✅ Backed up $1"</span>
+}
+<span class="tc-cmt"># Dùng: backup application.yml</span>
+
+<span class="tc-cmt"># springrun — chạy Spring Boot với profile</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">springrun</span>() {
+    <span class="tc-cmd">./mvnw</span> spring-boot:run <span class="tc-flag">-Dspring-boot.run.profiles</span>=<span class="tc-var">${1:-local}</span>
+}
+<span class="tc-cmt"># Dùng: springrun dev  /  springrun local</span>
+
+<span class="tc-cmt"># dklogs — docker logs với grep</span>
+<span class="tc-cmd">function</span> <span class="tc-hl">dklogs</span>() {
+    <span class="tc-cmd">docker</span> logs <span class="tc-flag">-f</span> --tail=<span class="tc-arg">200</span> <span class="tc-var">$1</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-i</span> <span class="tc-str">"${2:-error}"</span>
+}
+<span class="tc-cmt"># Dùng: dklogs my-api ERROR   (chỉ in dòng có ERROR)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S7 — TMUX ════ -->
+<div class="section" id="s7">
+  <div class="sec-head">
+    <span class="sec-tag st-2">TMUX</span>
+    <div><h2 class="sec-title">Tmux — Terminal Multiplexer</h2>
+    <p class="sec-sub">Session persist khi SSH disconnect · Nhiều pane trên 1 màn hình</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Workflow Tmux cho Backend Dev</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Tmux — session, window, pane management</span><span class="cb-tag ct-2">Tmux</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Cài đặt ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install tmux
+
+<span class="tc-cmt"># ── Session management ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tmux</span>                           <span class="tc-cmt"># tạo session mới</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tmux</span> new <span class="tc-flag">-s</span> <span class="tc-arg">backend</span>            <span class="tc-cmt"># tạo session tên "backend"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tmux</span> ls                        <span class="tc-cmt"># liệt kê sessions</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tmux</span> attach <span class="tc-flag">-t</span> <span class="tc-arg">backend</span>        <span class="tc-cmt"># vào lại session "backend"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tmux</span> kill-session <span class="tc-flag">-t</span> <span class="tc-arg">backend</span>  <span class="tc-cmt"># xóa session</span>
+
+<span class="tc-cmt"># ── Prefix key: Ctrl+B (mặc định), đổi sang Ctrl+A (thuận hơn) ──</span>
+
+<span class="tc-cmt"># ── Window (Tab) ──</span>
+<span class="tc-cmt"># Ctrl+B c    → tạo window mới</span>
+<span class="tc-cmt"># Ctrl+B 1..9 → chuyển window</span>
+<span class="tc-cmt"># Ctrl+B ,    → đặt tên window</span>
+<span class="tc-cmt"># Ctrl+B w    → list windows</span>
+<span class="tc-cmt"># Ctrl+B &    → đóng window hiện tại</span>
+
+<span class="tc-cmt"># ── Pane (Split) ──</span>
+<span class="tc-cmt"># Ctrl+B %    → chia dọc</span>
+<span class="tc-cmt"># Ctrl+B "    → chia ngang</span>
+<span class="tc-cmt"># Ctrl+B ←↑↓→ → chuyển pane</span>
+<span class="tc-cmt"># Ctrl+B z    → zoom pane (phóng to/thu nhỏ)</span>
+<span class="tc-cmt"># Ctrl+B x    → đóng pane</span>
+<span class="tc-cmt"># Ctrl+B d    → detach (session vẫn chạy)</span>
+
+<span class="tc-cmt"># ── ~/.tmux.conf — cấu hình tốt hơn ──</span>
+set <span class="tc-flag">-g</span> prefix C-a               <span class="tc-cmt"># đổi prefix thành Ctrl+A</span>
+unbind C-b
+bind C-a send-prefix
+
+set <span class="tc-flag">-g</span> mouse on               <span class="tc-cmt"># bật chuột (click để chọn pane)</span>
+set <span class="tc-flag">-g</span> history-limit 10000
+setw <span class="tc-flag">-g</span> mode-keys vi          <span class="tc-cmt"># vi-style copy mode</span>
+
+<span class="tc-cmt"># Split bằng | và -</span>
+bind | split-window <span class="tc-flag">-h</span>
+bind - split-window <span class="tc-flag">-v</span>
+
+<span class="tc-cmt"># ── Backend dev tmux session layout ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tmux</span> new <span class="tc-flag">-s</span> <span class="tc-arg">myproject</span>         <span class="tc-cmt"># Window 1: code</span>
+<span class="tc-cmt"># Ctrl+B c</span>                       <span class="tc-cmt"># Window 2: run spring</span>
+<span class="tc-cmt"># Ctrl+B c</span>                       <span class="tc-cmt"># Window 3: docker</span>
+<span class="tc-cmt"># Ctrl+B c</span>                       <span class="tc-cmt"># Window 4: logs</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 3 BANNER ════ -->
+<div class="cat-banner cb-3">
+  <div class="cb-icon">🟡</div>
+  <div><div class="cb-badge">BACKEND DEV TOOLS</div>
+  <div class="cb-title">Java · Docker · Git · API · Database</div>
+  <div class="cb-sub">Công cụ thiết yếu cho Backend Developer hàng ngày</div></div>
+</div>
+
+<!-- ════ S8 — JAVA / MAVEN / GRADLE ════ -->
+<div class="section" id="s8">
+  <div class="sec-head">
+    <span class="sec-tag st-3">JAVA</span>
+    <div><h2 class="sec-title">Java / Maven / Gradle trên Terminal</h2>
+    <p class="sec-sub">SDKMAN quản lý JDK, Maven/Gradle build commands</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">SDKMAN — quản lý nhiều phiên bản Java</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">SDKMAN + Maven + Gradle + Spring Boot</span><span class="cb-tag ct-3">Java</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── SDKMAN — quản lý JDK, Maven, Gradle ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> <span class="tc-str">"https://get.sdkman.io"</span> <span class="tc-pipe">|</span> <span class="tc-cmd">bash</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">sdk</span> install java 21-tem      <span class="tc-cmt"># cài JDK 21 (Temurin)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sdk</span> install java 17-tem      <span class="tc-cmt"># cài thêm JDK 17</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sdk</span> list java                <span class="tc-cmt"># xem các version có sẵn</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sdk</span> use java 17-tem          <span class="tc-cmt"># chuyển JDK trong terminal hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sdk</span> default java 21-tem      <span class="tc-cmt"># đặt JDK default</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">java</span> <span class="tc-flag">-version</span>               <span class="tc-cmt"># kiểm tra version</span>
+
+<span class="tc-cmt"># ── Maven ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> clean install          <span class="tc-cmt"># build + test</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> clean install <span class="tc-flag">-DskipTests</span>  <span class="tc-cmt"># build không test (nhanh hơn)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> test                   <span class="tc-cmt"># chỉ chạy test</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> test <span class="tc-flag">-pl</span> <span class="tc-arg">order-service</span>  <span class="tc-cmt"># test module cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> spring-boot:run        <span class="tc-cmt"># chạy Spring Boot</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> spring-boot:run <span class="tc-flag">-Dspring-boot.run.profiles</span>=dev
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> dependency:tree        <span class="tc-cmt"># xem dependency tree</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> versions:display-dependency-updates  <span class="tc-cmt"># check updates</span>
+
+<span class="tc-cmt"># Maven với nhiều thread (nhanh hơn)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> <span class="tc-flag">-T 4</span> clean install    <span class="tc-cmt"># dùng 4 thread</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./mvnw</span> <span class="tc-flag">-T 1C</span> clean install   <span class="tc-cmt"># 1 thread/CPU core</span>
+
+<span class="tc-cmt"># ── Gradle ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> build               <span class="tc-cmt"># build + test</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> bootRun              <span class="tc-cmt"># chạy Spring Boot</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> test                 <span class="tc-cmt"># chạy test</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> test <span class="tc-flag">--tests</span> <span class="tc-str">"*OrderServiceTest*"</span>  <span class="tc-cmt"># test cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> dependencies         <span class="tc-cmt"># xem dependencies</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> tasks                <span class="tc-cmt"># xem tất cả tasks</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./gradlew</span> <span class="tc-flag">--parallel --build-cache</span> build  <span class="tc-cmt"># tối ưu speed</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S9 — DOCKER ════ -->
+<div class="section" id="s9">
+  <div class="sec-head">
+    <span class="sec-tag st-3">DOCKER</span>
+    <div><h2 class="sec-title">Docker &amp; Compose — Container workflow</h2>
+    <p class="sec-sub">Build, run, debug containers từ terminal như một pro</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Docker commands thiết yếu cho Backend Dev</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Docker CLI — container, image, network, volume</span><span class="cb-tag ct-3">Docker</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Images ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> images                          <span class="tc-cmt"># danh sách images</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pull <span class="tc-arg">postgres:16</span>               <span class="tc-cmt"># pull image</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> build <span class="tc-flag">-t</span> <span class="tc-arg">my-app:1.0</span> .          <span class="tc-cmt"># build image</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> rmi <span class="tc-arg">my-app:1.0</span>                 <span class="tc-cmt"># xóa image</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image prune <span class="tc-flag">-a</span>                  <span class="tc-cmt"># dọn images không dùng</span>
+
+<span class="tc-cmt"># ── Containers ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> ps                               <span class="tc-cmt"># containers đang chạy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> ps <span class="tc-flag">-a</span>                            <span class="tc-cmt"># tất cả containers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-d</span> <span class="tc-flag">-p</span> <span class="tc-arg">5432:5432</span> \
+    <span class="tc-flag">-e</span> <span class="tc-arg">POSTGRES_PASSWORD=secret</span> \
+    <span class="tc-flag">--name</span> <span class="tc-arg">postgres</span> <span class="tc-arg">postgres:16</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stop <span class="tc-arg">postgres</span>                   <span class="tc-cmt"># dừng container</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> start <span class="tc-arg">postgres</span>                  <span class="tc-cmt"># khởi động lại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> rm <span class="tc-flag">-f</span> <span class="tc-arg">postgres</span>                 <span class="tc-cmt"># force xóa</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> container prune                  <span class="tc-cmt"># dọn containers stopped</span>
+
+<span class="tc-cmt"># ── Exec vào container ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec <span class="tc-flag">-it</span> <span class="tc-arg">postgres</span> <span class="tc-arg">bash</span>         <span class="tc-cmt"># vào bash</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec <span class="tc-flag">-it</span> <span class="tc-arg">postgres</span> <span class="tc-arg">psql</span> <span class="tc-flag">-U</span> <span class="tc-arg">admin</span><span class="tc-cmt"># vào psql trực tiếp</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec <span class="tc-arg">my-app</span> <span class="tc-arg">env</span>                <span class="tc-cmt"># xem env vars</span>
+
+<span class="tc-cmt"># ── Logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-arg">my-app</span>                     <span class="tc-cmt"># xem logs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-flag">-f</span> --tail=<span class="tc-arg">100</span> <span class="tc-arg">my-app</span>      <span class="tc-cmt"># follow 100 dòng cuối</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-arg">my-app</span> <span class="tc-flag">--since=30m</span>        <span class="tc-cmt"># logs 30 phút gần đây</span>
+
+<span class="tc-cmt"># ── Docker Compose ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d</span>                  <span class="tc-cmt"># start tất cả services (detached)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d</span> <span class="tc-arg">postgres kafka</span>   <span class="tc-cmt"># chỉ start chỉ định</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose down                    <span class="tc-cmt"># stop tất cả</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose down <span class="tc-flag">-v</span>                <span class="tc-cmt"># stop + xóa volumes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose logs <span class="tc-flag">-f</span> <span class="tc-arg">api</span>            <span class="tc-cmt"># follow logs service api</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose ps                      <span class="tc-cmt"># status</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose exec <span class="tc-arg">api</span> <span class="tc-arg">bash</span>          <span class="tc-cmt"># exec vào service api</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose restart <span class="tc-arg">api</span>            <span class="tc-cmt"># restart 1 service</span>
+
+<span class="tc-cmt"># ── Stats / Inspect ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stats                           <span class="tc-cmt"># live CPU/RAM usage</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect <span class="tc-arg">my-app</span> <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span>           <span class="tc-cmt"># full config dạng JSON</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect <span class="tc-flag">-f</span> <span class="tc-str">'{{.NetworkSettings.IPAddress}}'</span> <span class="tc-arg">my-app</span>  <span class="tc-cmt"># IP</span>
+
+<span class="tc-cmt"># ── Dọn dẹp hệ thống ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system prune <span class="tc-flag">-af</span>               <span class="tc-cmt"># dọn tất cả! (cẩn thận)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system df                       <span class="tc-cmt"># xem dung lượng Docker dùng</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S10 — GIT ════ -->
+<div class="section" id="s10">
+  <div class="sec-head">
+    <span class="sec-tag st-3">GIT</span>
+    <div><h2 class="sec-title">Git Workflow — Terminal-first</h2>
+    <p class="sec-sub">Những lệnh git nâng cao giúp làm việc nhanh hơn mà GUI không làm được</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Git commands nâng cao cho Backend Dev</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Git advanced workflow — branch, rebase, stash, bisect</span><span class="cb-tag ct-3">Git</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Log đẹp ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> log <span class="tc-flag">--oneline --graph --all --decorate</span>  <span class="tc-cmt"># xem graph đẹp</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> log <span class="tc-flag">--author="Nguyen"</span> <span class="tc-flag">--since="1 week ago"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> log <span class="tc-flag">-p</span> <span class="tc-path">src/service/OrderService.java</span>  <span class="tc-cmt"># lịch sử 1 file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> log <span class="tc-flag">--stat</span> <span class="tc-flag">--oneline</span> <span class="tc-flag">-10</span>  <span class="tc-cmt"># 10 commit + files changed</span>
+
+<span class="tc-cmt"># ── Stash — tạm cất code chưa commit ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> stash push <span class="tc-flag">-m</span> <span class="tc-str">"WIP: add payment service"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> stash list                 <span class="tc-cmt"># danh sách stash</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> stash pop                  <span class="tc-cmt"># lấy lại stash mới nhất</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> stash apply stash@{2}      <span class="tc-cmt"># áp dụng stash cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> stash drop stash@{0}       <span class="tc-cmt"># xóa stash</span>
+
+<span class="tc-cmt"># ── Rebase — giữ history gọn ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> rebase <span class="tc-arg">main</span>               <span class="tc-cmt"># rebase branch hiện tại lên main</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> rebase <span class="tc-flag">-i</span> HEAD~<span class="tc-arg">3</span>          <span class="tc-cmt"># interactive rebase 3 commit cuối (squash, edit...)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> rebase <span class="tc-flag">--abort</span>             <span class="tc-cmt"># hủy rebase nếu conflict</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> rebase <span class="tc-flag">--continue</span>          <span class="tc-cmt"># tiếp tục sau khi resolve conflict</span>
+
+<span class="tc-cmt"># ── Tìm bug với bisect ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> bisect start
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> bisect bad                  <span class="tc-cmt"># commit hiện tại là bad</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> bisect good v2.0.0          <span class="tc-cmt"># tag/commit trước đó là good</span>
+<span class="tc-cmt"># Git tự binary search → chạy test → đánh bad/good → tìm commit gây bug!</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> bisect reset                <span class="tc-cmt"># kết thúc bisect</span>
+
+<span class="tc-cmt"># ── Cherry-pick — lấy commit từ branch khác ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> cherry-pick <span class="tc-arg">abc1234</span>        <span class="tc-cmt"># lấy 1 commit cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> cherry-pick <span class="tc-arg">abc..def</span>       <span class="tc-cmt"># range commits</span>
+
+<span class="tc-cmt"># ── Undo / Fix ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> commit <span class="tc-flag">--amend --no-edit</span>   <span class="tc-cmt"># thêm file vào commit vừa rồi</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> reset HEAD~1 <span class="tc-flag">--soft</span>        <span class="tc-cmt"># undo commit nhưng giữ staged files</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> restore <span class="tc-arg">file.java</span>         <span class="tc-cmt"># discard changes file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> restore <span class="tc-flag">--staged</span> <span class="tc-arg">file.java</span> <span class="tc-cmt"># unstage file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">git</span> reflog                     <span class="tc-cmt"># xem mọi hành động → recovery</span>
+
+<span class="tc-cmt"># ── Alias git hữu ích trong ~/.gitconfig ──</span>
+<span class="tc-cmt"># [alias]</span>
+<span class="tc-cmt">#   lg  = log --oneline --graph --all --decorate</span>
+<span class="tc-cmt">#   st  = status -s</span>
+<span class="tc-cmt">#   co  = checkout</span>
+<span class="tc-cmt">#   br  = branch</span>
+<span class="tc-cmt">#   undo = reset HEAD~1 --soft</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S11 — CURL, HTTPIE ════ -->
+<div class="section" id="s11">
+  <div class="sec-head">
+    <span class="sec-tag st-3">API</span>
+    <div><h2 class="sec-title">curl, HTTPie &amp; jq — Test API từ terminal</h2>
+    <p class="sec-sub">Gọi REST API, format JSON response, debug không cần Postman</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">curl và HTTPie cho Backend Dev</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">curl + HTTPie + jq — API testing workflow</span><span class="cb-tag ct-3">API Testing</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── curl — universal, có sẵn trên mọi server ──</span>
+<span class="tc-cmt"># GET với Authorization header</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> <span class="tc-flag">-H</span> <span class="tc-str">"Authorization: Bearer $TOKEN"</span> \
+    https://api.dev/orders <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> .
+
+<span class="tc-cmt"># POST với JSON body</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s -X POST</span> https://api.dev/orders \
+    <span class="tc-flag">-H</span> <span class="tc-str">"Content-Type: application/json"</span> \
+    <span class="tc-flag">-H</span> <span class="tc-str">"Authorization: Bearer $TOKEN"</span> \
+    <span class="tc-flag">-d</span> <span class="tc-str">'{"customerId":"c1","items":[{"sku":"SKU01","qty":2}]}'</span> \
+    <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> .
+
+<span class="tc-cmt"># Xem headers response</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-I</span> https://api.dev/health      <span class="tc-cmt"># chỉ headers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-v</span> https://api.dev/health      <span class="tc-cmt"># verbose (headers + body)</span>
+
+<span class="tc-cmt"># Upload file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-F</span> <span class="tc-str">"file=@invoice.pdf"</span> https://api.dev/upload
+
+<span class="tc-cmt"># ── HTTPie — thân thiện hơn curl ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">http</span> GET https://api.dev/orders <span class="tc-arg">Authorization:"Bearer $TOKEN"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">http</span> POST https://api.dev/orders \
+    <span class="tc-arg">Authorization:"Bearer $TOKEN"</span> \
+    <span class="tc-arg">customerId=c1</span> <span class="tc-arg">items:='[{"sku":"SKU01","qty":2}]'</span>
+
+<span class="tc-cmt"># HTTPie session (tự lưu auth, cookies)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">http</span> <span class="tc-flag">--session=dev</span> POST https://api.dev/login \
+    <span class="tc-arg">email=admin@dev.com</span> <span class="tc-arg">password=secret</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">http</span> <span class="tc-flag">--session=dev</span> GET https://api.dev/orders  <span class="tc-cmt"># tự gửi token</span>
+
+<span class="tc-cmt"># ── jq — xử lý JSON output ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> https://api.dev/orders <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-str">'.'</span>           <span class="tc-cmt"># pretty print</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> https://api.dev/orders <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-str">'.data[0]'</span>     <span class="tc-cmt"># phần tử đầu</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> https://api.dev/orders <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-str">'.data | length'</span> <span class="tc-cmt"># đếm</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> https://api.dev/orders <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-str">'.data[].id'</span>   <span class="tc-cmt"># extract IDs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-s</span> https://api.dev/orders <span class="tc-pipe">|</span> \
+    <span class="tc-cmd">jq</span> <span class="tc-str">'[.data[] | select(.status=="PENDING") | {id, total}]'</span>
+
+<span class="tc-cmt"># ── Biến TOKEN thuận tiện ──</span>
+<span class="tc-prompt">$</span> <span class="tc-var">TOKEN</span>=$(curl <span class="tc-flag">-s -X POST</span> https://api.dev/auth/login \
+    <span class="tc-flag">-H</span> <span class="tc-str">"Content-Type: application/json"</span> \
+    <span class="tc-flag">-d</span> <span class="tc-str">'{"email":"admin@test.com","password":"secret"}'</span> \
+    <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-flag">-r</span> <span class="tc-str">'.accessToken'</span>)
+<span class="tc-prompt">$</span> <span class="tc-cmd">echo</span> <span class="tc-var">$TOKEN</span>                   <span class="tc-cmt"># xác nhận có token</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S12 — DATABASE CLI ════ -->
+<div class="section" id="s12">
+  <div class="sec-head">
+    <span class="sec-tag st-3">DATABASE</span>
+    <div><h2 class="sec-title">Database CLI — PostgreSQL &amp; MySQL &amp; Redis</h2>
+    <p class="sec-sub">psql, mycli, redis-cli — tương tác DB trực tiếp từ terminal</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">PostgreSQL với psql</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">psql + mycli + redis-cli</span><span class="cb-tag ct-3">Database</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── PostgreSQL ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">psql</span> <span class="tc-flag">-h</span> localhost <span class="tc-flag">-U</span> admin <span class="tc-flag">-d</span> shopdb   <span class="tc-cmt"># kết nối</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">psql</span> <span class="tc-str">"postgresql://admin:secret@localhost:5432/shopdb"</span>
+
+<span class="tc-cmt"># Trong psql:</span>
+<span class="tc-cmt"># \l        → list databases</span>
+<span class="tc-cmt"># \c shopdb → connect database</span>
+<span class="tc-cmt"># \dt       → list tables</span>
+<span class="tc-cmt"># \d orders → describe table orders</span>
+<span class="tc-cmt"># \x        → expanded mode (dữ liệu dọc, dễ đọc)</span>
+<span class="tc-cmt"># \timing   → bật timing query</span>
+<span class="tc-cmt"># \q        → thoát</span>
+
+<span class="tc-cmt"># Chạy SQL không cần vào REPL</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">psql</span> <span class="tc-flag">-U</span> admin shopdb <span class="tc-flag">-c</span> <span class="tc-str">"SELECT COUNT(*) FROM orders WHERE status='PENDING';"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">psql</span> <span class="tc-flag">-U</span> admin shopdb <span class="tc-flag">-f</span> <span class="tc-path">migration.sql</span>   <span class="tc-cmt"># chạy file SQL</span>
+
+<span class="tc-cmt"># Backup / Restore</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pg_dump</span> <span class="tc-flag">-U</span> admin shopdb <span class="tc-redirect">></span> backup_$(date +%Y%m%d).sql
+<span class="tc-prompt">$</span> <span class="tc-cmd">psql</span> <span class="tc-flag">-U</span> admin shopdb <span class="tc-flag"><</span> backup_20250322.sql
+
+<span class="tc-cmt"># ── MySQL (dùng mycli — autocomplete + syntax highlighting) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install mycli
+<span class="tc-prompt">$</span> <span class="tc-cmd">mycli</span> <span class="tc-flag">-h</span> localhost <span class="tc-flag">-u</span> root <span class="tc-flag">-p</span> shopdb
+<span class="tc-cmt"># mycli tốt hơn mysql CLI: autocomplete, syntax color, multi-line query</span>
+
+<span class="tc-cmt"># ── Redis ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">redis-cli</span>                           <span class="tc-cmt"># connect localhost:6379</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">redis-cli</span> <span class="tc-flag">-h</span> redis.dev <span class="tc-flag">-p</span> 6379 <span class="tc-flag">-a</span> <span class="tc-arg">password</span>
+
+<span class="tc-cmt"># Trong redis-cli:</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">KEYS</span> <span class="tc-str">"session:*"</span>               <span class="tc-cmt"># tìm keys</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">GET</span> <span class="tc-str">"session:abc123"</span>           <span class="tc-cmt"># đọc value</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">TTL</span> <span class="tc-str">"session:abc123"</span>           <span class="tc-cmt"># xem TTL (giây)</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">TYPE</span> <span class="tc-str">"mykey"</span>                   <span class="tc-cmt"># xem type (string, hash, list...)</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">HGETALL</span> <span class="tc-str">"user:123"</span>            <span class="tc-cmt"># đọc Hash</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">DEL</span> <span class="tc-str">"session:abc123"</span>          <span class="tc-cmt"># xóa key</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">FLUSHDB</span>                        <span class="tc-cmt"># xóa toàn bộ (cẩn thận!)</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">INFO</span> memory                    <span class="tc-cmt"># thông tin bộ nhớ</span>
+<span class="tc-prompt">></span> <span class="tc-cmd">MONITOR</span>                        <span class="tc-cmt"># real-time stream commands</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 4 BANNER ════ -->
+<div class="cat-banner cb-4">
+  <div class="cb-icon">🟣</div>
+  <div><div class="cb-badge">MONITORING &amp; DEBUG</div>
+  <div class="cb-title">Process · Log · Network</div>
+  <div class="cb-sub">htop · tail -f · lsof · netstat — debug vấn đề production</div></div>
+</div>
+
+<!-- ════ S13 — PROCESS & RESOURCE ════ -->
+<div class="section" id="s13">
+  <div class="sec-head">
+    <span class="sec-tag st-4">PROCESS</span>
+    <div><h2 class="sec-title">Process &amp; Resource Monitoring</h2>
+    <p class="sec-sub">ps, htop, top — tìm process ăn CPU/RAM và kill đúng target</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Monitoring process trên macOS</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Process monitoring — ps, htop, activity</span><span class="cb-tag ct-4">Process</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── htop — interactive process manager ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">htop</span>                           <span class="tc-cmt"># F5 = tree view, F9 = kill, F6 = sort</span>
+
+<span class="tc-cmt"># ── ps — tìm process cụ thể ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux                         <span class="tc-cmt"># tất cả processes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"java"</span>          <span class="tc-cmt"># tìm process java</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pgrep</span> <span class="tc-flag">-f</span> <span class="tc-str">"spring"</span>              <span class="tc-cmt"># lấy PID của process có "spring"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pgrep</span> <span class="tc-flag">-la</span> <span class="tc-str">"java"</span>              <span class="tc-cmt"># PID + tên</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pkill</span> <span class="tc-flag">-f</span> <span class="tc-str">"my-service"</span>          <span class="tc-cmt"># kill process bằng tên</span>
+
+<span class="tc-cmt"># ── CPU / Memory top consumers ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rk</span> <span class="tc-arg">3</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-10</span>  <span class="tc-cmt"># top CPU</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rk</span> <span class="tc-arg">4</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-10</span>  <span class="tc-cmt"># top RAM</span>
+
+<span class="tc-cmt"># ── top shortcuts ──</span>
+<span class="tc-cmt"># top → M (sort by memory) → C (sort by CPU) → q (quit)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">top</span> <span class="tc-flag">-o</span> <span class="tc-arg">cpu</span> <span class="tc-flag">-n</span> <span class="tc-arg">10</span>              <span class="tc-cmt"># sort by CPU, chỉ 10 processes</span>
+
+<span class="tc-cmt"># ── Java cụ thể ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">jps</span> <span class="tc-flag">-lv</span>                        <span class="tc-cmt"># liệt kê Java processes + JVM flags</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">jstat</span> <span class="tc-flag">-gcutil</span> <span class="tc-arg">$PID</span> <span class="tc-arg">1000</span>      <span class="tc-cmt"># GC stats mỗi 1 giây</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">jmap</span> <span class="tc-flag">-heap</span> <span class="tc-arg">$PID</span>               <span class="tc-cmt"># heap summary</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">jstack</span> <span class="tc-arg">$PID</span>                    <span class="tc-cmt"># thread dump (diagnose deadlock)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">jcmd</span> <span class="tc-arg">$PID</span> VM.flags             <span class="tc-cmt"># JVM flags thực tế</span>
+
+<span class="tc-cmt"># ── macOS Activity Monitor từ CLI ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">vm_stat</span>                        <span class="tc-cmt"># memory stats (macOS)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sysctl</span> <span class="tc-flag">-n</span> hw.ncpu              <span class="tc-cmt"># số CPU cores</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sysctl</span> <span class="tc-flag">-n</span> hw.memsize           <span class="tc-cmt"># tổng RAM (bytes)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S14 — LOG & STREAM ════ -->
+<div class="section" id="s14">
+  <div class="sec-head">
+    <span class="sec-tag st-4">LOGS</span>
+    <div><h2 class="sec-title">Log &amp; Stream — Phân tích log hiệu quả</h2>
+    <p class="sec-sub">tail, grep, awk — tìm lỗi trong log file hàng GB không cần mở editor</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Log analysis workflow</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Log analysis — tail, grep, awk, multitail</span><span class="cb-tag ct-4">Logs</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Follow log real-time ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> <span class="tc-path">app.log</span>                           <span class="tc-cmt"># follow file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> <span class="tc-path">app.log</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-i</span> <span class="tc-str">"error"</span>         <span class="tc-cmt"># chỉ dòng ERROR</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> <span class="tc-path">app.log</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-v</span> <span class="tc-str">"healthcheck"</span>  <span class="tc-cmt"># loại trừ healthcheck noise</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> <span class="tc-path">app.log</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-E</span> <span class="tc-str">"ERROR|WARN"</span>   <span class="tc-cmt"># nhiều pattern</span>
+
+<span class="tc-cmt"># ── Đếm và thống kê ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-c</span> <span class="tc-str">"ERROR"</span> <span class="tc-path">app.log</span>                  <span class="tc-cmt"># đếm số lần xuất hiện</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-str">"ERROR"</span> <span class="tc-path">app.log</span> <span class="tc-pipe">|</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{print $1}'</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-pipe">|</span> <span class="tc-cmd">uniq</span> <span class="tc-flag">-c</span>  <span class="tc-cmt"># theo ngày</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-str">"HTTP"</span> <span class="tc-path">access.log</span> <span class="tc-pipe">|</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{print $9}'</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-pipe">|</span> <span class="tc-cmd">uniq</span> <span class="tc-flag">-c</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rn</span>
+<span class="tc-cmt"># → thống kê HTTP status codes: 200, 404, 500...</span>
+
+<span class="tc-cmt"># ── Tìm trong log với context ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-A 5</span> <span class="tc-str">"NullPointerException"</span> <span class="tc-path">app.log</span>  <span class="tc-cmt"># 5 dòng sau exception</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-B 3</span> <span class="tc-str">"Connection refused"</span> <span class="tc-path">app.log</span>   <span class="tc-cmt"># 3 dòng trước</span>
+
+<span class="tc-cmt"># ── Xem log theo thời gian cụ thể ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'/2025-03-22 14:00/,/2025-03-22 14:30/'</span> <span class="tc-path">app.log</span>  <span class="tc-cmt"># từ 14:00 đến 14:30</span>
+
+<span class="tc-cmt"># ── multitail — theo dõi nhiều log cùng lúc ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install multitail
+<span class="tc-prompt">$</span> <span class="tc-cmd">multitail</span> <span class="tc-path">app.log</span> <span class="tc-path">error.log</span>     <span class="tc-cmt"># xem 2 file song song</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">multitail</span> <span class="tc-flag">-l</span> <span class="tc-str">"docker logs -f api"</span> <span class="tc-flag">-l</span> <span class="tc-str">"docker logs -f worker"</span>
+
+<span class="tc-cmt"># ── Phân tích JSON log (Spring Boot default) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> <span class="tc-path">app.log</span> <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-flag">-R</span> <span class="tc-str">'try fromjson | select(.level == "ERROR") | {time: .timestamp, msg: .message}'</span>
+
+<span class="tc-cmt"># ── Lấy log từ container ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-flag">--since=1h</span> <span class="tc-arg">my-api</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"ERROR"</span> <span class="tc-pipe">|</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-50</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S15 — NETWORK & PORT ════ -->
+<div class="section" id="s15">
+  <div class="sec-head">
+    <span class="sec-tag st-4">NETWORK</span>
+    <div><h2 class="sec-title">Network &amp; Port — Debug kết nối</h2>
+    <p class="sec-sub">lsof, netstat, nc, dig — kiểm tra port, DNS, network từ terminal</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Network debugging commands</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Network tools — lsof, nc, dig, nmap</span><span class="cb-tag ct-4">Network</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Port & Process ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsof</span> <span class="tc-flag">-i :8080</span>                  <span class="tc-cmt"># xem process đang dùng port 8080</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsof</span> <span class="tc-flag">-i TCP:8080</span>               <span class="tc-cmt"># chỉ TCP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsof</span> <span class="tc-flag">-i -P</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> LISTEN      <span class="tc-cmt"># tất cả ports đang LISTEN</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsof</span> <span class="tc-flag">-p</span> <span class="tc-arg">12345</span>                  <span class="tc-cmt"># tất cả file/socket của PID 12345</span>
+
+<span class="tc-cmt"># ── netstat ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">netstat</span> <span class="tc-flag">-an</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> LISTEN      <span class="tc-cmt"># ports đang listen</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">netstat</span> <span class="tc-flag">-an</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">":5432"</span>    <span class="tc-cmt"># connections đến postgres</span>
+
+<span class="tc-cmt"># ── nc (netcat) — test kết nối ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nc</span> <span class="tc-flag">-zv</span> localhost <span class="tc-arg">5432</span>          <span class="tc-cmt"># test kết nối TCP tới port</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nc</span> <span class="tc-flag">-zv</span> kafka.dev <span class="tc-arg">9092</span>          <span class="tc-cmt"># test Kafka broker reachable</span>
+<span class="tc-cmt"># Output: Connection to localhost port 5432 [tcp/postgresql] succeeded!</span>
+
+<span class="tc-cmt"># ── DNS ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dig</span> api.dev                     <span class="tc-cmt"># DNS lookup</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dig</span> <span class="tc-arg">+short</span> api.dev             <span class="tc-cmt"># chỉ IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nslookup</span> api.dev               <span class="tc-cmt"># DNS lookup (simpler)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">host</span> api.dev                    <span class="tc-cmt"># ngắn gọn nhất</span>
+
+<span class="tc-cmt"># ── /etc/hosts cho development ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sudo</span> <span class="tc-cmd">nano</span> /etc/hosts
+<span class="tc-cmt"># Thêm: 127.0.0.1  api.local  kafka.local  postgres.local</span>
+
+<span class="tc-cmt"># ── curl test với timing ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-o /dev/null -s -w</span> <span class="tc-str">"\n%{time_total}s\n"</span> https://api.dev/health
+<span class="tc-cmt"># → in response time (seconds)</span>
+
+<span class="tc-cmt"># ── Tunnel / Port Forward ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-L</span> <span class="tc-arg">5432:postgres.prod:5432</span> bastion.prod   <span class="tc-cmt"># tunnel tới prod DB</span>
+<span class="tc-cmt"># Sau đó: psql -h localhost -p 5432 (qua tunnel)</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> port-forward svc/postgres <span class="tc-arg">5432:5432</span>     <span class="tc-cmt"># K8s port forward</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 5 BANNER ════ -->
+<div class="cat-banner cb-5">
+  <div class="cb-icon">🟠</div>
+  <div><div class="cb-badge">SCRIPTS &amp; AUTOMATION</div>
+  <div class="cb-title">Shell Scripts &amp; SSH</div>
+  <div class="cb-sub">Scripts thực tế · SSH Config · Remote Server · Automation</div></div>
+</div>
+
+<!-- ════ S16 — SHELL SCRIPTS ════ -->
+<div class="section" id="s16">
+  <div class="sec-head">
+    <span class="sec-tag st-5">SCRIPTS</span>
+    <div><h2 class="sec-title">Shell Scripts thực tế cho Backend Dev</h2>
+    <p class="sec-sub">Tự động hóa deploy, backup, health check, release script</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Scripts hữu ích hàng ngày</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">deploy.sh + healthcheck.sh + release.sh</span><span class="cb-tag ct-5">Shell Scripts</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt">#!/usr/bin/env bash
+# deploy.sh — Deploy Spring Boot service lên server</span>
+set <span class="tc-flag">-euo</span> pipefail  <span class="tc-cmt"># e=exit on error, u=undefined vars, o=pipe fail</span>
+
+<span class="tc-cmt"># ── Colors ──</span>
+<span class="tc-var">GREEN</span>=<span class="tc-str">'\033[0;32m'</span>; <span class="tc-var">RED</span>=<span class="tc-str">'\033[0;31m'</span>; <span class="tc-var">NC</span>=<span class="tc-str">'\033[0m'</span>
+<span class="tc-cmd">info</span>()  { <span class="tc-cmd">echo</span> <span class="tc-flag">-e</span> <span class="tc-str">"${GREEN}[INFO]${NC} $1"</span>; }
+<span class="tc-cmd">error</span>() { <span class="tc-cmd">echo</span> <span class="tc-flag">-e</span> <span class="tc-str">"${RED}[ERROR]${NC} $1"</span>; <span class="tc-cmd">exit</span> 1; }
+
+<span class="tc-cmt"># ── Config ──</span>
+<span class="tc-var">APP_NAME</span>=<span class="tc-str">"order-service"</span>
+<span class="tc-var">ENV</span>=<span class="tc-str">${1:-dev}</span>              <span class="tc-cmt"># default: dev</span>
+<span class="tc-var">VERSION</span>=$(git describe <span class="tc-flag">--tags --abbrev=0</span>)
+
+info <span class="tc-str">"Deploying $APP_NAME v$VERSION to $ENV..."</span>
+
+<span class="tc-cmt"># ── Build ──</span>
+<span class="tc-cmd">./mvnw</span> clean package <span class="tc-flag">-DskipTests -Pprod</span> || <span class="tc-cmd">error</span> <span class="tc-str">"Build failed"</span>
+
+<span class="tc-cmt"># ── Build Docker image ──</span>
+<span class="tc-cmd">docker</span> build <span class="tc-flag">-t</span> <span class="tc-str">"$APP_NAME:$VERSION"</span> . || <span class="tc-cmd">error</span> <span class="tc-str">"Docker build failed"</span>
+
+<span class="tc-cmt"># ── Push to registry ──</span>
+<span class="tc-cmd">docker</span> tag <span class="tc-str">"$APP_NAME:$VERSION"</span> <span class="tc-str">"registry.company.com/$APP_NAME:$VERSION"</span>
+<span class="tc-cmd">docker</span> push <span class="tc-str">"registry.company.com/$APP_NAME:$VERSION"</span>
+
+info <span class="tc-str">"✅ Deploy $APP_NAME:$VERSION to $ENV completed!"</span>
+
+<span class="tc-cmt">---</span>
+<span class="tc-cmt">#!/usr/bin/env bash
+# healthcheck.sh — Kiểm tra health của service</span>
+<span class="tc-var">URL</span>=<span class="tc-str">${1:-http://localhost:8080/actuator/health}</span>
+<span class="tc-var">MAX_RETRIES</span>=<span class="tc-arg">30</span>; <span class="tc-var">WAIT</span>=<span class="tc-arg">2</span>; <span class="tc-var">COUNT</span>=<span class="tc-arg">0</span>
+
+<span class="tc-cmd">echo</span> <span class="tc-str">"⏳ Waiting for service at $URL..."</span>
+<span class="kw">until</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-sf</span> <span class="tc-str">"$URL"</span> <span class="tc-pipe">|</span> <span class="tc-cmd">jq</span> <span class="tc-flag">-e</span> <span class="tc-str">'.status == "UP"'</span> > /dev/null; <span class="kw">do</span>
+    <span class="tc-var">COUNT</span>=$(( COUNT + 1 ))
+    [[ <span class="tc-var">$COUNT</span> <span class="tc-flag">-ge</span> <span class="tc-var">$MAX_RETRIES</span> ]] && { <span class="tc-cmd">echo</span> <span class="tc-str">"❌ Service failed to start"</span>; <span class="tc-cmd">exit</span> 1; }
+    <span class="tc-cmd">echo</span> <span class="tc-str">"  Retry $COUNT/$MAX_RETRIES..."</span>
+    <span class="tc-cmd">sleep</span> <span class="tc-var">$WAIT</span>
+<span class="kw">done</span>
+<span class="tc-cmd">echo</span> <span class="tc-str">"✅ Service is UP!"</span>
+
+<span class="tc-cmt">---</span>
+<span class="tc-cmt">#!/usr/bin/env bash
+# db-backup.sh — Backup PostgreSQL hàng ngày</span>
+<span class="tc-var">DB_HOST</span>=<span class="tc-str">"postgres.prod"</span>
+<span class="tc-var">DB_NAME</span>=<span class="tc-str">"shopdb"</span>
+<span class="tc-var">BACKUP_DIR</span>=<span class="tc-str">"$HOME/backups"</span>
+<span class="tc-var">DATE</span>=$(date <span class="tc-str">+%Y%m%d_%H%M%S</span>)
+<span class="tc-var">FILE</span>=<span class="tc-str">"$BACKUP_DIR/${DB_NAME}_$DATE.sql.gz"</span>
+
+<span class="tc-cmd">mkdir</span> <span class="tc-flag">-p</span> <span class="tc-var">$BACKUP_DIR</span>
+<span class="tc-cmd">pg_dump</span> <span class="tc-flag">-h</span> <span class="tc-var">$DB_HOST</span> <span class="tc-flag">-U</span> admin <span class="tc-var">$DB_NAME</span> <span class="tc-pipe">|</span> <span class="tc-cmd">gzip</span> > <span class="tc-var">$FILE</span>
+<span class="tc-cmd">echo</span> <span class="tc-str">"✅ Backup saved: $FILE ($(du -sh $FILE | cut -f1))"</span>
+
+<span class="tc-cmt"># Xóa backup cũ hơn 7 ngày</span>
+<span class="tc-cmd">find</span> <span class="tc-var">$BACKUP_DIR</span> <span class="tc-flag">-mtime +7 -name</span> <span class="tc-str">"*.sql.gz"</span> <span class="tc-flag">-delete</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S17 — SSH ════ -->
+<div class="section" id="s17">
+  <div class="sec-head">
+    <span class="sec-tag st-5">SSH</span>
+    <div><h2 class="sec-title">SSH &amp; Remote Server — Kết nối server như local</h2>
+    <p class="sec-sub">SSH config, key management, tunneling, scp — quản lý remote server chuyên nghiệp</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">SSH Config và các kỹ thuật nâng cao</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">~/.ssh/config + SSH tips cho Backend Dev</span><span class="cb-tag ct-5">SSH</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo SSH key ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh-keygen</span> <span class="tc-flag">-t ed25519 -C</span> <span class="tc-str">"your@email.com"</span>     <span class="tc-cmt"># Ed25519 (hiện đại hơn RSA)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh-copy-id</span> <span class="tc-arg">user@server.dev</span>                     <span class="tc-cmt"># copy public key lên server</span>
+
+<span class="tc-cmt"># ── ~/.ssh/config — cấu hình shortcut ──</span>
+Host dev
+    HostName       server.dev.company.com
+    User           ubuntu
+    IdentityFile   ~/.ssh/id_dev
+    ServerAliveInterval 60                         <span class="tc-cmt"># prevent disconnect</span>
+    ServerAliveCountMax 3
+
+Host prod-bastion
+    HostName       bastion.prod.company.com
+    User           ec2-user
+    IdentityFile   ~/.ssh/id_prod
+
+Host prod-api
+    HostName       10.0.1.50                       <span class="tc-cmt"># private IP</span>
+    User           ubuntu
+    ProxyJump      prod-bastion                    <span class="tc-cmt"># qua bastion</span>
+    IdentityFile   ~/.ssh/id_prod
+
+<span class="tc-cmt"># ── Kết nối ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> dev                       <span class="tc-cmt"># kết nối server dev (dùng config)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> prod-api                  <span class="tc-cmt"># tự qua bastion!</span>
+
+<span class="tc-cmt"># ── SCP — Copy files ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">scp</span> <span class="tc-path">deploy.jar</span> dev:<span class="tc-path">/opt/app/</span>  <span class="tc-cmt"># copy file lên server</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">scp</span> dev:<span class="tc-path">/var/log/app.log</span> .   <span class="tc-cmt"># copy file về local</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">scp</span> <span class="tc-flag">-r</span> dev:<span class="tc-path">/opt/app/</span> <span class="tc-path">backup/</span> <span class="tc-cmt"># copy cả thư mục</span>
+
+<span class="tc-cmt"># rsync — hiệu quả hơn scp (chỉ sync phần thay đổi)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rsync</span> <span class="tc-flag">-avz</span> <span class="tc-flag">--progress</span> <span class="tc-path">deploy.jar</span> dev:<span class="tc-path">/opt/app/</span>
+
+<span class="tc-cmt"># ── SSH Tunnel ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-L 5432:postgres.internal:5432</span> prod-bastion
+<span class="tc-cmt"># → psql -h localhost -p 5432  (kết nối qua tunnel!)</span>
+
+<span class="tc-cmt"># ── Chạy lệnh remote không cần vào shell ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> dev <span class="tc-str">"sudo systemctl restart my-service"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> dev <span class="tc-str">"tail -100 /var/log/app.log"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> dev <span class="tc-str">"cd /opt/app && java -jar app.jar &"</span>
+
+<span class="tc-cmt"># ── SSH Key trong ssh-agent (không gõ passphrase liên tục) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">eval</span> $(ssh-agent <span class="tc-flag">-s</span>)
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh-add</span> ~/.ssh/id_ed25519
+<span class="tc-cmt"># macOS: thêm vào Keychain</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh-add</span> <span class="tc-flag">--apple-use-keychain</span> ~/.ssh/id_ed25519</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ S18 — CHEAT SHEET ════ -->
+<div class="section" id="s18">
+  <div class="sec-head">
+    <span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — Terminal macOS toàn tập</h2>
+    <p class="sec-sub">Tra cứu nhanh — shortcuts, lệnh quan trọng nhất cho Backend Dev</p></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4 class="h4-1">📁 File & Navigation</h4>
+      <div class="cheat-row"><span class="ck">Jump thư mục thông minh</span><span class="cv">z project-name</span></div>
+      <div class="cheat-row"><span class="ck">List chi tiết + git</span><span class="cv">ll (eza -la --git)</span></div>
+      <div class="cheat-row"><span class="ck">Tree view</span><span class="cv">lt (eza --tree)</span></div>
+      <div class="cheat-row"><span class="ck">Đọc file đẹp</span><span class="cv">bat file.java</span></div>
+      <div class="cheat-row"><span class="ck">Disk usage</span><span class="cv">du -sh */ | sort -rh</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-2">⌨️ Readline Shortcuts</h4>
+      <div class="cheat-row"><span class="ck">Đầu / Cuối dòng</span><span class="cv">Ctrl+A / Ctrl+E</span></div>
+      <div class="cheat-row"><span class="ck">Xóa word trước</span><span class="cv">Ctrl+W</span></div>
+      <div class="cheat-row"><span class="ck">Xóa từ cursor về đầu</span><span class="cv">Ctrl+U</span></div>
+      <div class="cheat-row"><span class="ck">Paste vừa xóa</span><span class="cv">Ctrl+Y</span></div>
+      <div class="cheat-row"><span class="ck">Search history</span><span class="cv">Ctrl+R (fzf)</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">🐳 Docker</h4>
+      <div class="cheat-row"><span class="ck">Follow logs</span><span class="cv">docker logs -f --tail=100</span></div>
+      <div class="cheat-row"><span class="ck">Exec vào container</span><span class="cv">docker exec -it name bash</span></div>
+      <div class="cheat-row"><span class="ck">Stats real-time</span><span class="cv">docker stats</span></div>
+      <div class="cheat-row"><span class="ck">Compose up</span><span class="cv">docker compose up -d</span></div>
+      <div class="cheat-row"><span class="ck">Dọn dẹp</span><span class="cv">docker system prune -af</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">☕ Java / Spring</h4>
+      <div class="cheat-row"><span class="ck">Build nhanh</span><span class="cv">./mvnw clean install -DskipTests</span></div>
+      <div class="cheat-row"><span class="ck">Run với profile</span><span class="cv">./mvnw spring-boot:run -Pdev</span></div>
+      <div class="cheat-row"><span class="ck">Java processes</span><span class="cv">jps -lv</span></div>
+      <div class="cheat-row"><span class="ck">Thread dump</span><span class="cv">jstack $PID</span></div>
+      <div class="cheat-row"><span class="ck">GC stats</span><span class="cv">jstat -gcutil $PID 1000</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-4">🔍 Search & Debug</h4>
+      <div class="cheat-row"><span class="ck">Tìm trong code</span><span class="cv">rg "pattern" -t java</span></div>
+      <div class="cheat-row"><span class="ck">Port đang dùng</span><span class="cv">lsof -i :8080</span></div>
+      <div class="cheat-row"><span class="ck">Kill port</span><span class="cv">lsof -ti :8080 | xargs kill -9</span></div>
+      <div class="cheat-row"><span class="ck">Test port open</span><span class="cv">nc -zv host port</span></div>
+      <div class="cheat-row"><span class="ck">Top CPU/RAM</span><span class="cv">ps aux | sort -rk3 | head -10</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-5">🔐 SSH & Remote</h4>
+      <div class="cheat-row"><span class="ck">Connect shortcut</span><span class="cv">ssh dev (từ ~/.ssh/config)</span></div>
+      <div class="cheat-row"><span class="ck">Copy file lên</span><span class="cv">scp file.jar dev:/opt/app/</span></div>
+      <div class="cheat-row"><span class="ck">Tunnel DB</span><span class="cv">ssh -L 5432:db.internal:5432 bastion</span></div>
+      <div class="cheat-row"><span class="ck">Chạy lệnh remote</span><span class="cv">ssh dev "systemctl restart app"</span></div>
+      <div class="cheat-row"><span class="ck">Port forward K8s</span><span class="cv">kubectl port-forward svc/db 5432:5432</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Lộ trình setup từ đầu — 6 bước</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Cài Homebrew + iTerm2</h4><p>Homebrew là package manager không thể thiếu trên macOS. iTerm2 cung cấp split pane, search, profiles mà Terminal.app không có.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Oh My Zsh + Powerlevel10k + Plugins</h4><p>Cài <code>zsh-autosuggestions</code> và <code>zsh-syntax-highlighting</code>. Powerlevel10k cho prompt đẹp hiện git status, exit code trực quan.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Cài các tools thay thế: eza, bat, rg, fd, fzf</h4><p>Thay <code>ls → eza</code>, <code>cat → bat</code>, <code>grep → rg</code>, <code>find → fd</code>. Cài fzf và chạy <code>$(brew --prefix)/opt/fzf/install</code> để có <kbd>Ctrl+R</kbd> history search.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Cấu hình ~/.zshrc với aliases và functions</h4><p>Thêm alias <code>mkcd</code>, <code>killport</code>, <code>jwt</code>, <code>envload</code>. Cài SDKMAN để quản lý nhiều phiên bản Java, Maven, Gradle.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Setup ~/.ssh/config cho tất cả servers</h4><p>Cấu hình shortcut cho dev, staging, prod. Dùng <code>ProxyJump</code> cho server qua bastion. Thêm key vào Keychain để không gõ passphrase.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>Học Tmux nếu làm việc nhiều với remote servers</h4><p>Tmux giữ session khi SSH disconnect. Tạo layout riêng cho từng project: window code, window run, window logs, window docker.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px">
+      <strong style="color:var(--text)">Tài nguyên tham khảo:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://ohmyz.sh" style="color:var(--t1)">Oh My Zsh</a> &nbsp;·&nbsp;
+        <a href="https://iterm2.com" style="color:var(--t1)">iTerm2</a> &nbsp;·&nbsp;
+        <a href="https://github.com/romkatv/powerlevel10k" style="color:var(--t1)">Powerlevel10k</a> &nbsp;·&nbsp;
+        <a href="https://github.com/junegunn/fzf" style="color:var(--t1)">fzf</a> &nbsp;·&nbsp;
+        <a href="https://github.com/BurntSushi/ripgrep" style="color:var(--t1)">ripgrep</a> &nbsp;·&nbsp;
+        <a href="https://sdkman.io" style="color:var(--t1)">SDKMAN</a> &nbsp;·&nbsp;
+        <a href="https://github.com/tmux/tmux" style="color:var(--t1)">Tmux</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <span>⌘ Terminal macOS · Backend Developer · iTerm2 · Zsh · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">18 chủ đề · Setup · Navigation · Docker · Git · SSH · Scripts</span>
+</div>
+</div><!-- /main -->
+
+<script>
+window.addEventListener('scroll', () => {
+  const el = document.documentElement;
+  document.getElementById('pbar').style.width =
+    (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
+});
+const sections = document.querySelectorAll('.section[id]');
+const links = document.querySelectorAll('.nav-link');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-28% 0px -60% 0px' });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

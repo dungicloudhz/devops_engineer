@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux — Backend & DevOps Engineer · Hướng dẫn toàn tập</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --acc:#89ddff;--acc-d:#2090c0;--acc-dim:rgba(137,221,255,.11);--acc-glow:rgba(137,221,255,.24);
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --blue:#5ba8ff;--blue-dim:rgba(91,168,255,.10);
+  --purple:#a07af4;--purple-dim:rgba(160,122,244,.10);
+  --yellow:#ffd060;--yellow-dim:rgba(255,208,96,.10);
+  --teal:#30d8c0;--teal-dim:rgba(48,216,192,.10);
+  --orange:#ff8c50;--orange-dim:rgba(255,140,80,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  --sky:#38bdf8;--sky-dim:rgba(56,189,248,.10);
+  --l1:#89ddff;--l1-dim:rgba(137,221,255,.11);--l1-glow:rgba(137,221,255,.26);
+  --l2:#c3e88d;--l2-dim:rgba(195,232,141,.11);--l2-glow:rgba(195,232,141,.26);
+  --l3:#ffcb6b;--l3-dim:rgba(255,203,107,.11);--l3-glow:rgba(255,203,107,.26);
+  --l4:#c792ea;--l4-dim:rgba(199,146,234,.11);--l4-glow:rgba(199,146,234,.26);
+  --l5:#f78c6c;--l5-dim:rgba(247,140,108,.11);--l5-glow:rgba(247,140,108,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--l1),var(--acc-d));display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#111;box-shadow:0 0 26px var(--l1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--l1),var(--l2),var(--l3),var(--l4),var(--l5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--l1-dim);color:var(--l1)}.ngh-2{background:var(--l2-dim);color:var(--l2)}
+.ngh-3{background:var(--l3-dim);color:var(--l3)}.ngh-4{background:var(--l4-dim);color:var(--l4)}
+.ngh-5{background:var(--l5-dim);color:var(--l5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(137,221,255,.07);border-left-color:var(--l1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;background:var(--l1-dim);color:var(--l1)}
+
+/* ── MAIN / HERO ── */
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(137,221,255,.09) 0%,transparent 62%),
+    radial-gradient(ellipse 45% 55% at 12% 82%,rgba(195,232,141,.06) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 45% at 50% 50%,rgba(255,203,107,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(137,221,255,.08) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--l1-dim);border:1px solid rgba(137,221,255,.35);color:var(--l1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--l1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--l1)}
+.h-grad{background:linear-gradient(135deg,var(--l1) 0%,var(--l2) 50%,var(--l3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--l1-dim);color:var(--l1)}.chip-2{background:var(--l2-dim);color:var(--l2)}
+.chip-3{background:var(--l3-dim);color:var(--l3)}.chip-4{background:var(--l4-dim);color:var(--l4)}
+.chip-5{background:var(--l5-dim);color:var(--l5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+.chip-b{background:var(--blue-dim);color:var(--blue)}.chip-t{background:var(--teal-dim);color:var(--teal)}
+
+/* ── CAT BANNER ── */
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--l1-dim);border:1px solid rgba(137,221,255,.28)}.cb-1::before{background:linear-gradient(90deg,var(--l1),var(--l2))}
+.cb-2{background:var(--l2-dim);border:1px solid rgba(195,232,141,.28)}.cb-2::before{background:linear-gradient(90deg,var(--l2),var(--l1))}
+.cb-3{background:var(--l3-dim);border:1px solid rgba(255,203,107,.28)}.cb-3::before{background:linear-gradient(90deg,var(--l3),var(--l5))}
+.cb-4{background:var(--l4-dim);border:1px solid rgba(199,146,234,.28)}.cb-4::before{background:linear-gradient(90deg,var(--l4),var(--l1))}
+.cb-5{background:var(--l5-dim);border:1px solid rgba(247,140,108,.28)}.cb-5::before{background:linear-gradient(90deg,var(--l5),var(--l3))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--l1-dim);color:var(--l1)}.cb-2 .cb-badge{background:var(--l2-dim);color:var(--l2)}
+.cb-3 .cb-badge{background:var(--l3-dim);color:var(--l3)}.cb-4 .cb-badge{background:var(--l4-dim);color:var(--l4)}
+.cb-5 .cb-badge{background:var(--l5-dim);color:var(--l5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+/* ── CONTENT / SECTION ── */
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--l1);background:var(--l1-dim);border:1px solid var(--l1-glow)}
+.st-2{color:var(--l2);background:var(--l2-dim);border:1px solid var(--l2-glow)}
+.st-3{color:var(--l3);background:var(--l3-dim);border:1px solid var(--l3-glow)}
+.st-4{color:var(--l4);background:var(--l4-dim);border:1px solid var(--l4-glow)}
+.st-5{color:var(--l5);background:var(--l5-dim);border:1px solid var(--l5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--l1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+
+/* ── GRIDS & CARDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--l1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── CODE BLOCKS ── */
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--l1-dim);color:var(--l1)}.ct-2{background:var(--l2-dim);color:var(--l2)}
+.ct-3{background:var(--l3-dim);color:var(--l3)}.ct-4{background:var(--l4-dim);color:var(--l4)}
+.ct-5{background:var(--l5-dim);color:var(--l5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.ct-b{background:var(--blue-dim);color:var(--blue)}.ct-t{background:var(--teal-dim);color:var(--teal)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+.tc-prompt{color:#89ddff}.tc-root{color:#ff6584}
+.tc-cmd{color:#82aaff}.tc-flag{color:#ffcb6b}
+.tc-path{color:#c3e88d}.tc-str{color:#c3e88d}
+.tc-arg{color:#f78c6c}.tc-cmt{color:#546e7a;font-style:italic}
+.tc-out{color:#546e7a}.tc-ok{color:#40d88e}
+.tc-err{color:#ff6584}.tc-hl{color:#ffd060}
+.tc-pipe{color:#89ddff}.tc-redirect{color:#c792ea}
+.tc-var{color:#f78c6c}.tc-num{color:#f78c6c}
+.tc-key{color:#c792ea}
+
+/* ── KBD TABLE ── */
+.kbd-table{width:100%;border-collapse:collapse;margin:13px 0}
+.kbd-table th{background:var(--s3);padding:9px 14px;text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.kbd-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.kbd-table tr:hover td{background:rgba(255,255,255,.025)}
+.kbd-desc{font-size:13px;color:var(--muted)}
+.kbds{display:flex;gap:4px;flex-wrap:wrap}
+kbd{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--l1);background:var(--l1-dim);border:1px solid rgba(137,221,255,.3);border-radius:5px;padding:3px 8px;white-space:nowrap}
+
+/* ── INFO BOXES ── */
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:var(--green-dim);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:var(--yellow-dim);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:var(--blue-dim);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+.i-note{background:var(--purple-dim);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:var(--pink-dim);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+
+/* ── RW BOX ── */
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--l1)}.rw-2::before{background:var(--l2)}.rw-3::before{background:var(--l3)}
+.rw-4::before{background:var(--l4)}.rw-5::before{background:var(--l5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--l1)}.rw-2 .rw-label{color:var(--l2)}.rw-3 .rw-label{color:var(--l3)}
+.rw-4 .rw-label{color:var(--l4)}.rw-5 .rw-label{color:var(--l5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── COMPARE ── */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmp-bad{background:rgba(255,101,132,.06);border:1px solid rgba(255,101,132,.2);border-radius:11px;padding:16px}
+.cmp-good{background:rgba(64,216,142,.06);border:1px solid rgba(64,216,142,.2);border-radius:11px;padding:16px}
+.cmp-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cmp-bad .cmp-label{color:var(--pink)}.cmp-good .cmp-label{color:var(--green)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--l1)}
+
+/* ── STEPS ── */
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--l1);background:var(--l1-dim);border:2px solid var(--l1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── CHEAT SHEET ── */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--l1)}.h4-2{color:var(--l2)}.h4-3{color:var(--l3)}.h4-4{color:var(--l4)}.h4-5{color:var(--l5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted)}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--l1)}
+
+/* ── FILESYSTEM TREE ── */
+.fs-tree{background:var(--code-bg);border:1px solid var(--l1-glow);border-radius:12px;padding:20px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9}
+.fs-dir{color:var(--l1)}.fs-file{color:var(--muted)}.fs-note{color:#546e7a;font-style:italic}
+.fs-imp{color:var(--l3)}.fs-warn{color:var(--l5)}
+
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(137,221,255,.08);color:var(--l1);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid,.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">🐧</div>
+      <div class="logo-text"><h2>Linux</h2><p>Backend &amp; DevOps · Hướng dẫn</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Nền tảng</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🗺️</span> Kiến trúc Linux</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🔵 Filesystem &amp; Files</div>
+    <a href="#s1" class="nav-link"><span class="ico">📁</span> Filesystem &amp; FHS</a>
+    <a href="#s2" class="nav-link"><span class="ico">📄</span> File Operations</a>
+    <a href="#s3" class="nav-link"><span class="ico">🔍</span> Find, Grep, Awk, Sed</a>
+    <a href="#s4" class="nav-link"><span class="ico">🔒</span> Permissions &amp; ACL</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🟢 Process &amp; System</div>
+    <a href="#s5" class="nav-link"><span class="ico">⚙️</span> Process Management</a>
+    <a href="#s6" class="nav-link"><span class="ico">📊</span> System Monitoring</a>
+    <a href="#s7" class="nav-link"><span class="ico">🧠</span> Memory &amp; CPU</a>
+    <a href="#s8" class="nav-link"><span class="ico">⏱️</span> Systemd &amp; Services</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Networking</div>
+    <a href="#s9"  class="nav-link"><span class="ico">🌐</span> Network Commands</a>
+    <a href="#s10" class="nav-link"><span class="ico">🔥</span> Firewall &amp; iptables</a>
+    <a href="#s11" class="nav-link"><span class="ico">🔌</span> SSH Advanced</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟣 Storage &amp; Disk</div>
+    <a href="#s12" class="nav-link"><span class="ico">💾</span> Disk &amp; Partition</a>
+    <a href="#s13" class="nav-link"><span class="ico">🗜️</span> Archive &amp; Compress</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🟠 DevOps & Scripts</div>
+    <a href="#s14" class="nav-link"><span class="ico">📝</span> Bash Scripting</a>
+    <a href="#s15" class="nav-link"><span class="ico">👥</span> Users &amp; Groups</a>
+    <a href="#s16" class="nav-link"><span class="ico">📦</span> Package Management</a>
+    <a href="#s17" class="nav-link"><span class="ico">⏰</span> Cron &amp; Scheduling</a>
+    <a href="#s18" class="nav-link"><span class="ico">🐳</span> Linux + Docker/K8s</a>
+    <a href="#s19" class="nav-link"><span class="ico">🛡️</span> Security Hardening</a>
+    <a href="#s20" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> Ubuntu · CentOS · Debian · Backend · DevOps</div>
+  <h1><span class="h-acc">Linux</span><br><span class="h-grad">Backend &amp; DevOps</span></h1>
+  <p class="hero-desc">Hướng dẫn toàn diện Linux cho Backend &amp; DevOps Engineer — từ filesystem, process management, networking, bash scripting đến bảo mật và tự động hóa production server.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">Filesystem &amp; Permissions</span>
+    <span class="chip chip-2">Process &amp; Systemd</span>
+    <span class="chip chip-3">Networking</span>
+    <span class="chip chip-4">Bash Scripting</span>
+    <span class="chip chip-5">Security</span>
+    <span class="chip chip-r">Cron Jobs</span>
+    <span class="chip chip-b">Docker &amp; K8s</span>
+    <span class="chip chip-t">Monitoring</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════ S0 — KIẾN TRÚC ════ -->
+<div class="section" id="s0">
+  <div class="sec-head">
+    <span class="sec-tag st-1">OVERVIEW</span>
+    <div><h2 class="sec-title">Kiến trúc Linux — Big Picture</h2>
+    <p class="sec-sub">Hiểu cách Linux hoạt động giúp debug nhanh hơn và thiết kế hệ thống đúng hơn</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Linux Architecture — 4 tầng từ hardware đến user</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--l1),var(--l2),var(--l3),var(--l4))"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="background:rgba(247,140,108,.08);border:1px solid rgba(247,140,108,.3);border-radius:9px;padding:12px 18px;display:flex;align-items:center;gap:14px">
+          <span style="font-size:20px">👤</span>
+          <div><div style="font-size:13px;font-weight:800;color:var(--l5)">User Space</div><div style="font-size:12px;color:var(--muted)">Applications · Shell · System Libraries (glibc) · Daemons</div></div>
+        </div>
+        <div style="text-align:center;color:var(--border2);font-size:12px">↕ System Calls (syscall interface)</div>
+        <div style="background:rgba(199,146,234,.08);border:1px solid rgba(199,146,234,.3);border-radius:9px;padding:12px 18px;display:flex;align-items:center;gap:14px">
+          <span style="font-size:20px">🧠</span>
+          <div><div style="font-size:13px;font-weight:800;color:var(--l4)">Kernel Space</div><div style="font-size:12px;color:var(--muted)">Process Scheduler · Memory Manager · VFS · Network Stack · Device Drivers</div></div>
+        </div>
+        <div style="text-align:center;color:var(--border2);font-size:12px">↕ Hardware abstraction</div>
+        <div style="background:rgba(137,221,255,.08);border:1px solid rgba(137,221,255,.3);border-radius:9px;padding:12px 18px;display:flex;align-items:center;gap:14px">
+          <span style="font-size:20px">🔧</span>
+          <div><div style="font-size:13px;font-weight:800;color:var(--l1)">Hardware</div><div style="font-size:12px;color:var(--muted)">CPU · RAM · Disk · NIC · GPU</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các bản phân phối phổ biến cho Backend/DevOps</div>
+    <table class="tbl">
+      <thead><tr><th>Distro</th><th>Package Manager</th><th>Use Case</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong class="tc-l1" style="color:var(--l1)">Ubuntu LTS</strong></td><td><code>apt</code></td><td>Phổ biến nhất cho dev/server</td><td>24.04 LTS — khuyên dùng</td></tr>
+        <tr><td><strong style="color:var(--l2)">Debian</strong></td><td><code>apt</code></td><td>Stable, production server</td><td>Base của Ubuntu</td></tr>
+        <tr><td><strong style="color:var(--l3)">RHEL/CentOS Stream</strong></td><td><code>dnf/yum</code></td><td>Enterprise, banking</td><td>AlmaLinux/Rocky thay CentOS 7</td></tr>
+        <tr><td><strong style="color:var(--l4)">Amazon Linux 2023</strong></td><td><code>dnf</code></td><td>AWS EC2</td><td>Optimized cho AWS</td></tr>
+        <tr><td><strong style="color:var(--l5)">Alpine Linux</strong></td><td><code>apk</code></td><td>Docker base image</td><td>Rất nhỏ (~5MB), dùng musl libc</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 1 BANNER ════ -->
+<div class="cat-banner cb-1">
+  <div class="cb-icon">📁</div>
+  <div><div class="cb-badge">FILESYSTEM &amp; FILES</div>
+  <div class="cb-title">Filesystem, Permissions &amp; Text Processing</div>
+  <div class="cb-sub">FHS · File Operations · grep/awk/sed · Permissions &amp; ACL</div></div>
+</div>
+
+<!-- ════ S1 — FILESYSTEM ════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-tag st-1">FILESYSTEM</span>
+    <div><h2 class="sec-title">Linux Filesystem Hierarchy Standard (FHS)</h2>
+    <p class="sec-sub">Biết đúng file nằm ở đâu — không còn loay hoay tìm config, log, binary</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cấu trúc thư mục quan trọng</div>
+    <div class="fs-tree">
+<span class="fs-dir">/</span>                              <span class="fs-note"># root của toàn bộ filesystem</span>
+├── <span class="fs-dir">bin/</span>  → <span class="fs-dir">/usr/bin/</span>            <span class="fs-note"># commands cơ bản: ls, cp, grep</span>
+├── <span class="fs-dir">sbin/</span> → <span class="fs-dir">/usr/sbin/</span>           <span class="fs-note"># system admin commands: iptables, fdisk</span>
+├── <span class="fs-imp">etc/</span>                           <span class="fs-note"># ⭐ config files TOÀN BỘ hệ thống</span>
+│   ├── <span class="fs-imp">nginx/nginx.conf</span>           <span class="fs-note"># nginx config</span>
+│   ├── <span class="fs-imp">systemd/system/</span>           <span class="fs-note"># systemd unit files</span>
+│   ├── <span class="fs-imp">ssh/sshd_config</span>           <span class="fs-note"># SSH server config</span>
+│   ├── <span class="fs-imp">hosts</span>                     <span class="fs-note"># static hostname resolution</span>
+│   ├── <span class="fs-imp">fstab</span>                     <span class="fs-note"># filesystem mount table</span>
+│   └── <span class="fs-imp">crontab</span>                   <span class="fs-note"># system cron jobs</span>
+├── <span class="fs-imp">var/</span>                           <span class="fs-note"># ⭐ variable data — logs, cache, spool</span>
+│   ├── <span class="fs-imp">log/</span>                      <span class="fs-note"># system &amp; app logs</span>
+│   │   ├── syslog, auth.log        <span class="fs-note"># Ubuntu</span>
+│   │   ├── messages, secure        <span class="fs-note"># RHEL/CentOS</span>
+│   │   └── journal/                <span class="fs-note"># systemd journal</span>
+│   ├── www/html/                   <span class="fs-note"># web root</span>
+│   └── lib/docker/                 <span class="fs-note"># docker data</span>
+├── <span class="fs-dir">home/</span>                          <span class="fs-note"># user home directories</span>
+├── <span class="fs-dir">root/</span>                          <span class="fs-note"># root user home</span>
+├── <span class="fs-dir">tmp/</span>                           <span class="fs-note"># temporary files (cleared on reboot)</span>
+├── <span class="fs-imp">opt/</span>                           <span class="fs-note"># ⭐ optional/third-party software</span>
+│   └── myapp/                      <span class="fs-note"># deploy app vào đây</span>
+├── <span class="fs-dir">proc/</span>                          <span class="fs-note"># virtual fs — process info</span>
+│   ├── cpuinfo                     <span class="fs-note"># CPU details</span>
+│   ├── meminfo                     <span class="fs-note"># memory stats</span>
+│   └── &lt;PID&gt;/                      <span class="fs-note"># info của từng process</span>
+├── <span class="fs-dir">sys/</span>                           <span class="fs-note"># virtual fs — kernel/hardware info</span>
+├── <span class="fs-dir">dev/</span>                           <span class="fs-note"># device files</span>
+│   ├── sda, nvme0n1                <span class="fs-note"># disk devices</span>
+│   ├── null, zero, random          <span class="fs-note"># special devices</span>
+│   └── tty, pts/                   <span class="fs-note"># terminal devices</span>
+├── <span class="fs-dir">mnt/</span>                           <span class="fs-note"># temporary mount points</span>
+├── <span class="fs-dir">media/</span>                         <span class="fs-note"># removable media</span>
+└── <span class="fs-dir">usr/</span>                           <span class="fs-note"># user programs</span>
+    ├── bin/                        <span class="fs-note"># user commands</span>
+    ├── lib/                        <span class="fs-note"># libraries</span>
+    ├── local/                      <span class="fs-note"># locally installed software</span>
+    └── share/                      <span class="fs-note"># architecture-independent data</span>
+    </div>
+    <div class="rw-box rw-1"><div class="rw-label">💡 Thực tế</div>
+    <div class="rw-title">Backend/DevOps thường làm việc ở đâu?</div>
+    <div class="rw-body"><strong style="color:var(--text)">/etc/</strong> — config nginx, ssh, systemd, cron. <strong style="color:var(--text)">/var/log/</strong> — debug lỗi. <strong style="color:var(--text)">/opt/</strong> hoặc <strong style="color:var(--text)">/srv/</strong> — deploy app. <strong style="color:var(--text)">/proc/</strong> — đọc CPU/RAM/network stats trực tiếp từ kernel. <strong style="color:var(--text)">/tmp/</strong> — file tạm, nhớ không lưu dữ liệu quan trọng ở đây.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2 — FILE OPERATIONS ════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-tag st-1">FILES</span>
+    <div><h2 class="sec-title">File Operations — Thao tác file chuyên sâu</h2>
+    <p class="sec-sub">cp, mv, ln, tar, rsync, dd — thao tác file production-safe</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các lệnh file quan trọng</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">File operations — copy, move, link, view</span><span class="cb-tag ct-1">Files</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Xem file hiệu quả ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /etc/nginx/nginx.conf            <span class="tc-cmt"># đọc file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">less</span> /var/log/syslog                  <span class="tc-cmt"># xem cuộn (q thoát, / tìm)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">head</span> <span class="tc-flag">-20</span> /var/log/app.log            <span class="tc-cmt"># 20 dòng đầu</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> /var/log/app.log             <span class="tc-cmt"># follow log real-time</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-n +100</span> file.log                <span class="tc-cmt"># từ dòng 100 đến cuối</span>
+
+<span class="tc-cmt"># ── Hard Link vs Soft Link ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ln</span> <span class="tc-path">original.txt</span> <span class="tc-path">hardlink.txt</span>       <span class="tc-cmt"># hard link — cùng inode</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ln</span> <span class="tc-flag">-s</span> <span class="tc-path">/opt/app/current</span> <span class="tc-path">/app</span>       <span class="tc-cmt"># symlink — trỏ đến path</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ls</span> <span class="tc-flag">-la</span> /app                          <span class="tc-cmt"># thấy -> /opt/app/current</span>
+<span class="tc-cmt"># Dùng symlink để deploy: /app → /releases/v1.2.0 (atomic switch!)</span>
+
+<span class="tc-cmt"># ── rsync — đồng bộ file an toàn ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rsync</span> <span class="tc-flag">-avz</span> <span class="tc-path">src/</span> <span class="tc-path">dest/</span>               <span class="tc-cmt"># sync thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rsync</span> <span class="tc-flag">-avz</span> <span class="tc-flag">--progress</span> <span class="tc-path">./app.jar</span> <span class="tc-arg">user@prod:/opt/app/</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rsync</span> <span class="tc-flag">-avz</span> <span class="tc-flag">--delete</span> <span class="tc-path">src/</span> <span class="tc-path">backup/</span>   <span class="tc-cmt"># --delete: xóa file không còn ở src</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rsync</span> <span class="tc-flag">-n</span> <span class="tc-path">src/</span> <span class="tc-path">dest/</span>                 <span class="tc-cmt"># -n dry run — xem trước không thực hiện</span>
+
+<span class="tc-cmt"># ── File information ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">file</span> <span class="tc-path">mystery-file</span>                   <span class="tc-cmt"># xác định loại file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">stat</span> <span class="tc-path">app.log</span>                         <span class="tc-cmt"># metadata đầy đủ (size, inode, time)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">wc</span> <span class="tc-flag">-l</span> <span class="tc-path">app.log</span>                       <span class="tc-cmt"># đếm dòng</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">wc</span> <span class="tc-flag">-c</span> <span class="tc-path">app.log</span>                       <span class="tc-cmt"># đếm bytes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">md5sum</span> deploy.jar                    <span class="tc-cmt"># checksum</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sha256sum</span> deploy.jar                 <span class="tc-cmt"># SHA256 checksum</span>
+
+<span class="tc-cmt"># ── Disk usage ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">du</span> <span class="tc-flag">-sh</span> <span class="tc-path">/var/log/</span>                    <span class="tc-cmt"># kích thước thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">du</span> <span class="tc-flag">-sh</span> <span class="tc-path">*/</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rh</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-10</span> <span class="tc-cmt"># top thư mục lớn nhất</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">df</span> <span class="tc-flag">-hT</span>                              <span class="tc-cmt"># disk free + filesystem type</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">df</span> <span class="tc-flag">-i</span>                               <span class="tc-cmt"># inode usage (hết inode ≠ hết disk!)</span>
+
+<span class="tc-cmt"># ── /proc filesystem — đọc kernel data ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/cpuinfo <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"model name"</span> <span class="tc-pipe">|</span> <span class="tc-cmd">uniq</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/meminfo                    <span class="tc-cmt"># memory statistics</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/<span class="tc-num">1234</span>/cmdline               <span class="tc-cmt"># command line của PID 1234</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/<span class="tc-num">1234</span>/status                <span class="tc-cmt"># status của process</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ls</span> <span class="tc-flag">-la</span> /proc/<span class="tc-num">1234</span>/fd/               <span class="tc-cmt"># file descriptors đang mở</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S3 — FIND GREP AWK SED ════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-tag st-1">TEXT PROCESSING</span>
+    <div><h2 class="sec-title">find, grep, awk, sed — Bộ tứ xử lý văn bản</h2>
+    <p class="sec-sub">Công cụ mạnh nhất để tìm kiếm và biến đổi dữ liệu trên Linux</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">find — Tìm file theo mọi tiêu chí</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">find — tìm file nâng cao</span><span class="cb-tag ct-1">find</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># Cú pháp: find [path] [conditions] [actions]</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /var/log <span class="tc-flag">-name</span> <span class="tc-str">"*.log"</span>            <span class="tc-cmt"># theo tên</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /opt <span class="tc-flag">-type f -name</span> <span class="tc-str">"*.jar"</span>        <span class="tc-cmt"># -type f=file, d=dir, l=symlink</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /home <span class="tc-flag">-user</span> <span class="tc-arg">deploy</span>               <span class="tc-cmt"># file thuộc user deploy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /tmp <span class="tc-flag">-mtime +7</span>                    <span class="tc-cmt"># file không đổi >7 ngày</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /var/log <span class="tc-flag">-size +100M</span>             <span class="tc-cmt"># file >100MB</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /etc <span class="tc-flag">-perm 777</span>                   <span class="tc-cmt"># file có permission 777 (nguy hiểm!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> / <span class="tc-flag">-name</span> <span class="tc-str">"*.conf"</span> <span class="tc-flag">2>/dev/null</span>    <span class="tc-cmt"># ẩn lỗi permission denied</span>
+
+<span class="tc-cmt"># Actions: exec, delete, print</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> /tmp <span class="tc-flag">-mtime +7 -delete</span>           <span class="tc-cmt"># xóa file cũ hơn 7 ngày</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> . <span class="tc-flag">-name</span> <span class="tc-str">"*.log"</span> <span class="tc-flag">-exec</span> <span class="tc-cmd">gzip</span> {} \; <span class="tc-cmt"># nén tất cả .log</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> . <span class="tc-flag">-name</span> <span class="tc-str">"*.class"</span> <span class="tc-flag">-exec</span> <span class="tc-cmd">rm</span> {} +  <span class="tc-cmt"># {} + hiệu quả hơn {} \;</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">grep — Tìm pattern trong text</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">grep — pattern matching trong log và code</span><span class="cb-tag ct-1">grep</span></div>
+      <div class="cb-body"><pre><span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-str">"ERROR"</span> /var/log/app.log          <span class="tc-cmt"># tìm "ERROR"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-i</span> <span class="tc-str">"error"</span> app.log               <span class="tc-cmt"># case-insensitive</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-n</span> <span class="tc-str">"NullPointer"</span> app.log          <span class="tc-cmt"># hiện số dòng</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-c</span> <span class="tc-str">"ERROR"</span> app.log               <span class="tc-cmt"># đếm số lần xuất hiện</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-v</span> <span class="tc-str">"DEBUG"</span> app.log               <span class="tc-cmt"># loại trừ dòng chứa DEBUG</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-A 5 -B 3</span> <span class="tc-str">"Exception"</span> app.log  <span class="tc-cmt"># 5 dòng sau, 3 dòng trước</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-r</span> <span class="tc-str">"password"</span> /etc/              <span class="tc-cmt"># tìm đệ quy trong thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-l</span> <span class="tc-str">"TODO"</span> src/**/*.java           <span class="tc-cmt"># chỉ in tên file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-E</span> <span class="tc-str">"ERROR|WARN|FATAL"</span> app.log   <span class="tc-cmt"># Extended regex</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-P</span> <span class="tc-str">"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"</span> access.log  <span class="tc-cmt"># Perl regex IP</span>
+
+<span class="tc-cmt"># Pipeline với grep</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-f</span> app.log <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">--line-buffered</span> <span class="tc-str">"ERROR"</span>  <span class="tc-cmt"># live filter</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"java"</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-v</span> <span class="tc-str">"grep"</span> <span class="tc-cmt"># loại grep khỏi kết quả</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">awk — Xử lý và trích xuất cột dữ liệu</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">awk — column extraction và data processing</span><span class="cb-tag ct-1">awk</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># $1, $2... = cột 1, 2... | $NF = cột cuối | $0 = toàn bộ dòng</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{print $1, $4}'</span> access.log      <span class="tc-cmt"># in cột 1 và 4</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-flag">-F:</span> <span class="tc-str">'{print $1}'</span> /etc/passwd    <span class="tc-cmt"># -F: dùng : làm delimiter → usernames</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{sum += $NF} END {print sum}'</span> data.txt  <span class="tc-cmt"># tổng cột cuối</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'NR>10 && NR<20'</span> file.txt     <span class="tc-cmt"># dòng 11-19 (NR = row number)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'$3 > 1000'</span> data.txt           <span class="tc-cmt"># dòng có cột 3 > 1000</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'/ERROR/ {count++} END {print count " errors"}'</span> app.log
+
+<span class="tc-cmt"># Thực tế: thống kê HTTP status codes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{print $9}'</span> access.log <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-pipe">|</span> <span class="tc-cmd">uniq</span> <span class="tc-flag">-c</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rn</span>
+<span class="tc-out">   5203 200
+    412 404
+     87 500
+     23 503</span>
+
+<span class="tc-cmt"># Top IP truy cập nhiều nhất</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{print $1}'</span> access.log <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-pipe">|</span> <span class="tc-cmd">uniq</span> <span class="tc-flag">-c</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-flag">-rn</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-10</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">sed — Stream Editor — tìm và thay thế</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">sed — find &amp; replace, delete lines, in-place edit</span><span class="cb-tag ct-1">sed</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># Cú pháp: sed 's/pattern/replacement/flags'</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-str">'s/localhost/db.prod.internal/'</span> config.yml
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-str">'s/localhost/db.prod.internal/g'</span> config.yml  <span class="tc-cmt"># g=all occurrences</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-flag">-i</span> <span class="tc-str">'s/DEBUG/INFO/g'</span> app.properties      <span class="tc-cmt"># -i in-place edit!</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-flag">-i.bak</span> <span class="tc-str">'s/old/new/g'</span> file.txt         <span class="tc-cmt"># backup .bak trước khi sửa</span>
+
+<span class="tc-cmt"># Xóa dòng</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-str">'/^#/d'</span> config.yml                       <span class="tc-cmt"># xóa dòng bắt đầu bằng #</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-str">'/^$/d'</span> file.txt                          <span class="tc-cmt"># xóa dòng trống</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-str">'5d'</span> file.txt                             <span class="tc-cmt"># xóa dòng số 5</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-str">'5,10d'</span> file.txt                          <span class="tc-cmt"># xóa dòng 5-10</span>
+
+<span class="tc-cmt"># Thực tế: Cập nhật version trong config khi deploy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sed</span> <span class="tc-flag">-i</span> <span class="tc-str">"s/APP_VERSION=.*/APP_VERSION=$NEW_VERSION/"</span> .env</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S4 — PERMISSIONS ════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-tag st-1">PERMISSIONS</span>
+    <div><h2 class="sec-title">Permissions, Ownership &amp; ACL</h2>
+    <p class="sec-sub">chmod, chown, umask, ACL — kiểm soát quyền truy cập file an toàn</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Đọc hiểu permission string</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Linux Permissions — đọc, thiết lập, ACL</span><span class="cb-tag ct-1">Permissions</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ls -la output:</span>
+<span class="tc-out">-rwxr-xr--  1  deploy  www-data  4096  Mar 22  app.jar</span>
+<span class="tc-cmt"># │││││││││  │  │       │         │     │       │</span>
+<span class="tc-cmt"># ││││││││└─ others: r-- = 4 (read only)</span>
+<span class="tc-cmt"># │││││└─── group: r-x = 5 (read+execute)</span>
+<span class="tc-cmt"># ││└─────── owner: rwx = 7 (read+write+execute)</span>
+<span class="tc-cmt"># │└──────── type: - = file, d = dir, l = symlink</span>
+<span class="tc-cmt"># r=4, w=2, x=1 → rwx=7, rw-=6, r-x=5, r--=4</span>
+
+<span class="tc-cmt"># ── chmod ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">755</span> /opt/app/               <span class="tc-cmt"># rwxr-xr-x  (directory)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">644</span> /etc/app.conf            <span class="tc-cmt"># rw-r--r--  (config file)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">600</span> ~/.ssh/id_rsa            <span class="tc-cmt"># rw------- (private key, bắt buộc!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">700</span> ~/.ssh/                  <span class="tc-cmt"># rwx------ (ssh directory)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">+x</span> deploy.sh                 <span class="tc-cmt"># thêm execute cho mọi người</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">u+x,g-w</span> script.sh           <span class="tc-cmt"># symbolic mode</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-flag">-R</span> <span class="tc-arg">755</span> /opt/app/             <span class="tc-cmt"># -R recursive</span>
+
+<span class="tc-cmt"># ── chown ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chown</span> <span class="tc-arg">deploy:www-data</span> /opt/app/   <span class="tc-cmt"># đổi owner:group</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chown</span> <span class="tc-flag">-R</span> <span class="tc-arg">deploy:deploy</span> /opt/app/  <span class="tc-cmt"># recursive</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chown</span> <span class="tc-arg">:www-data</span> /var/www/html/    <span class="tc-cmt"># chỉ đổi group</span>
+
+<span class="tc-cmt"># ── umask — default permissions khi tạo file ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">umask</span>                              <span class="tc-cmt"># xem umask hiện tại (thường 0022)</span>
+<span class="tc-cmt"># umask 022 → file=644 (666-022), dir=755 (777-022)</span>
+<span class="tc-cmt"># umask 027 → file=640, dir=750 (security best practice)</span>
+
+<span class="tc-cmt"># ── Special permissions ──</span>
+<span class="tc-cmt"># SUID (4): executable chạy với quyền owner (passwd command)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">4755</span> /usr/bin/special        <span class="tc-cmt"># Set SUID</span>
+<span class="tc-cmt"># Sticky bit (1): chỉ owner mới xóa file trong shared dir (/tmp)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">1777</span> /tmp                    <span class="tc-cmt"># Set sticky bit</span>
+
+<span class="tc-cmt"># ── ACL — fine-grained permissions ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">getfacl</span> /var/log/app/              <span class="tc-cmt"># xem ACL hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">setfacl</span> <span class="tc-flag">-m</span> u:<span class="tc-arg">monitoring:r</span> /var/log/app.log  <span class="tc-cmt"># user monitoring: read</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">setfacl</span> <span class="tc-flag">-m</span> g:<span class="tc-arg">devops:rwx</span> /opt/app/ <span class="tc-cmt"># group devops: rwx</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">setfacl</span> <span class="tc-flag">-R -m</span> u:<span class="tc-arg">ci:r-x</span> /opt/app/  <span class="tc-cmt"># recursive ACL</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">setfacl</span> <span class="tc-flag">-x</span> u:<span class="tc-arg">monitoring</span> /var/log/  <span class="tc-cmt"># xóa ACL entry</span></pre></div>
+    </div>
+    <div class="info i-warn">
+      <span class="info-ico">⚠️</span>
+      <div><strong style="color:var(--text)">Security best practices cho permissions:</strong> Private SSH key phải là <code>600</code>. Config chứa password nên <code>640</code> (owner read-write, group read). Không bao giờ dùng <code>777</code> trên production. Service account nên là system user (<code>--system</code>) không có login shell.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 2 BANNER ════ -->
+<div class="cat-banner cb-2">
+  <div class="cb-icon">⚙️</div>
+  <div><div class="cb-badge">PROCESS &amp; SYSTEM</div>
+  <div class="cb-title">Process, Monitoring &amp; Systemd</div>
+  <div class="cb-sub">Process Management · System Stats · Memory/CPU · Systemd Services</div></div>
+</div>
+
+<!-- ════ S5 — PROCESS ════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-tag st-2">PROCESS</span>
+    <div><h2 class="sec-title">Process Management — Kiểm soát tiến trình</h2>
+    <p class="sec-sub">ps, kill, nice, jobs, nohup — quản lý process như sysadmin</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Quản lý process toàn diện</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Process management — ps, kill, jobs, nohup, nice</span><span class="cb-tag ct-2">Process</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Xem processes ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux                             <span class="tc-cmt"># tất cả processes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> java               <span class="tc-cmt"># tìm java processes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> <span class="tc-flag">-ef --forest</span>                   <span class="tc-cmt"># tree view (parent-child)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pgrep</span> <span class="tc-flag">-a</span> nginx                    <span class="tc-cmt"># PIDs của nginx</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pidof</span> nginx                        <span class="tc-cmt"># PID(s) của process tên "nginx"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pstree</span> <span class="tc-flag">-p</span>                         <span class="tc-cmt"># tree với PIDs</span>
+
+<span class="tc-cmt"># ── Signals ──</span>
+<span class="tc-cmt"># SIGTERM (15) = graceful shutdown (polite)</span>
+<span class="tc-cmt"># SIGKILL  (9) = force kill (brutal, no cleanup)</span>
+<span class="tc-cmt"># SIGHUP   (1) = reload config (nginx, sshd)</span>
+<span class="tc-cmt"># SIGSTOP (19) = pause process</span>
+<span class="tc-cmt"># SIGCONT (18) = resume paused process</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">kill</span> <span class="tc-arg">1234</span>                         <span class="tc-cmt"># SIGTERM (default)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kill</span> <span class="tc-flag">-9</span> <span class="tc-arg">1234</span>                      <span class="tc-cmt"># SIGKILL (last resort)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kill</span> <span class="tc-flag">-HUP</span> $(pidof nginx)          <span class="tc-cmt"># reload nginx config</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">pkill</span> <span class="tc-flag">-f</span> <span class="tc-str">"java.*my-service"</span>       <span class="tc-cmt"># kill by name pattern</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">killall</span> nginx                      <span class="tc-cmt"># kill tất cả nginx processes</span>
+
+<span class="tc-cmt"># ── Background / Foreground ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">./long-task.sh</span> &                  <span class="tc-cmt"># chạy background, in PID</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">jobs</span>                               <span class="tc-cmt"># xem background jobs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fg</span> %1                              <span class="tc-cmt"># đưa job 1 về foreground</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">bg</span> %1                              <span class="tc-cmt"># tiếp tục job 1 ở background</span>
+<span class="tc-cmt"># Ctrl+Z = suspend, sau đó bg để chạy tiếp ở background</span>
+
+<span class="tc-cmt"># ── nohup — chạy tiếp khi logout ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nohup</span> <span class="tc-cmd">java</span> <span class="tc-flag">-jar</span> app.jar <span class="tc-redirect">></span> app.log <span class="tc-num">2>&1</span> &
+<span class="tc-cmt"># Output vào app.log, tiếp tục chạy sau khi SSH disconnect</span>
+<span class="tc-cmt"># Tốt hơn: dùng systemd hoặc supervisor thay nohup</span>
+
+<span class="tc-cmt"># ── nice / renice — ưu tiên CPU ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nice</span> <span class="tc-flag">-n 10</span> <span class="tc-cmd">./heavy-task.sh</span>       <span class="tc-cmt"># start với priority thấp (nice 10)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">renice</span> <span class="tc-flag">+5</span> <span class="tc-flag">-p</span> <span class="tc-arg">1234</span>               <span class="tc-cmt"># giảm priority process đang chạy</span>
+<span class="tc-cmt"># nice: -20 (cao nhất) đến 19 (thấp nhất), default 0</span>
+<span class="tc-cmt"># Dùng cho backup, indexing — không ảnh hưởng app chính</span>
+
+<span class="tc-cmt"># ── Open file limits ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ulimit</span> <span class="tc-flag">-n</span>                         <span class="tc-cmt"># max open files (default 1024)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ulimit</span> <span class="tc-flag">-n 65536</span>                   <span class="tc-cmt"># tăng lên (session hiện tại)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/<span class="tc-num">1234</span>/limits             <span class="tc-cmt"># limits của PID</span>
+<span class="tc-cmt"># Config /etc/security/limits.conf để persistent</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S6 — MONITORING ════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-tag st-2">MONITORING</span>
+    <div><h2 class="sec-title">System Monitoring — Quan sát server real-time</h2>
+    <p class="sec-sub">top, htop, vmstat, iostat, sar — đọc hiểu metrics hệ thống</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Monitoring commands cho production server</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">System monitoring — top, vmstat, iostat, sar</span><span class="cb-tag ct-2">Monitoring</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── top — interactive process monitor ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">top</span>
+<span class="tc-cmt"># Trong top: M=sort by mem, P=sort by cpu, 1=show all CPUs, k=kill</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">top</span> <span class="tc-flag">-b -n 1</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-20</span>          <span class="tc-cmt"># batch mode, 1 lần, pipe được</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">top</span> <span class="tc-flag">-p</span> <span class="tc-arg">1234,5678</span>                 <span class="tc-cmt"># monitor PIDs cụ thể</span>
+
+<span class="tc-cmt"># ── Load average — 3 numbers: 1 min, 5 min, 15 min ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">uptime</span>
+<span class="tc-out"> 10:30:12 up 45 days, load average: 0.52, 0.48, 0.45</span>
+<span class="tc-cmt"># Load > số CPU cores → server đang quá tải!</span>
+<span class="tc-cmt"># 2 cores: load 2.0 = đủ tải, load 4.0 = quá tải gấp đôi</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/loadavg                 <span class="tc-cmt"># xem trực tiếp</span>
+
+<span class="tc-cmt"># ── vmstat — virtual memory stats ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">vmstat</span> <span class="tc-arg">1</span> <span class="tc-arg">5</span>                        <span class="tc-cmt"># mỗi 1 giây, 5 lần</span>
+<span class="tc-out">procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+ 1  0      0 2048360  82084 4096480  0    0     12   234  341  782  8  2 88  2</span>
+<span class="tc-cmt"># r = run queue, b = blocked | wa = I/O wait (cao → disk bottleneck)</span>
+
+<span class="tc-cmt"># ── iostat — disk I/O stats ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">iostat</span> <span class="tc-flag">-xz 1</span>                      <span class="tc-cmt"># extended stats, interval 1s</span>
+<span class="tc-out">Device  r/s   w/s   rkB/s  wkB/s  await  %util
+sda    2.50  15.3   40.0  245.6    3.2   12.5</span>
+<span class="tc-cmt"># %util gần 100% → disk đang bottleneck</span>
+
+<span class="tc-cmt"># ── sar — System Activity Reporter ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sar</span> <span class="tc-flag">-u 1 3</span>                        <span class="tc-cmt"># CPU usage mỗi 1s, 3 lần</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sar</span> <span class="tc-flag">-r 1 3</span>                        <span class="tc-cmt"># memory usage</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sar</span> <span class="tc-flag">-n DEV 1 3</span>                   <span class="tc-cmt"># network interface stats</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sar</span> <span class="tc-flag">-b 1 3</span>                        <span class="tc-cmt"># I/O stats</span>
+<span class="tc-cmt"># sar lưu lịch sử → xem peak từ ngày hôm qua</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sar</span> <span class="tc-flag">-u -f</span> /var/log/sa/sa22        <span class="tc-cmt"># xem sar file ngày 22</span>
+
+<span class="tc-cmt"># ── dmesg — kernel ring buffer (hardware errors) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dmesg</span> <span class="tc-flag">-T</span> <span class="tc-pipe">|</span> <span class="tc-cmd">tail</span> <span class="tc-flag">-50</span>              <span class="tc-cmt"># -T = human timestamp</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dmesg</span> <span class="tc-flag">-T</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-i</span> <span class="tc-str">"error\|fail\|oom"</span>  <span class="tc-cmt"># tìm lỗi kernel</span>
+<span class="tc-cmt"># OOM Killer: nếu thấy "oom-kill" → RAM đã cạn kiệt!</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S7 — MEMORY CPU ════ -->
+<div class="section" id="s7">
+  <div class="sec-head">
+    <span class="sec-tag st-2">MEMORY</span>
+    <div><h2 class="sec-title">Memory &amp; CPU — Debug performance</h2>
+    <p class="sec-sub">free, /proc/meminfo, lscpu — đọc hiểu và tối ưu tài nguyên</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Memory và CPU analysis</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Memory &amp; CPU commands</span><span class="cb-tag ct-2">Resources</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Memory ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">free</span> <span class="tc-flag">-h</span>                           <span class="tc-cmt"># human-readable</span>
+<span class="tc-out">              total        used        free      shared  buff/cache   available
+Mem:           15Gi        6.2Gi       2.1Gi      284Mi       7.0Gi       8.8Gi
+Swap:           2Gi          0B        2Gi</span>
+<span class="tc-cmt"># "available" (không phải "free") mới là RAM thực sự có thể dùng</span>
+<span class="tc-cmt"># buff/cache: kernel cache - có thể giải phóng khi cần</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/meminfo <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-flag">-E</span> <span class="tc-str">"Mem|Swap|Cached"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">swapon</span> <span class="tc-flag">--show</span>                    <span class="tc-cmt"># swap usage</span>
+
+<span class="tc-cmt"># ── CPU ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lscpu</span>                             <span class="tc-cmt"># CPU topology</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nproc</span>                             <span class="tc-cmt"># số logical CPUs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/cpuinfo <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"cpu MHz"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">mpstat</span> <span class="tc-flag">-P ALL 1</span>                  <span class="tc-cmt"># per-CPU stats (cần sysstat)</span>
+
+<span class="tc-cmt"># ── OOM (Out of Memory) debug ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dmesg</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"Out of memory"</span>    <span class="tc-cmt"># OOM killer log</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dmesg</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"oom-kill"</span>         <span class="tc-cmt"># process bị kill</span>
+<span class="tc-cmt"># Xem /var/log/syslog hoặc journalctl -k | grep oom</span>
+
+<span class="tc-cmt"># ── Identify memory hog ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ps</span> aux <span class="tc-flag">--sort=-%mem</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-10</span>  <span class="tc-cmt"># top memory consumers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/<span class="tc-num">1234</span>/status <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"VmRSS\|VmSize"</span>  <span class="tc-cmt"># RAM của PID</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S8 — SYSTEMD ════ -->
+<div class="section" id="s8">
+  <div class="sec-head">
+    <span class="sec-tag st-2">SYSTEMD</span>
+    <div><h2 class="sec-title">Systemd — Quản lý Services như Pro</h2>
+    <p class="sec-sub">systemctl, journalctl, unit files — deploy và quản lý app như service thật sự</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">systemctl — Quản lý service</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">systemctl + journalctl + unit file</span><span class="cb-tag ct-2">Systemd</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── systemctl — điều khiển service ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> start nginx            <span class="tc-cmt"># khởi động</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> stop nginx             <span class="tc-cmt"># dừng</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> restart nginx          <span class="tc-cmt"># restart</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> reload nginx           <span class="tc-cmt"># reload config (không interrupt)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> status nginx           <span class="tc-cmt"># xem status + recent logs</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> enable nginx           <span class="tc-cmt"># autostart on boot</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> disable nginx          <span class="tc-cmt"># tắt autostart</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> is-active nginx        <span class="tc-cmt"># kiểm tra đang chạy</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> list-units <span class="tc-flag">--type=service --state=active</span>
+
+<span class="tc-cmt"># ── Tạo service cho Spring Boot app ──</span>
+<span class="tc-cmt"># /etc/systemd/system/order-service.service</span>
+[Unit]
+Description=Order Service
+After=network.target
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/order-service
+ExecStart=/usr/bin/java \
+    <span class="tc-flag">-Xms512m -Xmx1g</span> \
+    <span class="tc-flag">-XX:+UseG1GC</span> \
+    <span class="tc-flag">-Dspring.profiles.active</span>=prod \
+    <span class="tc-flag">-jar</span> /opt/order-service/app.jar
+ExecStop=/bin/kill <span class="tc-flag">-TERM</span> $MAINPID
+ExecReload=/bin/kill <span class="tc-flag">-HUP</span> $MAINPID
+Restart=on-failure
+RestartSec=<span class="tc-num">10</span>
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=order-service
+Environment=<span class="tc-str">"JAVA_HOME=/usr/lib/jvm/java-21"</span>
+EnvironmentFile=-/opt/order-service/.env
+
+[Install]
+WantedBy=multi-user.target
+
+<span class="tc-cmt"># Load và start:</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> daemon-reload
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> enable --now order-service
+
+<span class="tc-cmt"># ── journalctl — xem logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">-u</span> order-service                <span class="tc-cmt"># tất cả logs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">-u</span> order-service <span class="tc-flag">-f</span>            <span class="tc-cmt"># follow</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">-u</span> order-service <span class="tc-flag">--since "1 hour ago"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">-u</span> order-service <span class="tc-flag">-p err</span>        <span class="tc-cmt"># chỉ errors</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">-k</span>                              <span class="tc-cmt"># kernel messages</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">--disk-usage</span>                    <span class="tc-cmt"># dung lượng journal</span>
+<span class="tc-root">$</span> <span class="tc-cmd">journalctl</span> <span class="tc-flag">--vacuum-time=30d</span>              <span class="tc-cmt"># dọn log >30 ngày</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 3 BANNER ════ -->
+<div class="cat-banner cb-3">
+  <div class="cb-icon">🌐</div>
+  <div><div class="cb-badge">NETWORKING</div>
+  <div class="cb-title">Network Commands, Firewall &amp; SSH</div>
+  <div class="cb-sub">ip · ss · netstat · iptables · nftables · SSH Advanced</div></div>
+</div>
+
+<!-- ════ S9 — NETWORK ════ -->
+<div class="section" id="s9">
+  <div class="sec-head">
+    <span class="sec-tag st-3">NETWORK</span>
+    <div><h2 class="sec-title">Network Commands — Debug kết nối</h2>
+    <p class="sec-sub">ip, ss, netstat, tcpdump, nmap — troubleshoot mọi vấn đề mạng</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Network diagnostic toolkit</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Network commands — ip, ss, tcpdump, nmap</span><span class="cb-tag ct-3">Network</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── ip — modern replacement cho ifconfig ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ip</span> addr show                      <span class="tc-cmt"># xem IP của các interface</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ip</span> addr show eth0                 <span class="tc-cmt"># interface cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ip</span> route show                     <span class="tc-cmt"># routing table</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ip</span> route get 8.8.8.8              <span class="tc-cmt"># route đến IP nào đó</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ip</span> link set eth0 up/down          <span class="tc-cmt"># bật/tắt interface</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ip</span> addr add 192.168.1.10/24 dev eth0  <span class="tc-cmt"># thêm IP tạm</span>
+
+<span class="tc-cmt"># ── ss — socket statistics (thay netstat) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ss</span> <span class="tc-flag">-tuln</span>                          <span class="tc-cmt"># tcp/udp listening ports</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ss</span> <span class="tc-flag">-tulnp</span>                         <span class="tc-cmt"># + process name/PID</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ss</span> <span class="tc-flag">-tnp</span>                           <span class="tc-cmt"># established connections</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ss</span> <span class="tc-flag">-s</span>                             <span class="tc-cmt"># summary statistics</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ss</span> <span class="tc-flag">-tnp</span> dport :<span class="tc-num">8080</span>              <span class="tc-cmt"># connections đến port 8080</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ss</span> <span class="tc-flag">-tnp</span> state established        <span class="tc-cmt"># chỉ established</span>
+
+<span class="tc-cmt"># ── DNS ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dig</span> api.example.com               <span class="tc-cmt"># DNS lookup</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dig</span> <span class="tc-flag">+short</span> api.example.com       <span class="tc-cmt"># chỉ IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dig</span> <span class="tc-flag">@8.8.8.8</span> api.example.com    <span class="tc-cmt"># dùng DNS server cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dig</span> <span class="tc-flag">-x</span> 192.168.1.10              <span class="tc-cmt"># reverse DNS lookup</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">resolvectl</span> status                 <span class="tc-cmt"># DNS resolver status (systemd)</span>
+
+<span class="tc-cmt"># ── Connectivity tests ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ping</span> <span class="tc-flag">-c 4</span> 8.8.8.8                <span class="tc-cmt"># 4 pings</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">traceroute</span> api.example.com        <span class="tc-cmt"># trace route</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">mtr</span> api.example.com               <span class="tc-cmt"># ping + traceroute realtime</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nc</span> <span class="tc-flag">-zv</span> postgres.internal <span class="tc-num">5432</span>   <span class="tc-cmt"># test TCP connection</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> <span class="tc-flag">-v</span> http://localhost:8080/health
+
+<span class="tc-cmt"># ── tcpdump — capture packets (cực mạnh) ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">tcpdump</span> <span class="tc-flag">-i eth0</span>                  <span class="tc-cmt"># capture trên eth0</span>
+<span class="tc-root">$</span> <span class="tc-cmd">tcpdump</span> <span class="tc-flag">-i any port 8080</span>        <span class="tc-cmt"># filter port 8080</span>
+<span class="tc-root">$</span> <span class="tc-cmd">tcpdump</span> <span class="tc-flag">-i any host 10.0.1.5</span>   <span class="tc-cmt"># filter host</span>
+<span class="tc-root">$</span> <span class="tc-cmd">tcpdump</span> <span class="tc-flag">-i eth0 -w</span> /tmp/capture.pcap  <span class="tc-cmt"># ghi vào file (Wireshark)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">tcpdump</span> <span class="tc-flag">-i any "tcp port 80 and host 10.0.1.5"</span>
+
+<span class="tc-cmt"># ── nmap — port scanner ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nmap</span> <span class="tc-flag">-sT</span> localhost              <span class="tc-cmt"># scan TCP ports</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nmap</span> <span class="tc-flag">-p 8080,9090</span> server.dev   <span class="tc-cmt"># scan specific ports</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nmap</span> <span class="tc-flag">-sV</span> server.dev             <span class="tc-cmt"># detect service versions</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S10 — FIREWALL ════ -->
+<div class="section" id="s10">
+  <div class="sec-head">
+    <span class="sec-tag st-3">FIREWALL</span>
+    <div><h2 class="sec-title">Firewall — iptables &amp; ufw &amp; nftables</h2>
+    <p class="sec-sub">Kiểm soát traffic vào/ra server — thiết yếu cho bảo mật production</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">ufw (Ubuntu) và iptables</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Firewall — ufw (simple) và iptables (advanced)</span><span class="cb-tag ct-3">Firewall</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ════ UFW — Uncomplicated Firewall (Ubuntu) ════</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> status verbose               <span class="tc-cmt"># xem rules và status</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> enable                        <span class="tc-cmt"># bật firewall</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> default deny incoming         <span class="tc-cmt"># block tất cả incoming</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> default allow outgoing        <span class="tc-cmt"># allow tất cả outgoing</span>
+
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> allow ssh                      <span class="tc-cmt"># cho phép SSH (port 22)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> allow <span class="tc-num">80</span>/tcp                   <span class="tc-cmt"># HTTP</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> allow <span class="tc-num">443</span>/tcp                  <span class="tc-cmt"># HTTPS</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> allow from 10.0.1.0/24        <span class="tc-cmt"># từ subnet nội bộ</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> allow from 10.0.1.50 to any port <span class="tc-num">5432</span>  <span class="tc-cmt"># chỉ IP cụ thể đến pg</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> deny <span class="tc-num">3306</span>                     <span class="tc-cmt"># block MySQL từ bên ngoài</span>
+<span class="tc-root">$</span> <span class="tc-cmd">ufw</span> delete allow <span class="tc-num">80</span>/tcp          <span class="tc-cmt"># xóa rule</span>
+
+<span class="tc-cmt"># ════ iptables — fine-grained control ════</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-L -n -v --line-numbers</span> <span class="tc-cmt"># xem tất cả rules với số thứ tự</span>
+
+<span class="tc-cmt"># Allow established connections</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</span>
+
+<span class="tc-cmt"># Allow loopback</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-A INPUT -i lo -j ACCEPT</span>
+
+<span class="tc-cmt"># Allow SSH, HTTP, HTTPS</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-A INPUT -p tcp --dport 22 -j ACCEPT</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-A INPUT -p tcp --dport 80 -j ACCEPT</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-A INPUT -p tcp --dport 443 -j ACCEPT</span>
+
+<span class="tc-cmt"># Rate limiting SSH (chống brute force)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-A INPUT -p tcp --dport 22 -m limit --limit 5/min -j ACCEPT</span>
+
+<span class="tc-cmt"># Default DROP</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables</span> <span class="tc-flag">-P INPUT DROP</span>
+
+<span class="tc-cmt"># Save rules (Ubuntu/Debian)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">iptables-save</span> <span class="tc-redirect">></span> /etc/iptables/rules.v4
+<span class="tc-cmt"># apt install iptables-persistent để load khi reboot</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S11 — SSH ADVANCED ════ -->
+<div class="section" id="s11">
+  <div class="sec-head">
+    <span class="sec-tag st-3">SSH</span>
+    <div><h2 class="sec-title">SSH Advanced — Bảo mật và Hiệu quả</h2>
+    <p class="sec-sub">SSH hardening, key management, tunneling, jump host, authorized keys</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">SSH Server hardening &amp; advanced usage</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">SSH — sshd_config hardening + advanced features</span><span class="cb-tag ct-3">SSH</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── /etc/ssh/sshd_config — hardening ──</span>
+Port <span class="tc-num">2222</span>                          <span class="tc-cmt"># đổi port khỏi 22 (giảm scan bot)</span>
+PermitRootLogin no                  <span class="tc-cmt"># ❌ không cho root login</span>
+PasswordAuthentication no          <span class="tc-cmt"># ❌ chỉ dùng key</span>
+PubkeyAuthentication yes           <span class="tc-cmt"># ✅ key-based auth</span>
+AuthorizedKeysFile .ssh/authorized_keys
+MaxAuthTries <span class="tc-num">3</span>
+LoginGraceTime <span class="tc-num">30</span>
+AllowUsers deploy devops           <span class="tc-cmt"># chỉ users này được login</span>
+Protocol <span class="tc-num">2</span>
+X11Forwarding no
+ClientAliveInterval <span class="tc-num">300</span>           <span class="tc-cmt"># keepalive 5 phút</span>
+ClientAliveCountMax <span class="tc-num">2</span>
+
+<span class="tc-cmt"># Apply changes:</span>
+<span class="tc-root">$</span> <span class="tc-cmd">sshd</span> <span class="tc-flag">-t</span>                          <span class="tc-cmt"># test config trước khi restart!</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> reload sshd
+
+<span class="tc-cmt"># ── Authorized keys management ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh-keygen</span> <span class="tc-flag">-t ed25519 -C</span> <span class="tc-str">"deploy@ci"</span> <span class="tc-flag">-f</span> ~/.ssh/id_deploy
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh-copy-id</span> <span class="tc-flag">-i</span> ~/.ssh/id_deploy.pub deploy@server
+<span class="tc-cmt"># Hoặc thủ công:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> ~/.ssh/id_deploy.pub <span class="tc-redirect">>></span> ~/.ssh/authorized_keys
+<span class="tc-prompt">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">700</span> ~/.ssh && <span class="tc-cmd">chmod</span> <span class="tc-arg">600</span> ~/.ssh/authorized_keys
+
+<span class="tc-cmt"># ── SSH tunneling — forward local port ──</span>
+<span class="tc-cmt"># Local forward: truy cập DB prod qua bastion</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-L 5432:db.internal:5432 -N -f</span> bastion.prod
+<span class="tc-cmt"># Sau đó: psql -h localhost -p 5432 (qua tunnel)</span>
+
+<span class="tc-cmt"># Remote forward: expose local service ra ngoài</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-R 8080:localhost:8080</span> dev.server
+<span class="tc-cmt"># Trên server: curl http://localhost:8080 → request vào local machine</span>
+
+<span class="tc-cmt"># Dynamic SOCKS proxy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-D 1080 -N -f</span> bastion.prod    <span class="tc-cmt"># SOCKS5 proxy trên port 1080</span>
+
+<span class="tc-cmt"># ── Jump Host (ProxyJump) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-J</span> bastion.prod deploy@internal.server  <span class="tc-cmt"># qua bastion</span>
+<span class="tc-cmt"># Trong ~/.ssh/config:</span>
+Host internal
+    HostName internal.server
+    User deploy
+    ProxyJump bastion.prod
+
+<span class="tc-cmt"># ── SSH Agent Forwarding ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ssh</span> <span class="tc-flag">-A</span> bastion.prod               <span class="tc-cmt"># forward agent key</span>
+<span class="tc-cmt"># Sau khi vào bastion, ssh từ bastion dùng key local của bạn</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 4 BANNER ════ -->
+<div class="cat-banner cb-4">
+  <div class="cb-icon">💾</div>
+  <div><div class="cb-badge">STORAGE &amp; DISK</div>
+  <div class="cb-title">Disk Management &amp; Archives</div>
+  <div class="cb-sub">Partition · LVM · Mount · tar · gzip · dd</div></div>
+</div>
+
+<!-- ════ S12 — DISK ════ -->
+<div class="section" id="s12">
+  <div class="sec-head">
+    <span class="sec-tag st-4">DISK</span>
+    <div><h2 class="sec-title">Disk &amp; Partition Management</h2>
+    <p class="sec-sub">fdisk, lsblk, mount, LVM — quản lý storage trên production server</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Disk và partition workflow</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Disk management — lsblk, mount, LVM</span><span class="cb-tag ct-4">Disk</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Xem disk và partitions ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsblk</span>                              <span class="tc-cmt"># block devices tree</span>
+<span class="tc-out">NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+nvme0n1     259:0   0   50G  0  disk
+├─nvme0n1p1 259:1   0    1G  0  part /boot
+└─nvme0n1p2 259:2   0   49G  0  part
+  ├─vg0-root 253:0  0   20G  0  lvm  /
+  └─vg0-data 253:1  0   29G  0  lvm  /data</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsblk</span> <span class="tc-flag">-f</span>                           <span class="tc-cmt"># + filesystem type và UUID</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fdisk</span> <span class="tc-flag">-l</span>                           <span class="tc-cmt"># list partitions chi tiết</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">blkid</span>                              <span class="tc-cmt"># UUID của devices</span>
+
+<span class="tc-cmt"># ── Mount / Umount ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">mount</span>                              <span class="tc-cmt"># xem tất cả mounts</span>
+<span class="tc-root">$</span> <span class="tc-cmd">mount</span> /dev/sdb1 /mnt/data          <span class="tc-cmt"># mount partition</span>
+<span class="tc-root">$</span> <span class="tc-cmd">mount</span> <span class="tc-flag">-t ext4 -o rw,noatime</span> /dev/sdb1 /mnt/data
+<span class="tc-root">$</span> <span class="tc-cmd">umount</span> /mnt/data                   <span class="tc-cmt"># unmount</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsof</span> /mnt/data                     <span class="tc-cmt"># xem ai đang dùng mount</span>
+
+<span class="tc-cmt"># /etc/fstab — auto mount on boot</span>
+UUID=xxxx  /data  ext4  defaults,noatime  0 2
+<span class="tc-root">$</span> <span class="tc-cmd">mount</span> <span class="tc-flag">-a</span>                           <span class="tc-cmt"># test fstab entries</span>
+
+<span class="tc-cmt"># ── LVM — Logical Volume Manager ──</span>
+<span class="tc-cmt"># Xem LVM status</span>
+<span class="tc-root">$</span> <span class="tc-cmd">pvs</span>                                <span class="tc-cmt"># Physical Volumes</span>
+<span class="tc-root">$</span> <span class="tc-cmd">vgs</span>                                <span class="tc-cmt"># Volume Groups</span>
+<span class="tc-root">$</span> <span class="tc-cmd">lvs</span>                                <span class="tc-cmt"># Logical Volumes</span>
+<span class="tc-root">$</span> <span class="tc-cmd">lvdisplay</span>
+
+<span class="tc-cmt"># Extend logical volume (không reboot!)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">lvextend</span> <span class="tc-flag">-L +10G</span> /dev/vg0/data   <span class="tc-cmt"># thêm 10GB</span>
+<span class="tc-root">$</span> <span class="tc-cmd">resize2fs</span> /dev/vg0/data           <span class="tc-cmt"># resize filesystem (ext4)</span>
+<span class="tc-cmt"># hoặc: lvextend -r -L +10G /dev/vg0/data  (-r tự resize)</span>
+
+<span class="tc-cmt"># ── dd — low-level copy ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">dd</span> <span class="tc-flag">if=/dev/zero of=/var/swapfile bs=1M count=2048</span>  <span class="tc-cmt"># tạo 2GB swap</span>
+<span class="tc-root">$</span> <span class="tc-cmd">mkswap</span> /var/swapfile && <span class="tc-cmd">swapon</span> /var/swapfile
+<span class="tc-cmt"># Backup disk image</span>
+<span class="tc-root">$</span> <span class="tc-cmd">dd</span> <span class="tc-flag">if=/dev/sda of=/backup/disk.img bs=4M status=progress</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S13 — ARCHIVE ════ -->
+<div class="section" id="s13">
+  <div class="sec-head">
+    <span class="sec-tag st-4">ARCHIVE</span>
+    <div><h2 class="sec-title">Archive &amp; Compression — tar, gzip, zip</h2>
+    <p class="sec-sub">Nén, giải nén, backup — tất cả các format phổ biến</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">tar và compression commands</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">tar, gzip, zip — archive &amp; compression</span><span class="cb-tag ct-4">Archive</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── tar — Tape Archive (dùng nhiều nhất) ──</span>
+<span class="tc-cmt"># c=create, x=extract, t=list, v=verbose, f=file, z=gzip, j=bzip2, J=xz</span>
+
+<span class="tc-cmt"># Nén</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-czf</span> backup.tar.gz /opt/app/   <span class="tc-cmt"># tạo tar.gz</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-cjf</span> backup.tar.bz2 /opt/app/ <span class="tc-cmt"># tạo tar.bz2 (nén hơn, chậm hơn)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-cJf</span> backup.tar.xz /opt/app/  <span class="tc-cmt"># xz (nén nhất, chậm nhất)</span>
+
+<span class="tc-cmt"># Giải nén</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-xzf</span> backup.tar.gz             <span class="tc-cmt"># giải nén</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-xzf</span> backup.tar.gz <span class="tc-flag">-C</span> /tmp/   <span class="tc-cmt"># giải nén vào /tmp/</span>
+
+<span class="tc-cmt"># Xem nội dung không giải nén</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-tzf</span> backup.tar.gz             <span class="tc-cmt"># list files</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-xzf</span> backup.tar.gz app/config.yml  <span class="tc-cmt"># extract 1 file cụ thể</span>
+
+<span class="tc-cmt"># Backup incremental với tar</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-czf</span> backup-full.tar.gz <span class="tc-flag">--listed-incremental</span>=snap.snar /opt/app/
+<span class="tc-prompt">$</span> <span class="tc-cmd">tar</span> <span class="tc-flag">-czf</span> backup-inc.tar.gz  <span class="tc-flag">--listed-incremental</span>=snap.snar /opt/app/
+
+<span class="tc-cmt"># ── gzip / gunzip ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gzip</span> large.log                     <span class="tc-cmt"># nén → large.log.gz (xóa original)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gzip</span> <span class="tc-flag">-k</span> large.log                  <span class="tc-cmt"># -k giữ original</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gunzip</span> large.log.gz               <span class="tc-cmt"># giải nén</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">zcat</span> large.log.gz <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"ERROR"</span> <span class="tc-cmt"># grep trong .gz không cần giải nén!</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">zless</span> large.log.gz                <span class="tc-cmt"># xem .gz với less</span>
+
+<span class="tc-cmt"># ── zip / unzip ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">zip</span> <span class="tc-flag">-r</span> archive.zip /opt/app/      <span class="tc-cmt"># tạo zip</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">unzip</span> archive.zip <span class="tc-flag">-d</span> /tmp/        <span class="tc-cmt"># giải nén vào /tmp</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">unzip</span> <span class="tc-flag">-l</span> archive.zip               <span class="tc-cmt"># list nội dung</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 5 BANNER ════ -->
+<div class="cat-banner cb-5">
+  <div class="cb-icon">⚡</div>
+  <div><div class="cb-badge">DEVOPS &amp; AUTOMATION</div>
+  <div class="cb-title">Bash Scripts · Users · Packages · Cron · Security</div>
+  <div class="cb-sub">Tự động hóa, bảo mật và quản lý hệ thống production</div></div>
+</div>
+
+<!-- ════ S14 — BASH SCRIPTING ════ -->
+<div class="section" id="s14">
+  <div class="sec-head">
+    <span class="sec-tag st-5">BASH</span>
+    <div><h2 class="sec-title">Bash Scripting — Tự động hóa mọi thứ</h2>
+    <p class="sec-sub">Variables, conditions, loops, functions, error handling — viết script production-ready</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bash scripting patterns cho DevOps</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">bash-template.sh — production-grade script structure</span><span class="cb-tag ct-5">Bash</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt">#!/usr/bin/env bash
+# deploy.sh — Production deployment script
+# Usage: ./deploy.sh [environment] [version]</span>
+
+<span class="tc-cmt"># ── Safety settings (BẮTBUỘC) ──</span>
+set <span class="tc-flag">-euo</span> pipefail
+<span class="tc-cmt"># -e  : exit ngay khi có lỗi</span>
+<span class="tc-cmt"># -u  : lỗi khi dùng biến chưa khai báo</span>
+<span class="tc-cmt"># -o pipefail : pipeline fail nếu bất kỳ command nào fail</span>
+IFS=$<span class="tc-str">'\n\t'</span>    <span class="tc-cmt"># Internal Field Separator an toàn hơn</span>
+
+<span class="tc-cmt"># ── Constants & Colors ──</span>
+<span class="tc-key">readonly</span> <span class="tc-var">SCRIPT_DIR</span>=$(dirname "$(readlink -f "$0")")
+<span class="tc-key">readonly</span> <span class="tc-var">LOG_FILE</span>=<span class="tc-str">"/var/log/deploy.log"</span>
+<span class="tc-var">RED</span>=<span class="tc-str">'\033[0;31m'</span>; <span class="tc-var">GREEN</span>=<span class="tc-str">'\033[0;32m'</span>; <span class="tc-var">YELLOW</span>=<span class="tc-str">'\033[1;33m'</span>; <span class="tc-var">NC</span>=<span class="tc-str">'\033[0m'</span>
+
+<span class="tc-cmt"># ── Logging functions ──</span>
+<span class="tc-cmd">log</span>()   { <span class="tc-cmd">echo</span> <span class="tc-flag">-e</span> "$(date '+%Y-%m-%d %H:%M:%S') [INFO]  $1" <span class="tc-pipe">|</span> <span class="tc-cmd">tee</span> <span class="tc-flag">-a</span> <span class="tc-var">$LOG_FILE</span>; }
+<span class="tc-cmd">warn</span>()  { <span class="tc-cmd">echo</span> <span class="tc-flag">-e</span> "${YELLOW}$(date '+%H:%M:%S') [WARN]  $1${NC}" <span class="tc-pipe">|</span> <span class="tc-cmd">tee</span> <span class="tc-flag">-a</span> <span class="tc-var">$LOG_FILE</span>; }
+<span class="tc-cmd">error</span>() { <span class="tc-cmd">echo</span> <span class="tc-flag">-e</span> "${RED}$(date '+%H:%M:%S') [ERROR] $1${NC}" <span class="tc-redirect">>&2</span>; <span class="tc-cmd">exit</span> 1; }
+<span class="tc-cmd">ok</span>()    { <span class="tc-cmd">echo</span> <span class="tc-flag">-e</span> "${GREEN}✓ $1${NC}"; }
+
+<span class="tc-cmt"># ── Parameters với defaults ──</span>
+<span class="tc-var">ENV</span>=<span class="tc-str">${1:-dev}</span>           <span class="tc-cmt"># default "dev"</span>
+<span class="tc-var">VERSION</span>=<span class="tc-str">${2:-latest}</span>   <span class="tc-cmt"># default "latest"</span>
+<span class="tc-var">DRY_RUN</span>=<span class="tc-str">${DRY_RUN:-false}</span>
+
+<span class="tc-cmt"># ── Validate input ──</span>
+[[ <span class="tc-var">$ENV</span> =~ ^(dev|staging|prod)$ ]] || <span class="tc-cmd">error</span> <span class="tc-str">"ENV must be dev|staging|prod"</span>
+
+<span class="tc-cmt"># ── Functions ──</span>
+<span class="tc-cmd">check_dependencies</span>() {
+    <span class="tc-key">local</span> -a deps=(docker jq curl git)
+    <span class="tc-key">for</span> dep <span class="tc-key">in</span> "${deps[@]}"; <span class="tc-key">do</span>
+        command -v "$dep" &>/dev/null || <span class="tc-cmd">error</span> <span class="tc-str">"Missing dependency: $dep"</span>
+    <span class="tc-key">done</span>
+    <span class="tc-cmd">ok</span> <span class="tc-str">"All dependencies found"</span>
+}
+
+<span class="tc-cmd">deploy_service</span>() {
+    <span class="tc-key">local</span> <span class="tc-var">service</span>=$<span class="tc-num">1</span>
+    <span class="tc-cmd">log</span> <span class="tc-str">"Deploying $service to $ENV..."</span>
+
+    <span class="tc-key">if</span> [[ <span class="tc-var">$DRY_RUN</span> == <span class="tc-str">"true"</span> ]]; <span class="tc-key">then</span>
+        <span class="tc-cmd">log</span> <span class="tc-str">"[DRY RUN] Would deploy $service"</span>; <span class="tc-key">return</span>
+    <span class="tc-key">fi</span>
+
+    docker pull "registry.company.com/${service}:${VERSION}" || <span class="tc-cmd">error</span> <span class="tc-str">"Pull failed"</span>
+    docker stop "${service}" 2>/dev/null || true
+    docker rm   "${service}" 2>/dev/null || true
+    docker run <span class="tc-flag">-d --name</span> "${service}" \
+        <span class="tc-flag">-e</span> SPRING_PROFILES_ACTIVE=<span class="tc-var">$ENV</span> \
+        <span class="tc-flag">--restart=unless-stopped</span> \
+        "registry.company.com/${service}:${VERSION}"
+
+    <span class="tc-cmt"># Health check</span>
+    <span class="tc-key">local</span> <span class="tc-var">retries</span>=<span class="tc-num">30</span>
+    <span class="tc-key">until</span> curl <span class="tc-flag">-sf</span> "http://localhost:8080/actuator/health" | jq <span class="tc-flag">-e</span> <span class="tc-str">'.status=="UP"'</span> &>/dev/null; <span class="tc-key">do</span>
+        (( retries-- )) || <span class="tc-cmd">error</span> <span class="tc-str">"$service health check failed"</span>
+        <span class="tc-cmd">log</span> <span class="tc-str">"Waiting... ($retries retries left)"</span>
+        sleep <span class="tc-num">2</span>
+    <span class="tc-key">done</span>
+    <span class="tc-cmd">ok</span> <span class="tc-str">"$service deployed successfully"</span>
+}
+
+<span class="tc-cmt"># ── Cleanup on exit (trap) ──</span>
+<span class="tc-cmd">cleanup</span>() {
+    <span class="tc-key">local</span> <span class="tc-var">exit_code</span>=$?
+    [[ $exit_code -ne 0 ]] && <span class="tc-cmd">warn</span> <span class="tc-str">"Script exited with code $exit_code"</span>
+}
+trap cleanup EXIT
+
+<span class="tc-cmt"># ── Main ──</span>
+<span class="tc-cmd">main</span>() {
+    <span class="tc-cmd">log</span> <span class="tc-str">"=== Starting deployment: ENV=$ENV VERSION=$VERSION ==="</span>
+    <span class="tc-cmd">check_dependencies</span>
+    <span class="tc-cmd">deploy_service</span> <span class="tc-str">"order-service"</span>
+    <span class="tc-cmd">deploy_service</span> <span class="tc-str">"payment-service"</span>
+    <span class="tc-cmd">ok</span> <span class="tc-str">"=== Deployment complete ==="</span>
+}
+<span class="tc-cmd">main</span> "<span class="tc-var">$@</span>"</pre></div>
+    </div>
+    <div class="rw-box rw-5"><div class="rw-label">💡 Bash Tips quan trọng</div>
+    <div class="rw-title">Các pattern thực tế hay dùng</div>
+    <div class="rw-body">
+      <strong style="color:var(--text)">Kiểm tra file/dir tồn tại:</strong> <code>[[ -f file.txt ]]</code> (file), <code>[[ -d /dir ]]</code> (dir), <code>[[ -r file ]]</code> (readable)<br>
+      <strong style="color:var(--text)">String empty:</strong> <code>[[ -z "$var" ]]</code> (empty), <code>[[ -n "$var" ]]</code> (not empty)<br>
+      <strong style="color:var(--text)">Command exists:</strong> <code>command -v docker &>/dev/null</code><br>
+      <strong style="color:var(--text)">Chạy as root:</strong> <code>[[ $EUID -eq 0 ]] || error "Must run as root"</code>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S15 — USERS & GROUPS ════ -->
+<div class="section" id="s15">
+  <div class="sec-head">
+    <span class="sec-tag st-5">USERS</span>
+    <div><h2 class="sec-title">Users &amp; Groups — Quản lý tài khoản</h2>
+    <p class="sec-sub">useradd, usermod, sudo, su — tạo service accounts và phân quyền đúng cách</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">User management cho production server</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Users &amp; Groups — useradd, sudo, /etc/sudoers</span><span class="cb-tag ct-5">Users</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo user ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">useradd</span> <span class="tc-flag">-m -s /bin/bash</span> deploy    <span class="tc-cmt"># user với home dir và bash</span>
+<span class="tc-root">$</span> <span class="tc-cmd">useradd</span> <span class="tc-flag">--system --no-create-home --shell /bin/false</span> appuser
+<span class="tc-cmt"># --system: service account (UID < 1000, không login)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">passwd</span> deploy                     <span class="tc-cmt"># đặt password</span>
+<span class="tc-root">$</span> <span class="tc-cmd">usermod</span> <span class="tc-flag">-aG</span> docker,sudo deploy     <span class="tc-cmt"># thêm vào groups</span>
+<span class="tc-root">$</span> <span class="tc-cmd">userdel</span> <span class="tc-flag">-r</span> olduser               <span class="tc-cmt"># xóa user + home dir</span>
+
+<span class="tc-cmt"># ── Xem user info ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">id</span>                                 <span class="tc-cmt"># xem UID, GID, groups của user hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">id</span> deploy                         <span class="tc-cmt"># xem của user deploy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">groups</span>                            <span class="tc-cmt"># groups của user hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /etc/passwd <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> deploy    <span class="tc-cmt"># user entry</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">getent</span> passwd deploy              <span class="tc-cmt"># thông tin user (kể cả LDAP)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">who</span>                               <span class="tc-cmt"># ai đang logged in</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">last</span>                              <span class="tc-cmt"># lịch sử login</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lastb</span>                             <span class="tc-cmt"># failed login attempts</span>
+
+<span class="tc-cmt"># ── sudo ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sudo</span> <span class="tc-flag">-i</span>                           <span class="tc-cmt"># switch to root shell</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sudo</span> <span class="tc-flag">-u</span> deploy <span class="tc-cmd">bash</span>             <span class="tc-cmt"># switch to deploy user</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sudo</span> <span class="tc-flag">-l</span>                           <span class="tc-cmt"># xem quyền sudo của user hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">visudo</span>                            <span class="tc-cmt"># edit /etc/sudoers (LUÔN dùng visudo!)</span>
+
+<span class="tc-cmt"># /etc/sudoers — grant sudo without password cho deploy</span>
+deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart order-service
+deploy ALL=(ALL) NOPASSWD: /usr/bin/docker
+
+<span class="tc-cmt"># ── /etc/sudoers.d/ — best practice ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">echo</span> <span class="tc-str">"deploy ALL=(ALL) NOPASSWD: /bin/systemctl"</span> <span class="tc-redirect">></span> /etc/sudoers.d/deploy
+<span class="tc-root">$</span> <span class="tc-cmd">chmod</span> <span class="tc-arg">440</span> /etc/sudoers.d/deploy</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S16 — PACKAGE MANAGEMENT ════ -->
+<div class="section" id="s16">
+  <div class="sec-head">
+    <span class="sec-tag st-5">PACKAGES</span>
+    <div><h2 class="sec-title">Package Management — apt, dnf, snap</h2>
+    <p class="sec-sub">Cài đặt, cập nhật, quản lý phần mềm trên Ubuntu/Debian và RHEL/CentOS</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">apt (Ubuntu/Debian) và dnf (RHEL/CentOS)</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Package management — apt và dnf</span><span class="cb-tag ct-5">Packages</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ════ APT — Ubuntu/Debian ════</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> update                         <span class="tc-cmt"># refresh package list</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> upgrade <span class="tc-flag">-y</span>                    <span class="tc-cmt"># upgrade tất cả packages</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> install <span class="tc-arg">nginx curl jq</span>        <span class="tc-cmt"># cài packages</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> remove nginx                   <span class="tc-cmt"># gỡ package (giữ config)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> purge nginx                    <span class="tc-cmt"># gỡ + xóa config</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> autoremove                     <span class="tc-cmt"># dọn dependencies không dùng</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">apt</span> list <span class="tc-flag">--installed</span>               <span class="tc-cmt"># xem installed packages</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">apt</span> show nginx                     <span class="tc-cmt"># thông tin package</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">apt</span> search nginx                   <span class="tc-cmt"># tìm kiếm</span>
+<span class="tc-root">$</span> <span class="tc-cmd">dpkg</span> <span class="tc-flag">-l</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> nginx              <span class="tc-cmt"># installed packages matching</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dpkg</span> <span class="tc-flag">-L</span> nginx                      <span class="tc-cmt"># files của package</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dpkg</span> <span class="tc-flag">-S</span> /etc/nginx/nginx.conf     <span class="tc-cmt"># file thuộc package nào</span>
+
+<span class="tc-cmt"># Add 3rd party repo (ví dụ: Adoptium JDK)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">wget</span> <span class="tc-flag">-qO-</span> https://adoptium.net/gpg.key <span class="tc-pipe">|</span> <span class="tc-cmd">gpg</span> <span class="tc-flag">--dearmor</span> <span class="tc-redirect">></span> /usr/share/keyrings/adoptium.gpg
+<span class="tc-root">$</span> <span class="tc-cmd">echo</span> <span class="tc-str">"deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb focal main"</span> <span class="tc-redirect">></span> /etc/apt/sources.list.d/adoptium.list
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> update && apt install temurin-21-jdk
+
+<span class="tc-cmt"># ════ DNF — RHEL/CentOS/Fedora ════</span>
+<span class="tc-root">$</span> <span class="tc-cmd">dnf</span> install nginx                  <span class="tc-cmt"># cài</span>
+<span class="tc-root">$</span> <span class="tc-cmd">dnf</span> update <span class="tc-flag">-y</span>                     <span class="tc-cmt"># update all</span>
+<span class="tc-root">$</span> <span class="tc-cmd">dnf</span> remove nginx                   <span class="tc-cmt"># gỡ</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">dnf</span> list installed                 <span class="tc-cmt"># danh sách đã cài</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rpm</span> <span class="tc-flag">-qa</span> <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> java               <span class="tc-cmt"># packages matching java</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">rpm</span> <span class="tc-flag">-ql</span> nginx                      <span class="tc-cmt"># files của package nginx</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S17 — CRON ════ -->
+<div class="section" id="s17">
+  <div class="sec-head">
+    <span class="sec-tag st-5">CRON</span>
+    <div><h2 class="sec-title">Cron &amp; Task Scheduling</h2>
+    <p class="sec-sub">crontab, /etc/cron.d, systemd timer — lên lịch task tự động</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cron syntax và best practices</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">crontab syntax + examples + systemd timer</span><span class="cb-tag ct-5">Cron</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Cron syntax: m h dom month dow command ──</span>
+<span class="tc-cmt"># │ │ │   │     │</span>
+<span class="tc-cmt"># │ │ │   │     └── day of week (0=Sun, 1=Mon...7=Sun)</span>
+<span class="tc-cmt"># │ │ │   └──────── month (1-12)</span>
+<span class="tc-cmt"># │ │ └──────────── day of month (1-31)</span>
+<span class="tc-cmt"># │ └────────────── hour (0-23)</span>
+<span class="tc-cmt"># └──────────────── minute (0-59)</span>
+
+<span class="tc-cmt"># ── Chỉnh sửa crontab ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">crontab</span> <span class="tc-flag">-e</span>                        <span class="tc-cmt"># edit crontab của user hiện tại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">crontab</span> <span class="tc-flag">-l</span>                        <span class="tc-cmt"># xem crontab</span>
+<span class="tc-root">$</span> <span class="tc-cmd">crontab</span> <span class="tc-flag">-u</span> deploy <span class="tc-flag">-e</span>            <span class="tc-cmt"># edit của user deploy</span>
+
+<span class="tc-cmt"># ── Ví dụ crontab ──</span>
+<span class="tc-cmt"># Mỗi 5 phút</span>
+*/5 * * * *  /opt/scripts/health-check.sh
+
+<span class="tc-cmt"># Hàng ngày lúc 2:30 AM</span>
+30 2 * * *   /opt/scripts/db-backup.sh >> /var/log/backup.log 2>&1
+
+<span class="tc-cmt"># Mỗi thứ Hai lúc 3:00 AM (cleanup)</span>
+0 3 * * 1    find /var/log -mtime +30 -delete
+
+<span class="tc-cmt"># Đầu tháng lúc 4:00 AM</span>
+0 4 1 * *    /opt/scripts/monthly-report.sh
+
+<span class="tc-cmt"># Mỗi 15 phút chỉ trong giờ làm việc (8AM-6PM, T2-T6)</span>
+*/15 8-18 * * 1-5  /opt/scripts/sync.sh
+
+<span class="tc-cmt"># ── Best practices ──</span>
+<span class="tc-cmt"># 1. Luôn redirect output (không bị email spam)</span>
+* * * * * /script.sh >> /var/log/script.log 2>&1
+
+<span class="tc-cmt"># 2. Dùng absolute paths</span>
+* * * * * /usr/bin/python3 /opt/scripts/task.py
+
+<span class="tc-cmt"># 3. Lock để tránh concurrent runs</span>
+* * * * * flock -n /tmp/task.lock /opt/scripts/task.sh
+
+<span class="tc-cmt"># 4. Set environment variables</span>
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+<span class="tc-cmt"># ── /etc/cron.d/ — system-wide cron ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">cat</span> /etc/cron.d/myapp
+<span class="tc-out">SHELL=/bin/bash
+*/5 * * * * deploy /opt/app/healthcheck.sh</span>
+
+<span class="tc-cmt"># ── Systemd Timer (modern alternative to cron) ──</span>
+<span class="tc-cmt"># /etc/systemd/system/backup.timer</span>
+[Unit]
+Description=Daily database backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true    <span class="tc-cmt"># chạy lại nếu lỡ thời điểm</span>
+
+[Install]
+WantedBy=timers.target
+
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> enable --now backup.timer
+<span class="tc-prompt">$</span> <span class="tc-cmd">systemctl</span> list-timers <span class="tc-flag">--all</span>      <span class="tc-cmt"># xem tất cả timers</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S18 — DOCKER K8S ════ -->
+<div class="section" id="s18">
+  <div class="sec-head">
+    <span class="sec-tag st-5">DEVOPS</span>
+    <div><h2 class="sec-title">Linux + Docker &amp; Kubernetes — Tối ưu hóa</h2>
+    <p class="sec-sub">Kernel parameters, cgroups, namespaces — hiểu tầng Linux dưới Docker/K8s</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tuning Linux cho container workloads</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">sysctl + kernel tuning cho Docker/K8s</span><span class="cb-tag ct-5">Docker/K8s</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── sysctl — kernel parameters ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">sysctl</span> <span class="tc-flag">-a</span>                         <span class="tc-cmt"># xem tất cả params</span>
+<span class="tc-root">$</span> <span class="tc-cmd">sysctl</span> <span class="tc-flag">-w</span> net.ipv4.ip_forward=<span class="tc-num">1</span> <span class="tc-cmt"># enable IP forwarding (cần cho Docker)</span>
+<span class="tc-root">$</span> <span class="tc-cmd">sysctl</span> <span class="tc-flag">-p</span>                         <span class="tc-cmt"># load /etc/sysctl.conf</span>
+
+<span class="tc-cmt"># ── /etc/sysctl.d/99-backend.conf — tuning cho backend ──</span>
+<span class="tc-cmt"># TCP connection tuning</span>
+net.core.somaxconn = <span class="tc-num">65535</span>         <span class="tc-cmt"># max connections in queue</span>
+net.ipv4.tcp_max_syn_backlog = <span class="tc-num">65535</span>
+net.ipv4.ip_local_port_range = <span class="tc-num">1024 65535</span>
+
+<span class="tc-cmt"># TIME_WAIT optimization</span>
+net.ipv4.tcp_tw_reuse = <span class="tc-num">1</span>
+net.ipv4.tcp_fin_timeout = <span class="tc-num">15</span>
+
+<span class="tc-cmt"># File descriptor limits</span>
+fs.file-max = <span class="tc-num">2097152</span>
+fs.nr_open  = <span class="tc-num">1048576</span>
+
+<span class="tc-cmt"># Kubernetes specific</span>
+vm.swappiness = <span class="tc-num">0</span>                   <span class="tc-cmt"># K8s khuyên tắt swap</span>
+vm.overcommit_memory = <span class="tc-num">1</span>
+net.bridge.bridge-nf-call-iptables = <span class="tc-num">1</span>
+net.bridge.bridge-nf-call-ip6tables = <span class="tc-num">1</span>
+
+<span class="tc-cmt"># ── Cgroups — resource isolation (Docker dùng cgroups) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /proc/<span class="tc-num">1234</span>/cgroup              <span class="tc-cmt"># cgroup của process</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">systemd-cgls</span>                      <span class="tc-cmt"># cgroup hierarchy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">systemd-cgtop</span>                     <span class="tc-cmt"># resource usage by cgroup</span>
+
+<span class="tc-cmt"># ── Namespaces — isolation (Docker dùng namespaces) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lsns</span>                              <span class="tc-cmt"># list namespaces</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">nsenter</span> <span class="tc-flag">-t</span> <span class="tc-arg">1234</span> <span class="tc-flag">-n</span> ip addr      <span class="tc-cmt"># run cmd trong network ns của PID</span>
+
+<span class="tc-cmt"># ── Docker troubleshooting từ host ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /sys/fs/cgroup/memory/docker/<span class="tc-arg">CONTAINER_ID</span>/memory.limit_in_bytes
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /sys/fs/cgroup/cpuacct/docker/<span class="tc-arg">CONTAINER_ID</span>/cpuacct.usage
+
+<span class="tc-cmt"># ── /etc/docker/daemon.json — Docker daemon config ──</span>
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "5"
+  },
+  "default-ulimits": {
+    "nofile": {"Name":"nofile","Hard":65536,"Soft":65536}
+  },
+  "storage-driver": "overlay2"
+}</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S19 — SECURITY ════ -->
+<div class="section" id="s19">
+  <div class="sec-head">
+    <span class="sec-tag st-5">SECURITY</span>
+    <div><h2 class="sec-title">Security Hardening — Bảo mật Server</h2>
+    <p class="sec-sub">fail2ban, audit, SELinux/AppArmor — bảo vệ server khỏi tấn công</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Essential security measures cho production</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Security hardening — fail2ban, auditd, AppArmor</span><span class="cb-tag ct-5">Security</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── fail2ban — chống brute force ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> install fail2ban
+<span class="tc-cmt"># /etc/fail2ban/jail.local</span>
+[DEFAULT]
+bantime  = 3600    <span class="tc-cmt"># 1 giờ</span>
+findtime = 600     <span class="tc-cmt"># 10 phút</span>
+maxretry = 5
+
+[sshd]
+enabled  = true
+port     = <span class="tc-num">2222</span>    <span class="tc-cmt"># nếu đổi SSH port</span>
+logpath  = /var/log/auth.log
+
+[nginx-http-auth]
+enabled = true
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">fail2ban-client</span> status            <span class="tc-cmt"># xem status</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">fail2ban-client</span> status sshd       <span class="tc-cmt"># bị ban bao nhiêu IP</span>
+<span class="tc-root">$</span> <span class="tc-cmd">fail2ban-client</span> set sshd unbanip 1.2.3.4  <span class="tc-cmt"># unban IP</span>
+
+<span class="tc-cmt"># ── auditd — system audit ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> install auditd
+<span class="tc-root">$</span> <span class="tc-cmd">auditctl</span> <span class="tc-flag">-w</span> /etc/passwd <span class="tc-flag">-p wa -k</span> passwd-watch  <span class="tc-cmt"># monitor /etc/passwd</span>
+<span class="tc-root">$</span> <span class="tc-cmd">auditctl</span> <span class="tc-flag">-w</span> /opt/app/ <span class="tc-flag">-p rwxa -k</span> app-access    <span class="tc-cmt"># monitor app dir</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">ausearch</span> <span class="tc-flag">-k</span> passwd-watch <span class="tc-flag">-ts today</span>            <span class="tc-cmt"># xem audit logs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">aureport</span> <span class="tc-flag">-au</span>                      <span class="tc-cmt"># authentication report</span>
+
+<span class="tc-cmt"># ── Check for security issues ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">cat</span> /var/log/auth.log <span class="tc-pipe">|</span> <span class="tc-cmd">grep</span> <span class="tc-str">"Failed password"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">lastb</span>                             <span class="tc-cmt"># failed login attempts</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">grep</span> <span class="tc-str">"Invalid user"</span> /var/log/auth.log <span class="tc-pipe">|</span> <span class="tc-cmd">awk</span> <span class="tc-str">'{print $NF}'</span> <span class="tc-pipe">|</span> <span class="tc-cmd">sort</span> <span class="tc-pipe">|</span> <span class="tc-cmd">uniq</span> <span class="tc-flag">-c</span>
+
+<span class="tc-cmt"># ── Kiểm tra SUID/SGID files (security scan) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">find</span> / <span class="tc-flag">-perm /6000 -type f 2>/dev/null</span> <span class="tc-pipe">|</span> <span class="tc-cmd">head</span> <span class="tc-flag">-20</span>
+
+<span class="tc-cmt"># ── Disable unnecessary services ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> list-units <span class="tc-flag">--type=service --state=active</span>
+<span class="tc-root">$</span> <span class="tc-cmd">systemctl</span> disable --now avahi-daemon bluetooth cups
+
+<span class="tc-cmt"># ── Update security patches ──</span>
+<span class="tc-root">$</span> <span class="tc-cmd">apt</span> install unattended-upgrades
+<span class="tc-cmt"># /etc/apt/apt.conf.d/50unattended-upgrades</span>
+<span class="tc-cmt"># Unattended-Upgrade::Allowed-Origins { "${distro_id}:${distro_codename}-security"; };</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ S20 — CHEAT SHEET ════ -->
+<div class="section" id="s20">
+  <div class="sec-head">
+    <span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — Linux Backend &amp; DevOps</h2>
+    <p class="sec-sub">Tra cứu nhanh những lệnh quan trọng nhất</p></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4 class="h4-1">📁 Files &amp; Filesystem</h4>
+      <div class="cheat-row"><span class="ck">Tìm file theo tên</span><span class="cv">find / -name "*.log"</span></div>
+      <div class="cheat-row"><span class="ck">Tìm text trong files</span><span class="cv">grep -r "error" /var/log/</span></div>
+      <div class="cheat-row"><span class="ck">Thư mục lớn nhất</span><span class="cv">du -sh */ | sort -rh</span></div>
+      <div class="cheat-row"><span class="ck">Disk usage</span><span class="cv">df -hT</span></div>
+      <div class="cheat-row"><span class="ck">Inode usage</span><span class="cv">df -i</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-2">⚙️ Process &amp; System</h4>
+      <div class="cheat-row"><span class="ck">Top RAM consumers</span><span class="cv">ps aux --sort=-%mem | head</span></div>
+      <div class="cheat-row"><span class="ck">Top CPU consumers</span><span class="cv">ps aux --sort=-%cpu | head</span></div>
+      <div class="cheat-row"><span class="ck">Kill by name</span><span class="cv">pkill -f "my-service"</span></div>
+      <div class="cheat-row"><span class="ck">Load average</span><span class="cv">uptime</span></div>
+      <div class="cheat-row"><span class="ck">Memory available</span><span class="cv">free -h</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-2">⏱️ Systemd</h4>
+      <div class="cheat-row"><span class="ck">Service status</span><span class="cv">systemctl status app</span></div>
+      <div class="cheat-row"><span class="ck">Restart service</span><span class="cv">systemctl restart app</span></div>
+      <div class="cheat-row"><span class="ck">Enable autostart</span><span class="cv">systemctl enable app</span></div>
+      <div class="cheat-row"><span class="ck">Follow logs</span><span class="cv">journalctl -u app -f</span></div>
+      <div class="cheat-row"><span class="ck">Logs last hour</span><span class="cv">journalctl -u app --since "1h ago"</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">🌐 Network</h4>
+      <div class="cheat-row"><span class="ck">Listening ports</span><span class="cv">ss -tulnp</span></div>
+      <div class="cheat-row"><span class="ck">Test TCP port</span><span class="cv">nc -zv host port</span></div>
+      <div class="cheat-row"><span class="ck">Route table</span><span class="cv">ip route show</span></div>
+      <div class="cheat-row"><span class="ck">DNS lookup</span><span class="cv">dig +short domain</span></div>
+      <div class="cheat-row"><span class="ck">Capture packets</span><span class="cv">tcpdump -i eth0 port 8080</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">🔥 Firewall</h4>
+      <div class="cheat-row"><span class="ck">Allow SSH</span><span class="cv">ufw allow 22/tcp</span></div>
+      <div class="cheat-row"><span class="ck">Allow from subnet</span><span class="cv">ufw allow from 10.0.0.0/24</span></div>
+      <div class="cheat-row"><span class="ck">View rules</span><span class="cv">ufw status verbose</span></div>
+      <div class="cheat-row"><span class="ck">iptables list</span><span class="cv">iptables -L -n -v</span></div>
+      <div class="cheat-row"><span class="ck">Fail2ban status</span><span class="cv">fail2ban-client status sshd</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-4">🔒 Permissions</h4>
+      <div class="cheat-row"><span class="ck">Private key</span><span class="cv">chmod 600 ~/.ssh/id_rsa</span></div>
+      <div class="cheat-row"><span class="ck">Config file</span><span class="cv">chmod 644 /etc/app.conf</span></div>
+      <div class="cheat-row"><span class="ck">Script executable</span><span class="cv">chmod +x deploy.sh</span></div>
+      <div class="cheat-row"><span class="ck">Change owner</span><span class="cv">chown deploy:deploy /opt/app</span></div>
+      <div class="cheat-row"><span class="ck">Find world-writable</span><span class="cv">find / -perm -o+w -type f</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-5">📝 Text Processing</h4>
+      <div class="cheat-row"><span class="ck">HTTP status stats</span><span class="cv">awk '{print $9}' access.log | sort | uniq -c</span></div>
+      <div class="cheat-row"><span class="ck">Replace in file</span><span class="cv">sed -i 's/old/new/g' file</span></div>
+      <div class="cheat-row"><span class="ck">Sum column</span><span class="cv">awk '{sum+=$NF} END{print sum}' f</span></div>
+      <div class="cheat-row"><span class="ck">Remove empty lines</span><span class="cv">sed '/^$/d' file</span></div>
+      <div class="cheat-row"><span class="ck">Top IPs in log</span><span class="cv">awk '{print $1}' access.log | sort | uniq -c | sort -rn</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-5">🔐 SSH &amp; Users</h4>
+      <div class="cheat-row"><span class="ck">Test SSH config</span><span class="cv">sshd -t</span></div>
+      <div class="cheat-row"><span class="ck">SSH tunnel</span><span class="cv">ssh -L 5432:db:5432 -N bastion</span></div>
+      <div class="cheat-row"><span class="ck">Add to group</span><span class="cv">usermod -aG docker deploy</span></div>
+      <div class="cheat-row"><span class="ck">Create service user</span><span class="cv">useradd --system --no-create-home app</span></div>
+      <div class="cheat-row"><span class="ck">Failed logins</span><span class="cv">lastb</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Linux Server Checklist — Khi set up server mới</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Update hệ thống và cài security patches</h4><p><code>apt update && apt upgrade -y</code>. Cài <code>unattended-upgrades</code> để tự động cập nhật security patches. Không bao giờ để server chạy OS lỗi thời.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Tạo service account, tắt root login SSH</h4><p>Tạo user <code>deploy</code> với SSH key. Sửa <code>/etc/ssh/sshd_config</code>: <code>PermitRootLogin no</code>, <code>PasswordAuthentication no</code>. <strong>Test kết nối trước khi đóng session hiện tại!</strong></p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Setup firewall — default deny</h4><p><code>ufw default deny incoming && ufw allow 2222/tcp && ufw enable</code>. Chỉ mở đúng port cần thiết. Postgres/Redis chỉ mở từ internal network.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Cài fail2ban và configure</h4><p>Cài <code>fail2ban</code>, config ban 1 giờ sau 5 failed attempts. Enable jail cho SSH, nginx nếu có. Xem ban list thường xuyên.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Tạo systemd unit cho application</h4><p>Deploy app dưới service account (không phải root). Systemd unit với <code>Restart=on-failure</code>. Log ra journal, không ra file tự quản lý.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>Setup monitoring, log rotation, backup</h4><p>Cài node_exporter cho Prometheus. Cấu hình <code>logrotate</code> để tránh log lấp đầy disk. Cron job backup DB daily, verify backup định kỳ.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px">
+      <strong style="color:var(--text)">Tài nguyên học Linux sâu hơn:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://linuxcommand.org" style="color:var(--l1)">LinuxCommand.org</a> &nbsp;·&nbsp;
+        <a href="https://man7.org/linux/man-pages/" style="color:var(--l1)">Linux Man Pages</a> &nbsp;·&nbsp;
+        <a href="https://www.tldp.org/LDP/abs/html/" style="color:var(--l1)">Advanced Bash-Scripting Guide</a> &nbsp;·&nbsp;
+        <a href="https://www.kernel.org/doc/" style="color:var(--l1)">Linux Kernel Documentation</a> &nbsp;·&nbsp;
+        <a href="https://ubuntu.com/server/docs" style="color:var(--l1)">Ubuntu Server Guide</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <span>🐧 Linux · Backend &amp; DevOps Engineer · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">20 chủ đề · Filesystem · Process · Network · Bash · Security</span>
+</div>
+</div><!-- /main -->
+
+<script>
+window.addEventListener('scroll', () => {
+  const el = document.documentElement;
+  document.getElementById('pbar').style.width =
+    (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
+});
+const sections = document.querySelectorAll('.section[id]');
+const links    = document.querySelectorAll('.nav-link');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-28% 0px -60% 0px' });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitLab & GitLab CI/CD — Hướng dẫn toàn tập</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --acc:#fc6d26;--acc-d:#c03e00;--acc-dim:rgba(252,109,38,.11);--acc-glow:rgba(252,109,38,.28);
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --blue:#5ba8ff;--blue-dim:rgba(91,168,255,.10);
+  --purple:#a07af4;--purple-dim:rgba(160,122,244,.10);
+  --yellow:#ffd060;--yellow-dim:rgba(255,208,96,.10);
+  --teal:#30d8c0;--teal-dim:rgba(48,216,192,.10);
+  --orange:#ff8c50;--orange-dim:rgba(255,140,80,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  --sky:#38bdf8;--sky-dim:rgba(56,189,248,.10);
+  /* GitLab colors */
+  --g1:#fc6d26;--g1-dim:rgba(252,109,38,.11);--g1-glow:rgba(252,109,38,.28);
+  --g2:#e24329;--g2-dim:rgba(226,67,41,.11);--g2-glow:rgba(226,67,41,.26);
+  --g3:#fca326;--g3-dim:rgba(252,163,38,.11);--g3-glow:rgba(252,163,38,.26);
+  --g4:#6e49cb;--g4-dim:rgba(110,73,203,.11);--g4-glow:rgba(110,73,203,.26);
+  --g5:#1aaa55;--g5-dim:rgba(26,170,85,.11);--g5-glow:rgba(26,170,85,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--g1),var(--acc-d));display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 26px var(--g1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--g2),var(--g1),var(--g3),var(--g4),var(--g5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--g1-dim);color:var(--g1)}.ngh-2{background:var(--g2-dim);color:var(--g2)}
+.ngh-3{background:var(--g3-dim);color:var(--g3)}.ngh-4{background:var(--g4-dim);color:var(--g4)}
+.ngh-5{background:var(--g5-dim);color:var(--g5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(252,109,38,.07);border-left-color:var(--g1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;background:var(--g1-dim);color:var(--g1)}
+
+/* ── MAIN / HERO ── */
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(252,109,38,.10) 0%,transparent 62%),
+    radial-gradient(ellipse 45% 55% at 12% 82%,rgba(110,73,203,.07) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 45% at 50% 50%,rgba(252,163,38,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(252,109,38,.09) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--g1-dim);border:1px solid rgba(252,109,38,.35);color:var(--g1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--g1)}
+.h-grad{background:linear-gradient(135deg,var(--g2) 0%,var(--g1) 45%,var(--g3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--g1-dim);color:var(--g1)}.chip-2{background:var(--g2-dim);color:var(--g2)}
+.chip-3{background:var(--g3-dim);color:var(--g3)}.chip-4{background:var(--g4-dim);color:var(--g4)}
+.chip-5{background:var(--g5-dim);color:var(--g5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+.chip-b{background:var(--blue-dim);color:var(--blue)}.chip-t{background:var(--teal-dim);color:var(--teal)}
+
+/* ── CAT BANNER ── */
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--g1-dim);border:1px solid rgba(252,109,38,.28)}.cb-1::before{background:linear-gradient(90deg,var(--g2),var(--g1),var(--g3))}
+.cb-2{background:var(--g2-dim);border:1px solid rgba(226,67,41,.28)}.cb-2::before{background:linear-gradient(90deg,var(--g2),var(--g1))}
+.cb-3{background:var(--g3-dim);border:1px solid rgba(252,163,38,.28)}.cb-3::before{background:linear-gradient(90deg,var(--g3),var(--g2))}
+.cb-4{background:var(--g4-dim);border:1px solid rgba(110,73,203,.28)}.cb-4::before{background:linear-gradient(90deg,var(--g4),var(--g1))}
+.cb-5{background:var(--g5-dim);border:1px solid rgba(26,170,85,.28)}.cb-5::before{background:linear-gradient(90deg,var(--g5),var(--g4))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--g1-dim);color:var(--g1)}.cb-2 .cb-badge{background:var(--g2-dim);color:var(--g2)}
+.cb-3 .cb-badge{background:var(--g3-dim);color:var(--g3)}.cb-4 .cb-badge{background:var(--g4-dim);color:var(--g4)}
+.cb-5 .cb-badge{background:var(--g5-dim);color:var(--g5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+/* ── CONTENT / SECTION ── */
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--g1);background:var(--g1-dim);border:1px solid var(--g1-glow)}
+.st-2{color:var(--g2);background:var(--g2-dim);border:1px solid var(--g2-glow)}
+.st-3{color:var(--g3);background:var(--g3-dim);border:1px solid var(--g3-glow)}
+.st-4{color:var(--g4);background:var(--g4-dim);border:1px solid var(--g4-glow)}
+.st-5{color:var(--g5);background:var(--g5-dim);border:1px solid var(--g5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--g1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+
+/* ── GRIDS & CARDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--g1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── CODE BLOCKS — YAML style ── */
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--g1-dim);color:var(--g1)}.ct-2{background:var(--g2-dim);color:var(--g2)}
+.ct-3{background:var(--g3-dim);color:var(--g3)}.ct-4{background:var(--g4-dim);color:var(--g4)}
+.ct-5{background:var(--g5-dim);color:var(--g5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.ct-b{background:var(--blue-dim);color:var(--blue)}.ct-t{background:var(--teal-dim);color:var(--teal)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+/* YAML/Shell syntax colors */
+.y-key{color:#89ddff}       /* yaml keys */
+.y-str{color:#c3e88d}       /* strings */
+.y-num{color:#f78c6c}       /* numbers */
+.y-bool{color:#ff6584}      /* true/false */
+.y-anchor{color:#ffcb6b}    /* &anchor */
+.y-alias{color:#ffcb6b}     /* *alias */
+.y-stage{color:#fc6d26}     /* stage names */
+.y-var{color:#c792ea}       /* $VARIABLE */
+.y-cmt{color:#546e7a;font-style:italic}
+.y-script{color:#c3e88d}    /* script commands */
+.y-kw{color:#c792ea}        /* keywords */
+.y-sec{color:#ffd060;font-weight:700} /* section headers */
+.tc-prompt{color:#89ddff}.tc-cmd{color:#82aaff}.tc-flag{color:#ffcb6b}
+.tc-path{color:#c3e88d}.tc-arg{color:#f78c6c}.tc-cmt{color:#546e7a;font-style:italic}
+.tc-ok{color:#40d88e}.tc-err{color:#ff6584}.tc-pipe{color:#89ddff}
+
+/* ── INFO BOXES ── */
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:var(--green-dim);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:var(--yellow-dim);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:var(--blue-dim);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+.i-note{background:var(--purple-dim);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:var(--pink-dim);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+
+/* ── RW BOX ── */
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--g1)}.rw-2::before{background:var(--g2)}.rw-3::before{background:var(--g3)}
+.rw-4::before{background:var(--g4)}.rw-5::before{background:var(--g5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--g1)}.rw-2 .rw-label{color:var(--g2)}.rw-3 .rw-label{color:var(--g3)}
+.rw-4 .rw-label{color:var(--g4)}.rw-5 .rw-label{color:var(--g5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── COMPARE ── */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmp-bad{background:rgba(255,101,132,.06);border:1px solid rgba(255,101,132,.2);border-radius:11px;padding:16px}
+.cmp-good{background:rgba(64,216,142,.06);border:1px solid rgba(64,216,142,.2);border-radius:11px;padding:16px}
+.cmp-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cmp-bad .cmp-label{color:var(--pink)}.cmp-good .cmp-label{color:var(--green)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--g3)}
+
+/* ── PIPELINE FLOW ── */
+.pipeline{display:flex;align-items:center;gap:0;margin:14px 0;flex-wrap:wrap;row-gap:10px}
+.p-stage{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;text-align:center;min-width:110px}
+.p-stage-name{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.p-jobs{display:flex;flex-direction:column;gap:4px}
+.p-job{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:3px 8px;border-radius:5px;font-weight:600}
+.p-arr{color:var(--border2);font-size:20px;padding:0 4px;flex-shrink:0}
+.pj-1{background:var(--g1-dim);color:var(--g1)}.pj-2{background:var(--g2-dim);color:var(--g2)}
+.pj-3{background:var(--g3-dim);color:var(--g3)}.pj-4{background:var(--g4-dim);color:var(--g4)}
+.pj-5{background:var(--g5-dim);color:var(--g5)}
+
+/* ── STEPS ── */
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--g1);background:var(--g1-dim);border:2px solid var(--g1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── CHEAT SHEET ── */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--g1)}.h4-2{color:var(--g2)}.h4-3{color:var(--g3)}.h4-4{color:var(--g4)}.h4-5{color:var(--g5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted)}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g3)}
+
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(252,109,38,.1);color:var(--g1);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid,.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">🦊</div>
+      <div class="logo-text"><h2>GitLab CI/CD</h2><p>DevOps · Hướng dẫn toàn tập</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Nền tảng</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🦊</span> GitLab Overview</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🔶 GitLab Basics</div>
+    <a href="#s1" class="nav-link"><span class="ico">📁</span> Projects &amp; Groups</a>
+    <a href="#s2" class="nav-link"><span class="ico">🌿</span> Branch Strategy</a>
+    <a href="#s3" class="nav-link"><span class="ico">🔀</span> Merge Request Workflow</a>
+    <a href="#s4" class="nav-link"><span class="ico">🔐</span> Access Tokens &amp; Secrets</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🔴 GitLab CI/CD Core</div>
+    <a href="#s5"  class="nav-link"><span class="ico">📋</span> .gitlab-ci.yml — Cấu trúc</a>
+    <a href="#s6"  class="nav-link"><span class="ico">⚙️</span> Jobs &amp; Stages</a>
+    <a href="#s7"  class="nav-link"><span class="ico">🏃</span> GitLab Runner</a>
+    <a href="#s8"  class="nav-link"><span class="ico">🔢</span> Variables &amp; Environments</a>
+    <a href="#s9"  class="nav-link"><span class="ico">🎯</span> Rules &amp; Conditions</a>
+    <a href="#s10" class="nav-link"><span class="ico">📦</span> Artifacts &amp; Cache</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Advanced CI/CD</div>
+    <a href="#s11" class="nav-link"><span class="ico">📐</span> Templates &amp; includes</a>
+    <a href="#s12" class="nav-link"><span class="ico">🔗</span> Extends &amp; YAML Anchors</a>
+    <a href="#s13" class="nav-link"><span class="ico">🔄</span> Dynamic Pipelines</a>
+    <a href="#s14" class="nav-link"><span class="ico">📊</span> Matrix Jobs</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟣 Real-world Pipelines</div>
+    <a href="#s15" class="nav-link"><span class="ico">☕</span> Java Spring Boot CI</a>
+    <a href="#s16" class="nav-link"><span class="ico">🐳</span> Docker Build &amp; Push</a>
+    <a href="#s17" class="nav-link"><span class="ico">🚀</span> Deploy to Kubernetes</a>
+    <a href="#s18" class="nav-link"><span class="ico">🌍</span> Multi-Environment Deploy</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🟢 Production Best Practices</div>
+    <a href="#s19" class="nav-link"><span class="ico">🔒</span> Security Scanning</a>
+    <a href="#s20" class="nav-link"><span class="ico">⚡</span> Pipeline Optimization</a>
+    <a href="#s21" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> GitLab · GitLab CI/CD · GitLab Runner · DevOps</div>
+  <h1><span class="h-acc">GitLab</span><br><span class="h-grad">CI/CD Toàn Tập</span></h1>
+  <p class="hero-desc">Hướng dẫn toàn diện GitLab và GitLab CI/CD — từ Branch Strategy, Merge Request Workflow, viết <code>.gitlab-ci.yml</code> từ đầu, Templates, đến Pipeline thực tế deploy Java Spring Boot lên Kubernetes.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">.gitlab-ci.yml</span>
+    <span class="chip chip-2">GitLab Runner</span>
+    <span class="chip chip-3">Templates &amp; Extends</span>
+    <span class="chip chip-4">Variables &amp; Secrets</span>
+    <span class="chip chip-5">Deploy to K8s</span>
+    <span class="chip chip-r">Security Scan</span>
+    <span class="chip chip-b">Docker Build</span>
+    <span class="chip chip-t">Multi-Env</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════ S0 — OVERVIEW ════ -->
+<div class="section" id="s0">
+  <div class="sec-head">
+    <span class="sec-tag st-1">OVERVIEW</span>
+    <div><h2 class="sec-title">GitLab là gì? — Nền tảng DevOps All-in-one</h2>
+    <p class="sec-sub">Từ Source Control đến CI/CD đến Security Scanning — tất cả trong một platform</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GitLab vs GitHub — Khi nào chọn GitLab?</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">🔄</div><div class="card-title" style="color:var(--g1)">Built-in CI/CD</div><div class="card-desc">CI/CD native — không cần Jenkins, GitHub Actions. Cấu hình bằng <code>.gitlab-ci.yml</code> ngay trong repo.</div></div>
+      <div class="card"><div class="card-icon">🛡️</div><div class="card-title" style="color:var(--g2)">Security Scanning</div><div class="card-desc">SAST, DAST, Container Scanning, Dependency Scanning built-in. Tích hợp vào pipeline tự động.</div></div>
+      <div class="card"><div class="card-icon">🏠</div><div class="card-title" style="color:var(--g3)">Self-hosted</div><div class="card-desc">Cài đặt trên server riêng (GitLab CE/EE). Phù hợp với enterprise, ngân hàng, fintech cần data sovereignty.</div></div>
+      <div class="card"><div class="card-icon">📦</div><div class="card-title" style="color:var(--g5)">Container Registry</div><div class="card-desc">Registry Docker images tích hợp sẵn. Build và push image ngay trong pipeline không cần DockerHub.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GitLab CI/CD Concepts — Big Picture</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g2),var(--g1),var(--g3),var(--g4),var(--g5))"></div>
+      <div style="font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;margin-top:8px">GITLAB CI/CD FLOW</div>
+      <div class="pipeline">
+        <div class="p-stage">
+          <div class="p-stage-name" style="color:var(--g2)">🔨 build</div>
+          <div class="p-jobs">
+            <span class="p-job pj-2">compile</span>
+            <span class="p-job pj-2">test-unit</span>
+          </div>
+        </div>
+        <div class="p-arr">→</div>
+        <div class="p-stage">
+          <div class="p-stage-name" style="color:var(--g1)">🧪 test</div>
+          <div class="p-jobs">
+            <span class="p-job pj-1">integration</span>
+            <span class="p-job pj-1">code-quality</span>
+            <span class="p-job pj-1">sast</span>
+          </div>
+        </div>
+        <div class="p-arr">→</div>
+        <div class="p-stage">
+          <div class="p-stage-name" style="color:var(--g3)">📦 package</div>
+          <div class="p-jobs">
+            <span class="p-job pj-3">docker-build</span>
+            <span class="p-job pj-3">push-registry</span>
+          </div>
+        </div>
+        <div class="p-arr">→</div>
+        <div class="p-stage">
+          <div class="p-stage-name" style="color:var(--g4)">🚀 deploy-dev</div>
+          <div class="p-jobs">
+            <span class="p-job pj-4">helm-upgrade</span>
+          </div>
+        </div>
+        <div class="p-arr">→</div>
+        <div class="p-stage">
+          <div class="p-stage-name" style="color:var(--g5)">🌍 deploy-prod</div>
+          <div class="p-jobs">
+            <span class="p-job pj-5">manual-gate</span>
+            <span class="p-job pj-5">deploy</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted)">Mỗi <strong style="color:var(--text)">push/merge</strong> vào branch → kích hoạt pipeline → Jobs chạy song song trong Stage → Stage tiếp theo sau khi tất cả jobs thành công.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 1 BANNER ════ -->
+<div class="cat-banner cb-1">
+  <div class="cb-icon">🦊</div>
+  <div><div class="cb-badge">GITLAB BASICS</div>
+  <div class="cb-title">Projects, Branches &amp; Merge Requests</div>
+  <div class="cb-sub">Project Structure · Branch Strategy · MR Workflow · Access Tokens</div></div>
+</div>
+
+<!-- ════ S1 — PROJECTS & GROUPS ════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-tag st-1">BASICS</span>
+    <div><h2 class="sec-title">Projects &amp; Groups — Tổ chức codebase</h2>
+    <p class="sec-sub">Cấu trúc Group/Subgroup/Project — quản lý nhiều team và microservices</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cấu trúc tổ chức cho microservices team</div>
+    <div style="background:var(--code-bg);border:1px solid var(--g1-glow);border-radius:12px;padding:20px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9">
+<span style="color:var(--g1);font-weight:700">company/</span>                              <span style="color:#546e7a;font-style:italic"># Top-level Group</span>
+├── <span style="color:var(--g1)">backend/</span>                          <span style="color:#546e7a;font-style:italic"># Subgroup</span>
+│   ├── <span style="color:var(--g3)">order-service</span>               <span style="color:#546e7a;font-style:italic"># Project</span>
+│   ├── <span style="color:var(--g3)">payment-service</span>
+│   ├── <span style="color:var(--g3)">inventory-service</span>
+│   └── <span style="color:var(--g3)">api-gateway</span>
+├── <span style="color:var(--g1)">frontend/</span>
+│   ├── <span style="color:var(--g3)">web-app</span>
+│   └── <span style="color:var(--g3)">mobile-app</span>
+├── <span style="color:var(--g1)">infrastructure/</span>
+│   ├── <span style="color:var(--g3)">terraform-modules</span>
+│   ├── <span style="color:var(--g3)">helm-charts</span>
+│   └── <span style="color:var(--g3)">k8s-manifests</span>
+└── <span style="color:var(--g4)">ci-templates/</span>                    <span style="color:#546e7a;font-style:italic"># Shared CI/CD templates!</span>
+    └── <span style="color:var(--g4)">pipeline-templates</span>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Group-level CI/CD Variables:</strong> Khai báo biến một lần ở Group level → tất cả projects trong group đều dùng được. Không cần set lại <code>DOCKER_REGISTRY</code>, <code>K8S_CLUSTER_URL</code> ở từng project.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2 — BRANCH STRATEGY ════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-tag st-1">BRANCHES</span>
+    <div><h2 class="sec-title">Branch Strategy — GitFlow &amp; Trunk-based</h2>
+    <p class="sec-sub">Hai chiến lược phổ biến — chọn đúng cho team size và release cadence</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GitFlow vs Trunk-based Development</div>
+    <div class="compare">
+      <div style="background:rgba(110,73,203,.07);border:1px solid rgba(110,73,203,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--g4);margin-bottom:10px">🌿 GitFlow</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2;color:var(--muted)">
+          <div><span style="color:var(--g5)">main</span>         → production code</div>
+          <div><span style="color:var(--g4)">develop</span>      → integration branch</div>
+          <div><span style="color:var(--g1)">feature/*</span>    → new features</div>
+          <div><span style="color:var(--g3)">release/*</span>    → release prep</div>
+          <div><span style="color:var(--g2)">hotfix/*</span>     → production fixes</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px">✅ Rõ ràng, phù hợp versioned releases<br>❌ Nhiều branches, merge phức tạp</div>
+      </div>
+      <div style="background:rgba(26,170,85,.07);border:1px solid rgba(26,170,85,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--g5);margin-bottom:10px">🚀 Trunk-based Development</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2;color:var(--muted)">
+          <div><span style="color:var(--g5)">main</span>         → luôn deployable</div>
+          <div><span style="color:var(--g1)">feature/*</span>    → short-lived (&lt;1 ngày)</div>
+          <div style="color:var(--faint)">release/     → optional tags</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px">✅ CI/CD nhanh, ít conflict<br>✅ Feature flags control releases<br>❌ Cần team discipline cao</div>
+      </div>
+    </div>
+    <div class="rw-box rw-1"><div class="rw-label">🔶 Thực tế</div>
+    <div class="rw-title">Branch Protection Rules quan trọng</div>
+    <div class="rw-body">
+      Settings → Repository → Protected Branches: <strong style="color:var(--text)">main</strong> — Allowed to merge: Maintainers only, No force push. <strong style="color:var(--text)">develop</strong> — Allowed to merge: Developers+Maintainers via MR.<br>
+      Push Rules: Commit message format, no secrets in code, require signed commits (enterprise).
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S3 — MERGE REQUEST ════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-tag st-1">MERGE REQUEST</span>
+    <div><h2 class="sec-title">Merge Request Workflow — Code Review đúng cách</h2>
+    <p class="sec-sub">MR Templates, Approval Rules, Auto-merge, Review Apps</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">MR Template — chuẩn hóa quy trình review</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.gitlab/merge_request_templates/default.md</span><span class="cb-tag ct-1">MR Template</span></div>
+      <div class="cb-body"><pre><span class="y-cmt">## 📋 Mô tả</span>
+<span class="y-str">Tóm tắt thay đổi và lý do. Closes #[issue-number]</span>
+
+<span class="y-cmt">## 🔄 Loại thay đổi</span>
+<span class="y-str">- [ ] Bug fix (non-breaking)</span>
+<span class="y-str">- [ ] New feature (non-breaking)</span>
+<span class="y-str">- [ ] Breaking change</span>
+<span class="y-str">- [ ] Performance improvement</span>
+
+<span class="y-cmt">## ✅ Checklist</span>
+<span class="y-str">- [ ] Code đã được review bởi chính mình</span>
+<span class="y-str">- [ ] Tests đã được thêm/cập nhật</span>
+<span class="y-str">- [ ] Documentation đã cập nhật</span>
+<span class="y-str">- [ ] Không có secrets/credentials trong code</span>
+<span class="y-str">- [ ] CI pipeline đã pass</span>
+
+<span class="y-cmt">## 🧪 Cách test</span>
+<span class="y-str">1. ...</span>
+<span class="y-str">2. ...</span>
+
+<span class="y-cmt">## 📸 Screenshots (nếu có UI change)</span></pre></div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Approval Rules và Auto-merge configuration</span><span class="cb-tag ct-1">MR Config</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># Settings → Merge Requests → Approval Rules</span>
+<span class="y-sec">Approvals Required:</span>
+  - Any 1 approval from <span class="y-str">Backend Team</span>
+  - Must pass all CI jobs
+  - No unresolved discussions
+
+<span class="y-sec">Auto-merge when:</span>
+  ✅ All approvals received
+  ✅ Pipeline passes
+  ✅ No conflicts
+
+<span class="y-cmt"># Project Settings → Merge Requests</span>
+<span class="y-key">Squash commits:</span>         <span class="y-str">Require (clean history)</span>
+<span class="y-key">Delete source branch:</span>   <span class="y-bool">true</span>
+<span class="y-key">Merge method:</span>           <span class="y-str">Merge commit with semi-linear history</span>
+
+<span class="y-cmt"># .gitlab-ci.yml — Block merge if tests fail</span>
+<span class="y-sec">review-gate:</span>
+  <span class="y-key">stage:</span> <span class="y-str">test</span>
+  <span class="y-key">script:</span>
+    <span class="y-script">- echo "All checks passed"</span>
+  <span class="y-key">allow_failure:</span> <span class="y-bool">false</span>   <span class="y-cmt"># Block MR nếu fail!</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S4 — TOKENS & SECRETS ════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-tag st-1">SECURITY</span>
+    <div><h2 class="sec-title">Access Tokens &amp; Secrets Management</h2>
+    <p class="sec-sub">PAT, Deploy Keys, CI/CD Variables — quản lý credentials an toàn</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các loại tokens và khi nào dùng</div>
+    <table class="tbl">
+      <thead><tr><th>Token Type</th><th>Scope</th><th>Dùng cho</th><th>Best Practice</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--g1)">Personal Access Token</strong></td><td>User-level</td><td>API calls, git clone với auth</td><td>Rotation định kỳ, minimal scope</td></tr>
+        <tr><td><strong style="color:var(--g2)">Project Access Token</strong></td><td>Project</td><td>CI/CD automation per project</td><td>Dùng thay PAT cho project automation</td></tr>
+        <tr><td><strong style="color:var(--g3)">Group Access Token</strong></td><td>Group</td><td>Automation cho nhiều projects</td><td>Scope đúng với quyền cần thiết</td></tr>
+        <tr><td><strong style="color:var(--g4)">Deploy Keys</strong></td><td>SSH Key</td><td>Read-only clone trong CI</td><td>Read-only, rotate annually</td></tr>
+        <tr><td><strong style="color:var(--g5)">Runner Registration Token</strong></td><td>Runner</td><td>Register GitLab Runner</td><td>Không commit vào code!</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sub">
+    <div class="sub-title">CI/CD Variables — 3 cấp độ và masked/protected</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Variables — Instance → Group → Project</span><span class="cb-tag ct-1">Variables</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># Settings → CI/CD → Variables</span>
+<span class="y-sec">Cấp Instance (Admin):</span>    <span class="y-cmt"># áp dụng cho toàn GitLab</span>
+  DOCKER_REGISTRY_URL    <span class="y-cmt"># registry URL dùng chung</span>
+
+<span class="y-sec">Cấp Group:</span>               <span class="y-cmt"># áp dụng cho projects trong group</span>
+  REGISTRY_USER          <span class="y-cmt"># username đăng nhập registry</span>
+  REGISTRY_PASS          <span class="y-cmt"># 🔒 Masked + Protected</span>
+  SONAR_TOKEN            <span class="y-cmt"># 🔒 Masked</span>
+  SLACK_WEBHOOK          <span class="y-cmt"># 🔒 Masked</span>
+
+<span class="y-sec">Cấp Project:</span>             <span class="y-cmt"># chỉ áp dụng cho project này</span>
+  APP_NAME               <span class="y-str">"order-service"</span>
+  K8S_NAMESPACE          <span class="y-str">"production"</span>
+  DB_PASSWORD            <span class="y-cmt"># 🔒 Masked + Protected (chỉ cho protected branches)</span>
+
+<span class="y-cmt"># Variable flags:</span>
+<span class="y-key">Protected:</span>  <span class="y-cmt"># chỉ available trên protected branches (main, develop)</span>
+<span class="y-key">Masked:</span>     <span class="y-cmt"># giá trị không hiện trong job logs</span>
+<span class="y-key">Expand:</span>     <span class="y-cmt"># cho phép reference $VAR trong value</span>
+
+<span class="y-cmt"># Dùng trong .gitlab-ci.yml:</span>
+<span class="y-sec">deploy:</span>
+  <span class="y-key">script:</span>
+    <span class="y-script">- docker login -u $REGISTRY_USER -p $REGISTRY_PASS $DOCKER_REGISTRY_URL</span>
+    <span class="y-script">- kubectl set image deploy/$APP_NAME app=$IMAGE_TAG</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span> <span class="y-str">production</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 2 BANNER ════ -->
+<div class="cat-banner cb-2">
+  <div class="cb-icon">⚙️</div>
+  <div><div class="cb-badge">GITLAB CI/CD CORE</div>
+  <div class="cb-title">.gitlab-ci.yml — Từ cơ bản đến nâng cao</div>
+  <div class="cb-sub">Jobs · Stages · Runner · Variables · Rules · Artifacts · Cache</div></div>
+</div>
+
+<!-- ════ S5 — GITLAB-CI.YML ════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-tag st-2">CORE</span>
+    <div><h2 class="sec-title">.gitlab-ci.yml — Cấu trúc đầy đủ</h2>
+    <p class="sec-sub">Anatomy của một pipeline file hoàn chỉnh — mọi keyword quan trọng</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Template .gitlab-ci.yml đầy đủ với giải thích</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.gitlab-ci.yml — full structure annotated</span><span class="cb-tag ct-2">CI Config</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Global defaults ──</span>
+<span class="y-key">default:</span>
+  <span class="y-key">image:</span> <span class="y-str">eclipse-temurin:21-jdk</span>         <span class="y-cmt"># Docker image cho tất cả jobs</span>
+  <span class="y-key">tags:</span>                                  <span class="y-cmt"># runner tags</span>
+    - <span class="y-str">docker</span>
+    - <span class="y-str">linux</span>
+  <span class="y-key">interruptible:</span> <span class="y-bool">true</span>                   <span class="y-cmt"># cancel khi có pipeline mới</span>
+  <span class="y-key">retry:</span>                                 <span class="y-cmt"># retry khi runner fail</span>
+    <span class="y-key">max:</span> <span class="y-num">2</span>
+    <span class="y-key">when:</span> <span class="y-str">runner_system_failure</span>
+
+<span class="y-cmt"># ── Stages — thứ tự chạy ──</span>
+<span class="y-key">stages:</span>
+  - <span class="y-stage">build</span>
+  - <span class="y-stage">test</span>
+  - <span class="y-stage">package</span>
+  - <span class="y-stage">deploy-dev</span>
+  - <span class="y-stage">deploy-staging</span>
+  - <span class="y-stage">deploy-prod</span>
+
+<span class="y-cmt"># ── Global variables ──</span>
+<span class="y-key">variables:</span>
+  <span class="y-key">MAVEN_OPTS:</span> <span class="y-str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"</span>
+  <span class="y-key">IMAGE_NAME:</span> <span class="y-str">"$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME"</span>
+  <span class="y-key">IMAGE_TAG:</span>  <span class="y-str">"$CI_COMMIT_SHORT_SHA"</span>
+  <span class="y-key">APP_NAME:</span>   <span class="y-str">"order-service"</span>
+
+<span class="y-cmt"># ── Job định nghĩa ──</span>
+<span class="y-sec">compile:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">build</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw compile -DskipTests</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">paths:</span>
+      - <span class="y-str">target/</span>
+    <span class="y-key">expire_in:</span> <span class="y-str">1 hour</span>
+
+<span class="y-sec">unit-test:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw test</span>
+  <span class="y-key">coverage:</span> <span class="y-str">'/Total.*?([0-9]{1,3})%/'</span>   <span class="y-cmt"># extract coverage từ output</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">when:</span> <span class="y-str">always</span>                        <span class="y-cmt"># giữ dù pass hay fail</span>
+    <span class="y-key">reports:</span>
+      <span class="y-key">junit:</span> <span class="y-str">target/surefire-reports/**/*.xml</span>
+      <span class="y-key">coverage_report:</span>
+        <span class="y-key">coverage_format:</span> <span class="y-str">cobertura</span>
+        <span class="y-key">path:</span> <span class="y-str">target/site/jacoco/jacoco.xml</span>
+
+<span class="y-sec">docker-build:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">package</span>
+  <span class="y-key">image:</span> <span class="y-str">docker:24</span>
+  <span class="y-key">services:</span>
+    - <span class="y-str">docker:24-dind</span>                     <span class="y-cmt"># Docker-in-Docker</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">DOCKER_TLS_CERTDIR:</span> <span class="y-str">"/certs"</span>
+  <span class="y-key">before_script:</span>
+    - <span class="y-script">docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest .</span>
+    - <span class="y-script">docker push $IMAGE_NAME:$IMAGE_TAG</span>
+    - <span class="y-script">docker push $IMAGE_NAME:latest</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S6 — JOBS & STAGES ════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-tag st-2">JOBS</span>
+    <div><h2 class="sec-title">Jobs &amp; Stages — Tất cả keywords quan trọng</h2>
+    <p class="sec-sub">before_script, after_script, needs, dependencies, when, allow_failure</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Job keywords toàn diện</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Job keywords — needs, dependencies, when, parallel</span><span class="cb-tag ct-2">Jobs</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── needs — chạy job ngay khi dependency xong (không cần chờ stage) ──</span>
+<span class="y-sec">integration-test:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">needs:</span>
+    - <span class="y-key">job:</span> <span class="y-str">compile</span>
+      <span class="y-key">artifacts:</span> <span class="y-bool">true</span>                  <span class="y-cmt"># lấy artifacts từ compile job</span>
+  <span class="y-key">services:</span>
+    - <span class="y-key">name:</span> <span class="y-str">postgres:16-alpine</span>
+      <span class="y-key">alias:</span> <span class="y-str">db</span>
+    - <span class="y-key">name:</span> <span class="y-str">redis:7-alpine</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">SPRING_DATASOURCE_URL:</span> <span class="y-str">"jdbc:postgresql://db:5432/testdb"</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw verify -Pintegration-test</span>
+
+<span class="y-cmt"># ── when — điều kiện chạy job ──</span>
+<span class="y-sec">deploy-prod:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">deploy-prod</span>
+  <span class="y-key">when:</span> <span class="y-str">manual</span>                          <span class="y-cmt"># phải click tay mới chạy</span>
+  <span class="y-key">allow_failure:</span> <span class="y-bool">false</span>                 <span class="y-cmt"># block pipeline nếu fail</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span> <span class="y-str">production</span>
+    <span class="y-key">url:</span> <span class="y-str">https://app.company.com</span>
+
+<span class="y-cmt"># when options:</span>
+<span class="y-cmt"># on_success (default): chạy khi tất cả jobs trước thành công</span>
+<span class="y-cmt"># on_failure: chạy chỉ khi có job fail (cleanup, notification)</span>
+<span class="y-cmt"># always: luôn chạy</span>
+<span class="y-cmt"># manual: chờ user click</span>
+<span class="y-cmt"># delayed: chạy sau N giây</span>
+<span class="y-cmt"># never: không chạy (dùng trong rules)</span>
+
+<span class="y-cmt"># ── notify on failure ──</span>
+<span class="y-sec">notify-failure:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">.post</span>                         <span class="y-cmt"># built-in stage, luôn chạy cuối</span>
+  <span class="y-key">when:</span> <span class="y-str">on_failure</span>
+  <span class="y-key">image:</span> <span class="y-str">curlimages/curl</span>
+  <span class="y-key">script:</span>
+    - |
+      <span class="y-script">curl -X POST $SLACK_WEBHOOK \</span>
+        <span class="y-script">-H 'Content-type: application/json' \</span>
+        <span class="y-script">--data "{\"text\":\"❌ Pipeline failed: $CI_PROJECT_NAME ($CI_COMMIT_REF_NAME)\"}"</span>
+
+<span class="y-cmt"># ── parallel — chạy cùng lúc nhiều instances ──</span>
+<span class="y-sec">run-tests:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">parallel:</span> <span class="y-num">4</span>                           <span class="y-cmt"># chạy 4 jobs song song</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./run-tests.sh --shard $CI_NODE_INDEX/$CI_NODE_TOTAL</span>
+  <span class="y-cmt"># CI_NODE_INDEX: 1,2,3,4 | CI_NODE_TOTAL: 4</span>
+
+<span class="y-cmt"># ── timeout ──</span>
+<span class="y-sec">slow-build:</span>
+  <span class="y-key">timeout:</span> <span class="y-str">30 minutes</span>                   <span class="y-cmt"># cancel sau 30 phút</span></pre></div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Keyword</th><th>Mục đích</th><th>Giá trị phổ biến</th></tr></thead>
+      <tbody>
+        <tr><td><code>stage</code></td><td>Xếp job vào stage nào</td><td>build, test, deploy, .pre, .post</td></tr>
+        <tr><td><code>image</code></td><td>Docker image để chạy job</td><td>eclipse-temurin:21, node:20, python:3.12</td></tr>
+        <tr><td><code>tags</code></td><td>Chọn runner có tags này</td><td>docker, linux, arm64</td></tr>
+        <tr><td><code>needs</code></td><td>Phụ thuộc vào job cụ thể (DAG)</td><td>- job: compile</td></tr>
+        <tr><td><code>rules</code></td><td>Điều kiện chạy/bỏ qua</td><td>if, changes, exists, when</td></tr>
+        <tr><td><code>allow_failure</code></td><td>Pipeline có fail không khi job fail</td><td>true/false</td></tr>
+        <tr><td><code>environment</code></td><td>Track deployment environments</td><td>production, staging, dev</td></tr>
+        <tr><td><code>resource_group</code></td><td>Prevent concurrent deploy</td><td>production, staging</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ S7 — RUNNER ════ -->
+<div class="section" id="s7">
+  <div class="sec-head">
+    <span class="sec-tag st-2">RUNNER</span>
+    <div><h2 class="sec-title">GitLab Runner — Setup &amp; Executor Types</h2>
+    <p class="sec-sub">Shell, Docker, Kubernetes executors — cài đặt và cấu hình runner cho production</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cài đặt GitLab Runner và register</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Runner setup — install, register, configure</span><span class="cb-tag ct-2">Runner</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Cài GitLab Runner trên Ubuntu ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh <span class="tc-pipe">|</span> sudo bash
+<span class="tc-prompt">$</span> sudo <span class="tc-cmd">apt</span> install gitlab-runner
+
+<span class="y-cmt"># ── Register runner (dùng token từ Settings → CI/CD → Runners) ──</span>
+<span class="tc-prompt">$</span> sudo <span class="tc-cmd">gitlab-runner</span> register
+<span class="tc-arg">Enter GitLab URL:</span>           https://gitlab.company.com
+<span class="tc-arg">Enter registration token:</span>   glrt-xxxxxxxxxxxx
+<span class="tc-arg">Enter description:</span>          docker-runner-prod-01
+<span class="tc-arg">Enter tags:</span>                  docker,linux,production
+<span class="tc-arg">Enter executor:</span>             docker
+<span class="tc-arg">Default Docker image:</span>       eclipse-temurin:21-jdk
+
+<span class="y-cmt"># ── /etc/gitlab-runner/config.toml — cấu hình chi tiết ──</span>
+[[runners]]
+  name = <span class="y-str">"docker-runner-prod-01"</span>
+  url  = <span class="y-str">"https://gitlab.company.com"</span>
+  token = <span class="y-str">"glrt-xxxxxxxxxxxx"</span>
+  executor = <span class="y-str">"docker"</span>
+  tags = [<span class="y-str">"docker"</span>, <span class="y-str">"linux"</span>]
+  
+  [runners.docker]
+    image       = <span class="y-str">"eclipse-temurin:21-jdk"</span>
+    privileged  = <span class="y-bool">false</span>                 <span class="y-cmt"># true nếu cần Docker-in-Docker</span>
+    shm_size    = <span class="y-num">268435456</span>
+    
+    <span class="y-cmt"># Mount cache cho Maven/Gradle</span>
+    volumes = [
+      <span class="y-str">"/cache"</span>,
+      <span class="y-str">"/var/run/docker.sock:/var/run/docker.sock"</span>,
+      <span class="y-str">"/opt/maven-cache:/root/.m2:rw"</span>
+    ]
+
+<span class="y-cmt"># ── Kubernetes Executor — runner trong K8s ──</span>
+<span class="tc-prompt">$</span> sudo <span class="tc-cmd">gitlab-runner</span> register
+<span class="tc-arg">executor:</span> kubernetes
+
+[[runners]]
+  [runners.kubernetes]
+    host              = <span class="y-str">"https://k8s-api.internal:6443"</span>
+    namespace         = <span class="y-str">"gitlab-runner"</span>
+    image             = <span class="y-str">"ubuntu:22.04"</span>
+    service_account   = <span class="y-str">"gitlab-runner-sa"</span>
+    cpu_request       = <span class="y-str">"500m"</span>
+    memory_request    = <span class="y-str">"512Mi"</span>
+    cpu_limit         = <span class="y-str">"2"</span>
+    memory_limit      = <span class="y-str">"4Gi"</span></pre></div>
+    </div>
+    <div class="info i-note">
+      <span class="info-ico">📌</span>
+      <div><strong style="color:var(--text)">Executor nào nên dùng?</strong><br>
+      <strong>Shell:</strong> Đơn giản nhưng runner bị "ô nhiễm" giữa jobs, cần cleanup thủ công.<br>
+      <strong>Docker:</strong> Isolate tốt, phổ biến nhất. Mỗi job một container fresh.<br>
+      <strong>Kubernetes:</strong> Scale tự động theo workload, phù hợp production lớn.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S8 — VARIABLES ════ -->
+<div class="section" id="s8">
+  <div class="sec-head">
+    <span class="sec-tag st-2">VARIABLES</span>
+    <div><h2 class="sec-title">Variables &amp; Predefined CI Variables</h2>
+    <p class="sec-sub">GitLab cung cấp hàng chục biến built-in — dùng đúng giúp pipeline thông minh hơn</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Predefined Variables quan trọng nhất</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Predefined CI/CD Variables — hay dùng nhất</span><span class="cb-tag ct-2">Variables</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Pipeline info ──</span>
+<span class="y-var">$CI_PIPELINE_ID</span>            <span class="y-cmt"># ID duy nhất của pipeline</span>
+<span class="y-var">$CI_PIPELINE_SOURCE</span>        <span class="y-cmt"># push | merge_request_event | schedule | web | api</span>
+<span class="y-var">$CI_JOB_ID</span>                 <span class="y-cmt"># ID của job hiện tại</span>
+<span class="y-var">$CI_JOB_NAME</span>               <span class="y-cmt"># tên job</span>
+<span class="y-var">$CI_JOB_STAGE</span>              <span class="y-cmt"># tên stage</span>
+
+<span class="y-cmt"># ── Git info ──</span>
+<span class="y-var">$CI_COMMIT_SHA</span>             <span class="y-cmt"># full commit SHA</span>
+<span class="y-var">$CI_COMMIT_SHORT_SHA</span>       <span class="y-cmt"># 8 ký tự đầu — dùng làm image tag!</span>
+<span class="y-var">$CI_COMMIT_REF_NAME</span>        <span class="y-cmt"># branch/tag name</span>
+<span class="y-var">$CI_COMMIT_BRANCH</span>          <span class="y-cmt"># branch name (không có trên tag)</span>
+<span class="y-var">$CI_COMMIT_TAG</span>             <span class="y-cmt"># tag name nếu là tag pipeline</span>
+<span class="y-var">$CI_DEFAULT_BRANCH</span>         <span class="y-cmt"># default branch của repo (main)</span>
+<span class="y-var">$CI_MERGE_REQUEST_IID</span>      <span class="y-cmt"># MR number (chỉ có trong MR pipelines)</span>
+<span class="y-var">$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME</span>
+
+<span class="y-cmt"># ── Project info ──</span>
+<span class="y-var">$CI_PROJECT_ID</span>             <span class="y-cmt"># numeric ID của project</span>
+<span class="y-var">$CI_PROJECT_NAME</span>           <span class="y-cmt"># order-service</span>
+<span class="y-var">$CI_PROJECT_PATH</span>           <span class="y-cmt"># company/backend/order-service</span>
+<span class="y-var">$CI_PROJECT_DIR</span>            <span class="y-cmt"># /builds/company/backend/order-service</span>
+<span class="y-var">$CI_PROJECT_URL</span>            <span class="y-cmt"># https://gitlab.com/company/backend/order-service</span>
+
+<span class="y-cmt"># ── Registry ──</span>
+<span class="y-var">$CI_REGISTRY</span>               <span class="y-cmt"># registry.gitlab.com</span>
+<span class="y-var">$CI_REGISTRY_IMAGE</span>         <span class="y-cmt"># registry.gitlab.com/company/backend/order-service</span>
+<span class="y-var">$CI_REGISTRY_USER</span>          <span class="y-cmt"># gitlab-ci-token</span>
+<span class="y-var">$CI_REGISTRY_PASSWORD</span>      <span class="y-cmt"># token tự động generated</span>
+
+<span class="y-cmt"># ── Environment ──</span>
+<span class="y-var">$CI_ENVIRONMENT_NAME</span>       <span class="y-cmt"># production, staging</span>
+<span class="y-var">$CI_ENVIRONMENT_URL</span>        <span class="y-cmt"># https://app.company.com</span>
+
+<span class="y-cmt"># ── Ví dụ dùng ──</span>
+<span class="y-key">variables:</span>
+  <span class="y-key">IMAGE_TAG:</span> <span class="y-str">"$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"</span>
+  <span class="y-key">DEPLOY_ENV:</span> <span class="y-str">"$CI_ENVIRONMENT_NAME"</span>
+  
+<span class="y-sec">build:</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">echo "Building $CI_PROJECT_NAME from $CI_COMMIT_REF_NAME"</span>
+    - <span class="y-script">docker build -t $IMAGE_TAG .</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S9 — RULES ════ -->
+<div class="section" id="s9">
+  <div class="sec-head">
+    <span class="sec-tag st-2">RULES</span>
+    <div><h2 class="sec-title">Rules &amp; Conditions — Kiểm soát khi nào job chạy</h2>
+    <p class="sec-sub">rules thay thế only/except — linh hoạt hơn nhiều</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">rules — mọi use case phổ biến</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">rules — if, changes, exists, when</span><span class="cb-tag ct-2">Rules</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── if — dựa vào biến ──</span>
+<span class="y-sec">deploy-main:</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == "main"</span>          <span class="y-cmt"># chỉ chạy trên main</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG</span>                       <span class="y-cmt"># hoặc khi có tag</span>
+
+<span class="y-sec">skip-draft:</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_MERGE_REQUEST_TITLE =~ /^Draft:/</span>
+      <span class="y-key">when:</span> <span class="y-str">never</span>                             <span class="y-cmt"># skip Draft MRs</span>
+    - <span class="y-key">when:</span> <span class="y-str">on_success</span>                         <span class="y-cmt"># chạy cho các trường hợp khác</span>
+
+<span class="y-cmt"># ── changes — chỉ chạy khi file thay đổi ──</span>
+<span class="y-sec">backend-lint:</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_PIPELINE_SOURCE == "merge_request_event"</span>
+      <span class="y-key">changes:</span>
+        - <span class="y-str">"src/**/*.java"</span>
+        - <span class="y-str">"pom.xml"</span>
+
+<span class="y-cmt"># ── exists — kiểm tra file tồn tại ──</span>
+<span class="y-sec">terraform-plan:</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">exists:</span>
+        - <span class="y-str">"terraform/**/*.tf"</span>
+
+<span class="y-cmt"># ── Kết hợp phức tạp ──</span>
+<span class="y-sec">deploy-prod:</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/</span>  <span class="y-cmt"># chỉ semver tags</span>
+      <span class="y-key">when:</span> <span class="y-str">manual</span>
+      <span class="y-key">allow_failure:</span> <span class="y-bool">false</span>
+    - <span class="y-key">when:</span> <span class="y-str">never</span>                               <span class="y-cmt"># không chạy trong trường hợp khác</span>
+
+<span class="y-cmt"># ── workflow rules — điều kiện chạy TOÀN BỘ pipeline ──</span>
+<span class="y-key">workflow:</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_MERGE_REQUEST_IID</span>               <span class="y-cmt"># chạy cho MRs</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>  <span class="y-cmt"># chạy cho main</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG</span>                       <span class="y-cmt"># chạy cho tags</span>
+    - <span class="y-key">when:</span> <span class="y-str">never</span>                               <span class="y-cmt"># bỏ qua tất cả trường hợp khác</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S10 — ARTIFACTS & CACHE ════ -->
+<div class="section" id="s10">
+  <div class="sec-head">
+    <span class="sec-tag st-2">ARTIFACTS</span>
+    <div><h2 class="sec-title">Artifacts &amp; Cache — Tối ưu pipeline speed</h2>
+    <p class="sec-sub">Artifacts truyền file giữa jobs, Cache tái dùng dependencies</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Artifacts vs Cache — khác nhau quan trọng</div>
+    <div class="compare">
+      <div style="background:rgba(252,109,38,.06);border:1px solid rgba(252,109,38,.2);border-radius:11px;padding:16px">
+        <div class="cmp-label" style="color:var(--g1)">📦 Artifacts</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          Truyền file <strong style="color:var(--text)">giữa jobs</strong> trong pipeline<br>
+          Upload lên GitLab server<br>
+          Download cho jobs cần<br>
+          Có thể download từ UI<br>
+          <strong style="color:var(--text)">expire_in</strong> để auto cleanup
+        </div>
+      </div>
+      <div style="background:rgba(26,170,85,.06);border:1px solid rgba(26,170,85,.2);border-radius:11px;padding:16px">
+        <div class="cmp-label" style="color:var(--g5)">🗃️ Cache</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          Tái sử dụng <strong style="color:var(--text)">giữa các pipelines</strong><br>
+          Lưu trên runner local hoặc distributed<br>
+          Dùng cho dependencies (.m2, node_modules)<br>
+          <strong style="color:var(--text)">Không đảm bảo</strong> luôn tồn tại<br>
+          Key xác định cache bucket
+        </div>
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Artifacts &amp; Cache cấu hình chi tiết</span><span class="cb-tag ct-2">Artifacts/Cache</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Artifacts — giữ kết quả build ──</span>
+<span class="y-sec">build-jar:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">build</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw package -DskipTests</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">name:</span> <span class="y-str">"$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"</span>  <span class="y-cmt"># tên artifact</span>
+    <span class="y-key">paths:</span>
+      - <span class="y-str">target/*.jar</span>
+    <span class="y-key">exclude:</span>
+      - <span class="y-str">target/*-sources.jar</span>              <span class="y-cmt"># loại trừ</span>
+    <span class="y-key">expire_in:</span> <span class="y-str">1 week</span>
+    <span class="y-key">when:</span> <span class="y-str">always</span>                            <span class="y-cmt"># giữ dù job fail</span>
+    <span class="y-key">reports:</span>                               <span class="y-cmt"># các loại reports đặc biệt</span>
+      <span class="y-key">junit:</span>      <span class="y-str">target/surefire-reports/*.xml</span>
+      <span class="y-key">coverage_report:</span>
+        <span class="y-key">coverage_format:</span> <span class="y-str">cobertura</span>
+        <span class="y-key">path:</span>            <span class="y-str">target/site/jacoco/jacoco.xml</span>
+      <span class="y-key">sast:</span>       <span class="y-str">gl-sast-report.json</span>
+      <span class="y-key">container_scanning:</span> <span class="y-str">gl-container-scanning-report.json</span>
+
+<span class="y-cmt"># ── Cache — tái sử dụng Maven/Gradle dependencies ──</span>
+<span class="y-key">variables:</span>
+  <span class="y-key">MAVEN_OPTS:</span> <span class="y-str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"</span>
+
+<span class="y-sec">build-with-cache:</span>
+  <span class="y-key">cache:</span>
+    <span class="y-key">key:</span>
+      <span class="y-key">files:</span>
+        - <span class="y-str">pom.xml</span>                           <span class="y-cmt"># cache invalidate khi pom.xml thay đổi</span>
+      <span class="y-key">prefix:</span> <span class="y-str">"maven-$CI_COMMIT_REF_SLUG"</span>
+    <span class="y-key">paths:</span>
+      - <span class="y-str">.m2/repository/</span>
+    <span class="y-key">policy:</span> <span class="y-str">pull-push</span>                      <span class="y-cmt"># pull đầu, push cuối (default)</span>
+    <span class="y-cmt"># policy: pull   → chỉ dùng cache, không update (fast)</span>
+    <span class="y-cmt"># policy: push   → chỉ update cache, không dùng</span>
+
+<span class="y-cmt"># ── Distributed cache với S3 (trong config.toml) ──</span>
+[runners.cache]
+  Type   = <span class="y-str">"s3"</span>
+  Shared = <span class="y-bool">true</span>
+  [runners.cache.s3]
+    ServerAddress = <span class="y-str">"minio.internal:9000"</span>
+    BucketName    = <span class="y-str">"gitlab-runner-cache"</span>
+    Insecure      = <span class="y-bool">false</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 3 BANNER ════ -->
+<div class="cat-banner cb-3">
+  <div class="cb-icon">📐</div>
+  <div><div class="cb-badge">ADVANCED CI/CD</div>
+  <div class="cb-title">Templates, Extends, Dynamic Pipelines</div>
+  <div class="cb-sub">include · extends · YAML Anchors · !reference · Child pipelines · Matrix</div></div>
+</div>
+
+<!-- ════ S11 — TEMPLATES ════ -->
+<div class="section" id="s11">
+  <div class="sec-head">
+    <span class="sec-tag st-3">TEMPLATES</span>
+    <div><h2 class="sec-title">Templates &amp; include — Tái sử dụng CI Config</h2>
+    <p class="sec-sub">Viết một lần, dùng cho 50 projects — include từ file, URL, template project</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">4 loại include và khi nào dùng</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">include — local, project, remote, template</span><span class="cb-tag ct-3">include</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── include: local — file trong cùng repo ──</span>
+<span class="y-key">include:</span>
+  - <span class="y-key">local:</span> <span class="y-str">'.gitlab/ci/build.yml'</span>
+  - <span class="y-key">local:</span> <span class="y-str">'.gitlab/ci/test.yml'</span>
+  - <span class="y-key">local:</span> <span class="y-str">'.gitlab/ci/deploy.yml'</span>
+
+<span class="y-cmt"># ── include: project — từ repo khác trong cùng GitLab ──</span>
+<span class="y-key">include:</span>
+  - <span class="y-key">project:</span>  <span class="y-str">'company/ci-templates/pipeline-templates'</span>
+    <span class="y-key">ref:</span>      <span class="y-str">'main'</span>                          <span class="y-cmt"># branch hoặc tag</span>
+    <span class="y-key">file:</span>
+      - <span class="y-str">'/templates/java-maven.yml'</span>
+      - <span class="y-str">'/templates/docker-build.yml'</span>
+      - <span class="y-str">'/templates/k8s-deploy.yml'</span>
+
+<span class="y-cmt"># ── include: remote — từ URL ──</span>
+<span class="y-key">include:</span>
+  - <span class="y-key">remote:</span> <span class="y-str">'https://raw.githubusercontent.com/company/templates/main/ci.yml'</span>
+
+<span class="y-cmt"># ── include: template — GitLab built-in templates ──</span>
+<span class="y-key">include:</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/SAST.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/Dependency-Scanning.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/Container-Scanning.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Code-Quality.gitlab-ci.yml</span>
+
+<span class="y-cmt"># ── Kết hợp nhiều loại ──</span>
+<span class="y-key">include:</span>
+  - <span class="y-key">project:</span> <span class="y-str">'company/ci-templates/pipeline-templates'</span>
+    <span class="y-key">ref:</span>     <span class="y-str">'v2.1.0'</span>                          <span class="y-cmt"># pin to tag (stable!)</span>
+    <span class="y-key">file:</span>    <span class="y-str">'/templates/java-maven.yml'</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/SAST.gitlab-ci.yml</span>
+  - <span class="y-key">local:</span>    <span class="y-str">'.gitlab/ci/custom-deploy.yml'</span>
+
+<span class="y-key">stages:</span> [build, test, package, security, deploy]
+
+<span class="y-cmt"># Override job từ template</span>
+<span class="y-sec">maven-build:</span>                             <span class="y-cmt"># job này có trong java-maven.yml</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">MAVEN_ARGS:</span> <span class="y-str">"-P production"</span>          <span class="y-cmt"># override biến</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Xây dựng CI Template Library — company/ci-templates</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">templates/java-maven.yml — reusable Maven template</span><span class="cb-tag ct-3">Template</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># company/ci-templates: templates/java-maven.yml</span>
+<span class="y-cmt"># Reusable template cho tất cả Java/Maven projects</span>
+
+<span class="y-key">.maven-defaults:</span>                          <span class="y-cmt"># Hidden job (. prefix = không chạy)</span>
+  <span class="y-key">image:</span> <span class="y-str">eclipse-temurin:21-jdk</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">MAVEN_OPTS:</span> <span class="y-str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Xmx1g"</span>
+  <span class="y-key">cache:</span>
+    <span class="y-key">key:</span>
+      <span class="y-key">files:</span> [<span class="y-str">pom.xml</span>]
+    <span class="y-key">paths:</span> [<span class="y-str">.m2/repository/</span>]
+
+<span class="y-sec">maven-compile:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.maven-defaults</span>               <span class="y-cmt"># kế thừa từ hidden job</span>
+  <span class="y-key">stage:</span> <span class="y-stage">build</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw compile -DskipTests --no-transfer-progress</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">paths:</span> [<span class="y-str">target/classes/</span>]
+    <span class="y-key">expire_in:</span> <span class="y-str">2 hours</span>
+
+<span class="y-sec">maven-test:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.maven-defaults</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">needs:</span> [<span class="y-str">maven-compile</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw test --no-transfer-progress</span>
+  <span class="y-key">coverage:</span> <span class="y-str">'/Total.*?([0-9]{1,3})%/'</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">when:</span> <span class="y-str">always</span>
+    <span class="y-key">reports:</span>
+      <span class="y-key">junit:</span>  <span class="y-str">target/surefire-reports/**/*.xml</span>
+
+<span class="y-sec">maven-package:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.maven-defaults</span>
+  <span class="y-key">stage:</span> <span class="y-stage">package</span>
+  <span class="y-key">needs:</span> [<span class="y-str">maven-test</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw package -DskipTests --no-transfer-progress</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">paths:</span> [<span class="y-str">target/*.jar</span>]
+    <span class="y-key">expire_in:</span> <span class="y-str">1 week</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S12 — EXTENDS & ANCHORS ════ -->
+<div class="section" id="s12">
+  <div class="sec-head">
+    <span class="sec-tag st-3">EXTENDS</span>
+    <div><h2 class="sec-title">extends, YAML Anchors &amp; !reference</h2>
+    <p class="sec-sub">Ba cách tái sử dụng config — chọn đúng cách cho từng tình huống</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">extends vs YAML Anchors vs !reference</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">extends + YAML anchors (&amp;/*)  + !reference</span><span class="cb-tag ct-3">DRY Config</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ══════ extends — kế thừa toàn bộ job config ══════</span>
+<span class="y-sec">.base-deploy:</span>                             <span class="y-cmt"># hidden job = template</span>
+  <span class="y-key">image:</span> <span class="y-str">bitnami/kubectl:latest</span>
+  <span class="y-key">before_script:</span>
+    - <span class="y-script">kubectl config use-context $K8S_CONTEXT</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">kubectl set image deploy/$APP_NAME app=$IMAGE_TAG -n $K8S_NAMESPACE</span>
+    - <span class="y-script">kubectl rollout status deploy/$APP_NAME -n $K8S_NAMESPACE</span>
+
+<span class="y-sec">deploy-dev:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.base-deploy</span>                   <span class="y-cmt"># kế thừa tất cả từ .base-deploy</span>
+  <span class="y-key">stage:</span> <span class="y-stage">deploy-dev</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">K8S_NAMESPACE:</span>     <span class="y-str">dev</span>
+    <span class="y-key">K8S_CONTEXT:</span>       <span class="y-str">k8s-dev</span>
+
+<span class="y-sec">deploy-prod:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.base-deploy</span>                   <span class="y-cmt"># cùng template, khác biến</span>
+  <span class="y-key">stage:</span> <span class="y-stage">deploy-prod</span>
+  <span class="y-key">when:</span>  <span class="y-str">manual</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">K8S_NAMESPACE:</span>     <span class="y-str">production</span>
+    <span class="y-key">K8S_CONTEXT:</span>       <span class="y-str">k8s-prod</span>
+
+<span class="y-cmt"># ══════ YAML Anchors — reuse any section ══════</span>
+<span class="y-anchor">.docker_login: &amp;docker_login</span>
+  - <span class="y-script">docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY</span>
+
+<span class="y-anchor">.notify_slack: &amp;notify_slack</span>
+  - <span class="y-script">curl -X POST $SLACK_WEBHOOK -d "{\"text\":\"Deployed $CI_PROJECT_NAME\"}"</span>
+
+<span class="y-sec">build-image:</span>
+  <span class="y-key">before_script:</span>
+    - <span class="y-alias">*docker_login</span>                        <span class="y-cmt"># use anchor</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">docker build -t $IMAGE_TAG .</span>
+    - <span class="y-script">docker push $IMAGE_TAG</span>
+
+<span class="y-sec">deploy:</span>
+  <span class="y-key">after_script:</span>
+    - <span class="y-alias">*notify_slack</span>                        <span class="y-cmt"># reuse anchor</span>
+
+<span class="y-cmt"># ══════ !reference — reuse specific sections (GitLab 14.4+) ══════</span>
+<span class="y-sec">.vars-common:</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">MAVEN_OPTS:</span> <span class="y-str">"-Xmx2g"</span>
+    <span class="y-key">JAVA_HOME:</span>  <span class="y-str">"/usr/lib/jvm/java-21"</span>
+
+<span class="y-sec">build:</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">!reference</span> [<span class="y-str">.vars-common</span>, <span class="y-str">variables</span>]   <span class="y-cmt"># chỉ lấy phần variables</span>
+    <span class="y-key">EXTRA_VAR:</span> <span class="y-str">"extra"</span>                     <span class="y-cmt"># thêm biến riêng</span></pre></div>
+    </div>
+    <div class="rw-box rw-3"><div class="rw-label">📐 Khi nào dùng cái nào?</div>
+    <div class="rw-title">extends vs anchors vs !reference</div>
+    <div class="rw-body"><strong style="color:var(--text)">extends:</strong> Tốt nhất cho kế thừa toàn bộ job config. GitLab merge thông minh (deep merge).<br><strong style="color:var(--text)">YAML Anchors (&amp;/*):</strong> Tốt cho reuse script arrays. Nhưng chỉ copy, không merge.<br><strong style="color:var(--text)">!reference:</strong> Tốt nhất khi chỉ muốn lấy một section cụ thể (chỉ variables, chỉ script).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S13 — DYNAMIC PIPELINES ════ -->
+<div class="section" id="s13">
+  <div class="sec-head">
+    <span class="sec-tag st-3">DYNAMIC</span>
+    <div><h2 class="sec-title">Dynamic Pipelines — Child Pipelines &amp; trigger</h2>
+    <p class="sec-sub">Monorepo, microservices — chỉ chạy pipeline cho service thay đổi</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Parent-Child Pipeline pattern cho Monorepo</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Monorepo — Parent pipeline trigger child pipelines</span><span class="cb-tag ct-3">Dynamic</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── .gitlab-ci.yml (parent — root) ──</span>
+<span class="y-key">stages:</span> [<span class="y-stage">trigger</span>]
+
+<span class="y-sec">trigger-order-service:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">trigger</span>
+  <span class="y-key">trigger:</span>
+    <span class="y-key">include:</span> <span class="y-str">services/order-service/.gitlab-ci.yml</span>
+    <span class="y-key">strategy:</span> <span class="y-str">depend</span>                       <span class="y-cmt"># parent chờ child hoàn thành</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">changes:</span>                             <span class="y-cmt"># chỉ trigger khi có thay đổi</span>
+        - <span class="y-str">services/order-service/**/*</span>
+
+<span class="y-sec">trigger-payment-service:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">trigger</span>
+  <span class="y-key">trigger:</span>
+    <span class="y-key">include:</span> <span class="y-str">services/payment-service/.gitlab-ci.yml</span>
+    <span class="y-key">strategy:</span> <span class="y-str">depend</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">changes:</span>
+        - <span class="y-str">services/payment-service/**/*</span>
+        - <span class="y-str">shared-libs/**/*</span>                  <span class="y-cmt"># trigger khi shared lib thay đổi</span>
+
+<span class="y-cmt"># ── Trigger pipeline từ project khác ──</span>
+<span class="y-sec">trigger-infra:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">trigger</span>
+  <span class="y-key">trigger:</span>
+    <span class="y-key">project:</span> <span class="y-str">company/infrastructure/k8s-manifests</span>
+    <span class="y-key">branch:</span>  <span class="y-str">main</span>
+    <span class="y-key">strategy:</span> <span class="y-str">depend</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">UPSTREAM_IMAGE:</span> <span class="y-str">$IMAGE_TAG</span>           <span class="y-cmt"># pass biến sang downstream</span>
+    <span class="y-key">UPSTREAM_SHA:</span>   <span class="y-str">$CI_COMMIT_SHA</span>
+
+<span class="y-cmt"># ── Dynamic child pipeline (generate at runtime) ──</span>
+<span class="y-sec">generate-pipeline:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">.pre</span>
+  <span class="y-key">image:</span> <span class="y-str">python:3.12</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">python scripts/generate-pipeline.py > generated-pipeline.yml</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">paths:</span> [<span class="y-str">generated-pipeline.yml</span>]
+
+<span class="y-sec">dynamic-pipeline:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">trigger</span>
+  <span class="y-key">needs:</span> [<span class="y-str">generate-pipeline</span>]
+  <span class="y-key">trigger:</span>
+    <span class="y-key">include:</span>
+      - <span class="y-key">artifact:</span> <span class="y-str">generated-pipeline.yml</span>   <span class="y-cmt"># dùng file được generate!</span>
+        <span class="y-key">job:</span>      <span class="y-str">generate-pipeline</span>
+    <span class="y-key">strategy:</span> <span class="y-str">depend</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S14 — MATRIX ════ -->
+<div class="section" id="s14">
+  <div class="sec-head">
+    <span class="sec-tag st-3">MATRIX</span>
+    <div><h2 class="sec-title">Matrix Jobs — Test nhiều version song song</h2>
+    <p class="sec-sub">parallel:matrix — chạy job với nhiều biến kết hợp</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Matrix build — test nhiều JDK/OS/DB</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">parallel:matrix — multi-version testing</span><span class="cb-tag ct-3">Matrix</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># Test trên nhiều JDK versions song song</span>
+<span class="y-sec">test-matrix:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">image:</span> <span class="y-str">eclipse-temurin:$JAVA_VERSION-jdk</span>  <span class="y-cmt"># image thay đổi theo matrix</span>
+  <span class="y-key">parallel:</span>
+    <span class="y-key">matrix:</span>
+      - <span class="y-key">JAVA_VERSION:</span> [<span class="y-str">"17"</span>, <span class="y-str">"21"</span>, <span class="y-str">"23"</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">echo "Testing with Java $JAVA_VERSION"</span>
+    - <span class="y-script">./mvnw test</span>
+  <span class="y-cmt"># → Tạo 3 jobs: test-matrix: [17], [21], [23]</span>
+
+<span class="y-cmt"># Multi-dimension matrix (JDK × DB)</span>
+<span class="y-sec">integration-matrix:</span>
+  <span class="y-key">parallel:</span>
+    <span class="y-key">matrix:</span>
+      - <span class="y-key">JAVA_VERSION:</span> [<span class="y-str">"17"</span>, <span class="y-str">"21"</span>]
+        <span class="y-key">DB_VERSION:</span>   [<span class="y-str">"postgres:14"</span>, <span class="y-str">"postgres:16"</span>]
+  <span class="y-cmt"># → Tạo 4 jobs: 17+pg14, 17+pg16, 21+pg14, 21+pg16</span>
+  <span class="y-key">services:</span>
+    - <span class="y-key">name:</span> <span class="y-str">$DB_VERSION</span>
+      <span class="y-key">alias:</span> <span class="y-str">db</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw verify -Pintegration-test</span>
+
+<span class="y-cmt"># Deploy matrix — nhiều regions cùng lúc</span>
+<span class="y-sec">deploy-regions:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">deploy-prod</span>
+  <span class="y-key">parallel:</span>
+    <span class="y-key">matrix:</span>
+      - <span class="y-key">REGION:</span>     [<span class="y-str">"us-east-1"</span>, <span class="y-str">"eu-west-1"</span>, <span class="y-str">"ap-southeast-1"</span>]
+        <span class="y-key">K8S_CLUSTER:</span> [<span class="y-str">"prod-us"</span>, <span class="y-str">"prod-eu"</span>, <span class="y-str">"prod-ap"</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">kubectl config use-context $K8S_CLUSTER</span>
+    - <span class="y-script">helm upgrade --install $APP_NAME ./chart -n production --set region=$REGION</span>
+  <span class="y-key">when:</span> <span class="y-str">manual</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 4 BANNER ════ -->
+<div class="cat-banner cb-4">
+  <div class="cb-icon">🚀</div>
+  <div><div class="cb-badge">REAL-WORLD PIPELINES</div>
+  <div class="cb-title">Java Spring Boot → Docker → Kubernetes</div>
+  <div class="cb-sub">Full pipeline từ code đến production — end-to-end</div></div>
+</div>
+
+<!-- ════ S15 — JAVA SPRING BOOT CI ════ -->
+<div class="section" id="s15">
+  <div class="sec-head">
+    <span class="sec-tag st-4">JAVA</span>
+    <div><h2 class="sec-title">Java Spring Boot CI Pipeline — Complete</h2>
+    <p class="sec-sub">Build, Test, Coverage, Code Quality — pipeline hoàn chỉnh cho Spring Boot</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Pipeline Spring Boot đầy đủ với coverage và quality gate</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.gitlab-ci.yml — Spring Boot full CI pipeline</span><span class="cb-tag ct-4">Spring Boot CI</span></div>
+      <div class="cb-body"><pre><span class="y-key">include:</span>
+  - <span class="y-key">template:</span> <span class="y-str">Code-Quality.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/SAST.gitlab-ci.yml</span>
+
+<span class="y-key">default:</span>
+  <span class="y-key">image:</span> <span class="y-str">eclipse-temurin:21-jdk-jammy</span>
+  <span class="y-key">cache:</span>
+    <span class="y-key">key:</span>
+      <span class="y-key">files:</span> [<span class="y-str">pom.xml</span>]
+    <span class="y-key">paths:</span> [<span class="y-str">.m2/repository/</span>]
+
+<span class="y-key">stages:</span> [<span class="y-stage">validate</span>, <span class="y-stage">build</span>, <span class="y-stage">test</span>, <span class="y-stage">quality</span>, <span class="y-stage">package</span>, <span class="y-stage">security</span>]
+
+<span class="y-key">variables:</span>
+  <span class="y-key">MAVEN_OPTS:</span>       <span class="y-str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Xmx1500m"</span>
+  <span class="y-key">MAVEN_CLI_OPTS:</span>   <span class="y-str">"--no-transfer-progress --batch-mode"</span>
+
+<span class="y-cmt"># ── Stage: validate ──</span>
+<span class="y-sec">validate-pom:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">validate</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS validate</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS dependency:resolve</span>
+
+<span class="y-cmt"># ── Stage: build ──</span>
+<span class="y-sec">compile:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">build</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS compile</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">paths:</span>       [<span class="y-str">target/classes/</span>]
+    <span class="y-key">expire_in:</span>   <span class="y-str">2 hours</span>
+
+<span class="y-cmt"># ── Stage: test ──</span>
+<span class="y-sec">unit-tests:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">needs:</span> [<span class="y-str">compile</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS test</span>
+  <span class="y-key">coverage:</span> <span class="y-str">'/Total.*?([0-9]{1,3})%/'</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">when:</span> <span class="y-str">always</span>
+    <span class="y-key">reports:</span>
+      <span class="y-key">junit:</span>    <span class="y-str">target/surefire-reports/**/*.xml</span>
+      <span class="y-key">coverage_report:</span>
+        <span class="y-key">coverage_format:</span> <span class="y-str">cobertura</span>
+        <span class="y-key">path:</span>            <span class="y-str">target/site/jacoco/jacoco.xml</span>
+
+<span class="y-sec">integration-tests:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">needs:</span> [<span class="y-str">compile</span>]
+  <span class="y-key">services:</span>
+    - <span class="y-key">name:</span>  <span class="y-str">postgres:16-alpine</span>
+      <span class="y-key">alias:</span> <span class="y-str">postgres</span>
+    - <span class="y-key">name:</span>  <span class="y-str">redis:7-alpine</span>
+      <span class="y-key">alias:</span> <span class="y-str">redis</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">POSTGRES_DB:</span>               <span class="y-str">testdb</span>
+    <span class="y-key">POSTGRES_USER:</span>             <span class="y-str">test</span>
+    <span class="y-key">POSTGRES_PASSWORD:</span>         <span class="y-str">test</span>
+    <span class="y-key">SPRING_DATASOURCE_URL:</span>     <span class="y-str">jdbc:postgresql://postgres:5432/testdb</span>
+    <span class="y-key">SPRING_DATASOURCE_USERNAME:</span><span class="y-str">test</span>
+    <span class="y-key">SPRING_DATASOURCE_PASSWORD:</span><span class="y-str">test</span>
+    <span class="y-key">SPRING_REDIS_HOST:</span>         <span class="y-str">redis</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS verify -Pintegration-test</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">when:</span> <span class="y-str">always</span>
+    <span class="y-key">reports:</span>
+      <span class="y-key">junit:</span> <span class="y-str">target/failsafe-reports/**/*.xml</span>
+
+<span class="y-cmt"># ── Stage: quality ──</span>
+<span class="y-sec">sonarqube:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">quality</span>
+  <span class="y-key">needs:</span> [<span class="y-str">unit-tests</span>]
+  <span class="y-key">variables:</span>
+    <span class="y-key">SONAR_USER_HOME:</span> <span class="y-str">"$CI_PROJECT_DIR/.sonar"</span>
+    <span class="y-key">GIT_DEPTH:</span>       <span class="y-str">"0"</span>                     <span class="y-cmt"># full git history cho blame</span>
+  <span class="y-key">cache:</span>
+    <span class="y-key">key:</span>   <span class="y-str">"$CI_JOB_NAME"</span>
+    <span class="y-key">paths:</span> [<span class="y-str">.sonar/cache/</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS sonar:sonar</span>
+      <span class="y-script">-Dsonar.host.url=$SONAR_URL</span>
+      <span class="y-script">-Dsonar.login=$SONAR_TOKEN</span>
+      <span class="y-script">-Dsonar.projectKey=$CI_PROJECT_NAME</span>
+      <span class="y-script">-Dsonar.qualitygate.wait=true</span>           <span class="y-cmt"># fail nếu quality gate không pass</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_MERGE_REQUEST_IID</span>
+
+<span class="y-cmt"># ── Stage: package ──</span>
+<span class="y-sec">build-jar:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">package</span>
+  <span class="y-key">needs:</span> [<span class="y-str">unit-tests</span>, <span class="y-str">integration-tests</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw $MAVEN_CLI_OPTS package -DskipTests</span>
+    - <span class="y-script">mv target/*.jar target/app.jar</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">paths:</span>     [<span class="y-str">target/app.jar</span>]
+    <span class="y-key">expire_in:</span> <span class="y-str">1 week</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S16 — DOCKER BUILD ════ -->
+<div class="section" id="s16">
+  <div class="sec-head">
+    <span class="sec-tag st-4">DOCKER</span>
+    <div><h2 class="sec-title">Docker Build &amp; Push — GitLab Container Registry</h2>
+    <p class="sec-sub">Multi-stage Dockerfile, BuildKit, push lên GitLab registry</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Dockerfile tối ưu + CI job build/push</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Dockerfile (multi-stage) + docker-build job</span><span class="cb-tag ct-4">Docker</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Dockerfile — multi-stage build ──</span>
+<span class="y-key">FROM</span> eclipse-temurin:<span class="y-str">21-jdk-jammy</span> <span class="y-kw">AS</span> builder
+<span class="y-key">WORKDIR</span> /build
+<span class="y-key">COPY</span> .mvn/ .mvn/
+<span class="y-key">COPY</span> mvnw pom.xml ./
+<span class="y-key">RUN</span> ./mvnw dependency:go-offline      <span class="y-cmt"># cache dependencies layer</span>
+<span class="y-key">COPY</span> src/ src/
+<span class="y-key">RUN</span> ./mvnw package <span class="y-str">-DskipTests</span>
+
+<span class="y-key">FROM</span> eclipse-temurin:<span class="y-str">21-jre-jammy</span>    <span class="y-cmt"># smaller runtime image</span>
+<span class="y-key">WORKDIR</span> /app
+<span class="y-cmt"># Security: run as non-root</span>
+<span class="y-key">RUN</span> groupadd <span class="y-str">-r app</span> && useradd <span class="y-str">-r -g app app</span>
+<span class="y-key">COPY</span> --from=builder /build/target/*.jar app.jar
+<span class="y-key">RUN</span> chown app:app app.jar
+<span class="y-key">USER</span> app
+<span class="y-key">EXPOSE</span> <span class="y-num">8080</span>
+<span class="y-key">HEALTHCHECK</span> --interval=<span class="y-str">30s</span> --timeout=<span class="y-str">10s</span> \
+  <span class="y-key">CMD</span> curl <span class="y-str">-f http://localhost:8080/actuator/health</span> || exit 1
+<span class="y-key">ENTRYPOINT</span> [<span class="y-str">"java"</span>, <span class="y-str">"-XX:+UseContainerSupport"</span>, <span class="y-str">"-jar"</span>, <span class="y-str">"app.jar"</span>]
+
+<span class="y-cmt"># ── .gitlab-ci.yml ──</span>
+<span class="y-sec">docker-build:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">package</span>
+  <span class="y-key">image:</span> <span class="y-str">docker:26</span>
+  <span class="y-key">services:</span>
+    - <span class="y-key">name:</span> <span class="y-str">docker:26-dind</span>
+      <span class="y-key">command:</span> [<span class="y-str">"--tls=false"</span>]
+  <span class="y-key">variables:</span>
+    <span class="y-key">DOCKER_HOST:</span>      <span class="y-str">tcp://docker:2375</span>
+    <span class="y-key">DOCKER_TLS_CERTDIR:</span> <span class="y-str">""</span>
+    <span class="y-key">DOCKER_BUILDKIT:</span>  <span class="y-str">"1"</span>               <span class="y-cmt"># BuildKit — nhanh hơn, caching tốt hơn</span>
+    <span class="y-key">IMAGE_TAG:</span>        <span class="y-str">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</span>
+    <span class="y-key">IMAGE_LATEST:</span>     <span class="y-str">$CI_REGISTRY_IMAGE:latest</span>
+    <span class="y-key">IMAGE_BRANCH:</span>     <span class="y-str">$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG</span>
+  <span class="y-key">before_script:</span>
+    - <span class="y-script">docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY</span>
+  <span class="y-key">script:</span>
+    - <span class="y-cmt"># Build với cache từ registry</span>
+    - |
+      <span class="y-script">docker build</span>
+        <span class="y-script">--cache-from $IMAGE_LATEST</span>
+        <span class="y-script">--build-arg BUILDKIT_INLINE_CACHE=1</span>
+        <span class="y-script">--label "org.opencontainers.image.revision=$CI_COMMIT_SHA"</span>
+        <span class="y-script">--label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"</span>
+        <span class="y-script">-t $IMAGE_TAG</span>
+        <span class="y-script">-t $IMAGE_LATEST</span>
+        <span class="y-script">-t $IMAGE_BRANCH</span>
+        <span class="y-script">.</span>
+    - <span class="y-script">docker push $IMAGE_TAG</span>
+    - <span class="y-script">docker push $IMAGE_LATEST</span>
+    - <span class="y-script">docker push $IMAGE_BRANCH</span>
+    - <span class="y-script">echo "IMAGE_TAG=$IMAGE_TAG" >> build.env</span>  <span class="y-cmt"># pass sang jobs sau</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">reports:</span>
+      <span class="y-key">dotenv:</span> <span class="y-str">build.env</span>                  <span class="y-cmt"># biến được pass sang dependent jobs!</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S17 — DEPLOY K8S ════ -->
+<div class="section" id="s17">
+  <div class="sec-head">
+    <span class="sec-tag st-4">KUBERNETES</span>
+    <div><h2 class="sec-title">Deploy lên Kubernetes — Helm &amp; kubectl</h2>
+    <p class="sec-sub">helm upgrade, rollout status, rollback strategy trong GitLab CI</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Kubernetes deployment với Helm</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Deploy to K8s — helm upgrade + rollback + smoke test</span><span class="cb-tag ct-4">K8s Deploy</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── deploy-dev job ──</span>
+<span class="y-sec">deploy-dev:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">deploy-dev</span>
+  <span class="y-key">image:</span>
+    <span class="y-key">name:</span>       <span class="y-str">alpine/helm:3.14</span>
+    <span class="y-key">entrypoint:</span> [<span class="y-str">""</span>]
+  <span class="y-key">needs:</span>
+    - <span class="y-key">job:</span>      <span class="y-str">docker-build</span>
+      <span class="y-key">artifacts:</span> <span class="y-bool">true</span>                    <span class="y-cmt"># lấy IMAGE_TAG từ build.env</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span> <span class="y-str">development</span>
+    <span class="y-key">url:</span>  <span class="y-str">https://dev.company.com</span>
+    <span class="y-key">on_stop:</span> <span class="y-str">stop-dev</span>                   <span class="y-cmt"># cleanup khi environment tắt</span>
+  <span class="y-key">before_script:</span>
+    - <span class="y-cmt"># Setup kubeconfig từ CI variable</span>
+    - <span class="y-script">mkdir -p ~/.kube</span>
+    - <span class="y-script">echo "$KUBECONFIG_DEV" | base64 -d > ~/.kube/config</span>
+    - <span class="y-script">chmod 600 ~/.kube/config</span>
+  <span class="y-key">script:</span>
+    - <span class="y-cmt"># Helm upgrade --install (create if not exists)</span>
+    - |
+      <span class="y-script">helm upgrade --install $APP_NAME ./chart/</span>
+        <span class="y-script">--namespace dev</span>
+        <span class="y-script">--create-namespace</span>
+        <span class="y-script">--set image.repository=$CI_REGISTRY_IMAGE</span>
+        <span class="y-script">--set image.tag=$CI_COMMIT_SHORT_SHA</span>
+        <span class="y-script">--set ingress.host=dev.company.com</span>
+        <span class="y-script">--set replicaCount=2</span>
+        <span class="y-script">--values chart/values-dev.yaml</span>
+        <span class="y-script">--timeout 5m</span>
+        <span class="y-script">--wait</span>                              <span class="y-cmt"># chờ pods ready</span>
+        <span class="y-script">--atomic</span>                            <span class="y-cmt"># rollback tự động nếu fail!</span>
+    - <span class="y-cmt"># Smoke test</span>
+    - <span class="y-script">sleep 10</span>
+    - <span class="y-script">curl -sf https://dev.company.com/actuator/health | grep '"status":"UP"'</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+
+<span class="y-cmt"># Stop/cleanup job</span>
+<span class="y-sec">stop-dev:</span>
+  <span class="y-key">stage:</span>  <span class="y-stage">deploy-dev</span>
+  <span class="y-key">image:</span>  <span class="y-str">alpine/helm:3.14</span>
+  <span class="y-key">when:</span>   <span class="y-str">manual</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span>   <span class="y-str">development</span>
+    <span class="y-key">action:</span> <span class="y-str">stop</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">helm uninstall $APP_NAME -n dev</span>
+
+<span class="y-cmt"># ── Manual rollback job ──</span>
+<span class="y-sec">rollback-prod:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">deploy-prod</span>
+  <span class="y-key">image:</span> <span class="y-str">alpine/helm:3.14</span>
+  <span class="y-key">when:</span>  <span class="y-str">manual</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">helm rollback $APP_NAME 0 -n production</span>  <span class="y-cmt"># 0 = previous revision</span>
+    - <span class="y-script">helm history $APP_NAME -n production</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span>   <span class="y-str">production</span>
+    <span class="y-key">action:</span> <span class="y-str">rollback</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S18 — MULTI-ENV ════ -->
+<div class="section" id="s18">
+  <div class="sec-head">
+    <span class="sec-tag st-4">MULTI-ENV</span>
+    <div><h2 class="sec-title">Multi-Environment Deploy — Dev → Staging → Prod</h2>
+    <p class="sec-sub">Pipeline đầy đủ từ development đến production với approval gate</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Full multi-environment pipeline strategy</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.gitlab-ci.yml — multi-environment promotion</span><span class="cb-tag ct-4">Multi-Env</span></div>
+      <div class="cb-body"><pre><span class="y-key">stages:</span>
+  - <span class="y-stage">build</span>
+  - <span class="y-stage">test</span>
+  - <span class="y-stage">package</span>
+  - <span class="y-stage">deploy-dev</span>
+  - <span class="y-stage">deploy-staging</span>
+  - <span class="y-stage">deploy-prod</span>
+
+<span class="y-cmt"># ── Reusable deploy template ──</span>
+<span class="y-sec">.deploy-template:</span>
+  <span class="y-key">image:</span> <span class="y-str">alpine/helm:3.14</span>
+  <span class="y-key">before_script:</span>
+    - <span class="y-script">mkdir -p ~/.kube && echo $KUBECONFIG_B64 | base64 -d > ~/.kube/config</span>
+    - <span class="y-script">helm repo add company-charts $HELM_REPO_URL --username $HELM_USER --password $HELM_PASS</span>
+  <span class="y-key">script:</span>
+    - |
+      <span class="y-script">helm upgrade --install $APP_NAME company-charts/$APP_NAME</span>
+        <span class="y-script">--version $CHART_VERSION</span>
+        <span class="y-script">--namespace $K8S_NAMESPACE</span>
+        <span class="y-script">--set image.tag=$IMAGE_TAG</span>
+        <span class="y-script">--values chart/values-$CI_ENVIRONMENT_NAME.yaml</span>
+        <span class="y-script">--atomic --timeout 10m</span>
+    - <span class="y-script">echo "✅ Deployed $APP_NAME:$IMAGE_TAG to $CI_ENVIRONMENT_NAME"</span>
+
+<span class="y-cmt"># ── Deploy: dev (auto on every push to main) ──</span>
+<span class="y-sec">deploy-dev:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.deploy-template</span>
+  <span class="y-key">stage:</span>   <span class="y-stage">deploy-dev</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">K8S_NAMESPACE:</span>    <span class="y-str">dev</span>
+    <span class="y-key">KUBECONFIG_B64:</span>   <span class="y-str">$KUBECONFIG_DEV_B64</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span>       <span class="y-str">development</span>
+    <span class="y-key">url:</span>        <span class="y-str">https://dev.company.com</span>
+    <span class="y-key">deployment_tier:</span> <span class="y-str">development</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+
+<span class="y-cmt"># ── Deploy: staging (manual promotion) ──</span>
+<span class="y-sec">deploy-staging:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.deploy-template</span>
+  <span class="y-key">stage:</span>   <span class="y-stage">deploy-staging</span>
+  <span class="y-key">when:</span>    <span class="y-str">manual</span>                          <span class="y-cmt"># phải click mới chạy</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">K8S_NAMESPACE:</span>    <span class="y-str">staging</span>
+    <span class="y-key">KUBECONFIG_B64:</span>   <span class="y-str">$KUBECONFIG_STAGING_B64</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span>       <span class="y-str">staging</span>
+    <span class="y-key">url:</span>        <span class="y-str">https://staging.company.com</span>
+    <span class="y-key">deployment_tier:</span> <span class="y-str">staging</span>
+  <span class="y-key">resource_group:</span> <span class="y-str">staging</span>               <span class="y-cmt"># chỉ 1 deploy staging cùng lúc</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH</span>
+
+<span class="y-cmt"># ── Deploy: production (tag only + manual + approval) ──</span>
+<span class="y-sec">deploy-prod:</span>
+  <span class="y-key">extends:</span> <span class="y-str">.deploy-template</span>
+  <span class="y-key">stage:</span>   <span class="y-stage">deploy-prod</span>
+  <span class="y-key">when:</span>    <span class="y-str">manual</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">K8S_NAMESPACE:</span>    <span class="y-str">production</span>
+    <span class="y-key">KUBECONFIG_B64:</span>   <span class="y-str">$KUBECONFIG_PROD_B64</span>
+  <span class="y-key">environment:</span>
+    <span class="y-key">name:</span>       <span class="y-str">production</span>
+    <span class="y-key">url:</span>        <span class="y-str">https://app.company.com</span>
+    <span class="y-key">deployment_tier:</span> <span class="y-str">production</span>
+  <span class="y-key">resource_group:</span> <span class="y-str">production</span>            <span class="y-cmt"># chỉ 1 deploy prod cùng lúc!</span>
+  <span class="y-key">rules:</span>
+    - <span class="y-key">if:</span> <span class="y-str">$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/</span>
+      <span class="y-key">when:</span> <span class="y-str">manual</span>
+      <span class="y-key">allow_failure:</span> <span class="y-bool">false</span>
+    - <span class="y-key">when:</span> <span class="y-str">never</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 5 BANNER ════ -->
+<div class="cat-banner cb-5">
+  <div class="cb-icon">🛡️</div>
+  <div><div class="cb-badge">PRODUCTION BEST PRACTICES</div>
+  <div class="cb-title">Security, Optimization &amp; Monitoring</div>
+  <div class="cb-sub">SAST · Container Scanning · Pipeline Speed · Cheat Sheet</div></div>
+</div>
+
+<!-- ════ S19 — SECURITY ════ -->
+<div class="section" id="s19">
+  <div class="sec-head">
+    <span class="sec-tag st-5">SECURITY</span>
+    <div><h2 class="sec-title">Security Scanning — GitLab SAST &amp; Container Scan</h2>
+    <p class="sec-sub">Tự động quét lỗ hổng trong code và Docker image ngay trong pipeline</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tích hợp đầy đủ security pipeline</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Security pipeline — SAST, Dependency, Container</span><span class="cb-tag ct-5">Security</span></div>
+      <div class="cb-body"><pre><span class="y-key">include:</span>
+  <span class="y-cmt"># GitLab built-in security templates</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/SAST.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/Secret-Detection.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/Dependency-Scanning.gitlab-ci.yml</span>
+  - <span class="y-key">template:</span> <span class="y-str">Security/Container-Scanning.gitlab-ci.yml</span>
+
+<span class="y-key">stages:</span> [<span class="y-stage">build</span>, <span class="y-stage">test</span>, <span class="y-stage">security</span>, <span class="y-stage">deploy</span>]
+
+<span class="y-cmt"># ── Configure SAST ──</span>
+<span class="y-key">variables:</span>
+  <span class="y-key">SAST_EXCLUDED_PATHS:</span>    <span class="y-str">"spec,test,tests,tmp,vendor"</span>
+  <span class="y-key">SAST_EXCLUDED_ANALYZERS:</span><span class="y-str">""</span>           <span class="y-cmt"># dùng tất cả analyzers</span>
+  <span class="y-key">DS_EXCLUDED_PATHS:</span>      <span class="y-str">"spec,test"</span>
+
+<span class="y-cmt"># ── Container Scanning — scan Docker image ──</span>
+<span class="y-sec">container_scanning:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">security</span>
+  <span class="y-key">needs:</span> [<span class="y-str">docker-build</span>]
+  <span class="y-key">variables:</span>
+    <span class="y-key">CS_IMAGE:</span> <span class="y-str">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</span>
+    <span class="y-key">CS_SEVERITY_THRESHOLD:</span> <span class="y-str">high</span>          <span class="y-cmt"># fail nếu có HIGH vulnerabilities</span>
+
+<span class="y-cmt"># ── Secret Detection — tìm secrets trong code ──</span>
+<span class="y-sec">secret_detection:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">security</span>
+  <span class="y-key">variables:</span>
+    <span class="y-key">SECRET_DETECTION_HISTORIC_SCAN:</span> <span class="y-str">"true"</span>  <span class="y-cmt"># scan toàn bộ git history!</span>
+
+<span class="y-cmt"># ── Custom Trivy scan (thay thế cho Container Scanning) ──</span>
+<span class="y-sec">trivy-scan:</span>
+  <span class="y-key">stage:</span>   <span class="y-stage">security</span>
+  <span class="y-key">image:</span>   <span class="y-str">aquasec/trivy:latest</span>
+  <span class="y-key">needs:</span>   [<span class="y-str">docker-build</span>]
+  <span class="y-key">script:</span>
+    - <span class="y-cmt"># Scan image và fail nếu có CRITICAL/HIGH</span>
+    - |
+      <span class="y-script">trivy image</span>
+        <span class="y-script">--exit-code 1</span>
+        <span class="y-script">--severity CRITICAL,HIGH</span>
+        <span class="y-script">--no-progress</span>
+        <span class="y-script">--format json</span>
+        <span class="y-script">--output trivy-report.json</span>
+        <span class="y-script">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</span>
+  <span class="y-key">artifacts:</span>
+    <span class="y-key">when:</span>   <span class="y-str">always</span>
+    <span class="y-key">paths:</span>  [<span class="y-str">trivy-report.json</span>]
+    <span class="y-key">reports:</span>
+      <span class="y-key">container_scanning:</span> <span class="y-str">trivy-report.json</span>  <span class="y-cmt"># hiện trong MR Security tab!</span>
+  <span class="y-key">allow_failure:</span> <span class="y-bool">true</span>                    <span class="y-cmt"># warn không block (tùy policy)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S20 — OPTIMIZATION ════ -->
+<div class="section" id="s20">
+  <div class="sec-head">
+    <span class="sec-tag st-5">PERFORMANCE</span>
+    <div><h2 class="sec-title">Pipeline Optimization — Từ 20 phút xuống 5 phút</h2>
+    <p class="sec-sub">Cache, parallel, DAG, resource_group — tối ưu speed và reliability</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các kỹ thuật tối ưu pipeline</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Pipeline optimization — cache, DAG, depth, timeout</span><span class="cb-tag ct-5">Optimization</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── 1. Shallow clone — không clone full history ──</span>
+<span class="y-key">variables:</span>
+  <span class="y-key">GIT_DEPTH:</span>        <span class="y-str">"1"</span>             <span class="y-cmt"># chỉ 1 commit, nhanh hơn nhiều</span>
+  <span class="y-key">GIT_STRATEGY:</span>     <span class="y-str">clone</span>           <span class="y-cmt"># hoặc fetch (nhanh hơn clone)</span>
+  <span class="y-key">GIT_CLEAN_FLAGS:</span>  <span class="y-str">-ffdx</span>           <span class="y-cmt"># clean working directory</span>
+<span class="y-cmt"># Ngoại lệ: SonarQube cần GIT_DEPTH: 0 để blame đúng</span>
+
+<span class="y-cmt"># ── 2. DAG (Directed Acyclic Graph) với needs — không cần chờ stage ──</span>
+<span class="y-sec">compile:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">build</span>
+
+<span class="y-sec">unit-test:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">needs:</span> [<span class="y-str">compile</span>]                   <span class="y-cmt"># chạy ngay sau compile, không chờ toàn bộ build stage</span>
+
+<span class="y-sec">integration-test:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">test</span>
+  <span class="y-key">needs:</span> [<span class="y-str">compile</span>]                   <span class="y-cmt"># chạy song song với unit-test!</span>
+
+<span class="y-sec">docker-build:</span>
+  <span class="y-key">stage:</span> <span class="y-stage">package</span>
+  <span class="y-key">needs:</span>
+    - <span class="y-key">job:</span>      <span class="y-str">unit-test</span>
+    - <span class="y-key">job:</span>      <span class="y-str">integration-test</span>
+    - <span class="y-key">job:</span>      <span class="y-str">compile</span>
+      <span class="y-key">artifacts:</span> <span class="y-bool">false</span>               <span class="y-cmt"># chỉ wait, không cần artifacts</span>
+
+<span class="y-cmt"># ── 3. Cache Maven dependencies — tiết kiệm 3-5 phút ──</span>
+<span class="y-key">variables:</span>
+  <span class="y-key">MAVEN_OPTS:</span> <span class="y-str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2"</span>
+
+<span class="y-key">cache:</span>
+  <span class="y-key">key:</span>
+    <span class="y-key">files:</span>  [<span class="y-str">pom.xml</span>]
+    <span class="y-key">prefix:</span> <span class="y-str">$CI_JOB_NAME</span>
+  <span class="y-key">paths:</span>   [<span class="y-str">.m2/</span>]
+  <span class="y-key">policy:</span>  <span class="y-str">pull</span>                        <span class="y-cmt"># pull-only cho test jobs</span>
+
+<span class="y-cmt"># ── 4. Fail fast — kill pipeline khi critical test fail ──</span>
+<span class="y-sec">validate-requirements:</span>
+  <span class="y-key">stage:</span>  <span class="y-stage">.pre</span>
+  <span class="y-key">script:</span>
+    - <span class="y-script">./mvnw validate</span>
+  <span class="y-cmt"># .pre stage chạy trước tất cả — fail fast nếu pom.xml sai</span>
+
+<span class="y-cmt"># ── 5. Timeout per job — tránh job treo mãi ──</span>
+<span class="y-sec">integration-test:</span>
+  <span class="y-key">timeout:</span> <span class="y-str">20 minutes</span>
+
+<span class="y-cmt"># ── 6. interruptible — cancel pipeline cũ khi push mới ──</span>
+<span class="y-key">default:</span>
+  <span class="y-key">interruptible:</span> <span class="y-bool">true</span>                 <span class="y-cmt"># pipeline bị cancel khi có push mới vào branch</span>
+
+<span class="y-cmt"># ── 7. resource_group — prevent concurrent deploys ──</span>
+<span class="y-sec">deploy-prod:</span>
+  <span class="y-key">resource_group:</span> <span class="y-str">production</span>          <span class="y-cmt"># chỉ 1 job deploy-prod chạy cùng lúc</span>
+  <span class="y-cmt"># Job tiếp theo sẽ chờ job hiện tại xong</span></pre></div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Kỹ thuật</th><th>Tiết kiệm</th><th>Khi nào áp dụng</th></tr></thead>
+      <tbody>
+        <tr><td><code>GIT_DEPTH: 1</code></td><td>10-60s</td><td>Mọi job, trừ SonarQube</td></tr>
+        <tr><td>Maven/Gradle cache</td><td>3-5 phút</td><td>Mọi Java project</td></tr>
+        <tr><td>DAG với <code>needs</code></td><td>2-8 phút</td><td>Khi jobs độc lập nhau</td></tr>
+        <tr><td><code>interruptible: true</code></td><td>Giảm waste</td><td>Feature branches</td></tr>
+        <tr><td>Docker layer cache</td><td>1-3 phút</td><td>Docker build jobs</td></tr>
+        <tr><td><code>parallel: N</code></td><td>Giảm 1/N</td><td>Khi test có thể shard</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ S21 — CHEAT SHEET ════ -->
+<div class="section" id="s21">
+  <div class="sec-head">
+    <span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — GitLab CI/CD toàn tập</h2>
+    <p class="sec-sub">Tra cứu nhanh mọi thứ cần biết</p></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4 class="h4-1">📋 Pipeline Structure</h4>
+      <div class="cheat-row"><span class="ck">Stages đặc biệt</span><span class="cv">.pre, .post</span></div>
+      <div class="cheat-row"><span class="ck">Chạy trước tất cả</span><span class="cv">stage: .pre</span></div>
+      <div class="cheat-row"><span class="ck">Chạy sau tất cả</span><span class="cv">stage: .post</span></div>
+      <div class="cheat-row"><span class="ck">Hidden job</span><span class="cv">.job-name (dot prefix)</span></div>
+      <div class="cheat-row"><span class="ck">Cancel khi push mới</span><span class="cv">interruptible: true</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-2">⚙️ Job Keywords</h4>
+      <div class="cheat-row"><span class="ck">Chạy thủ công</span><span class="cv">when: manual</span></div>
+      <div class="cheat-row"><span class="ck">Luôn chạy</span><span class="cv">when: always</span></div>
+      <div class="cheat-row"><span class="ck">Chạy khi fail</span><span class="cv">when: on_failure</span></div>
+      <div class="cheat-row"><span class="ck">Không block pipeline</span><span class="cv">allow_failure: true</span></div>
+      <div class="cheat-row"><span class="ck">Prevent concurrent</span><span class="cv">resource_group: prod</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-2">🔢 Predefined Variables</h4>
+      <div class="cheat-row"><span class="ck">Image tag (8 chars)</span><span class="cv">$CI_COMMIT_SHORT_SHA</span></div>
+      <div class="cheat-row"><span class="ck">Branch name</span><span class="cv">$CI_COMMIT_BRANCH</span></div>
+      <div class="cheat-row"><span class="ck">Default branch</span><span class="cv">$CI_DEFAULT_BRANCH</span></div>
+      <div class="cheat-row"><span class="ck">Registry image URL</span><span class="cv">$CI_REGISTRY_IMAGE</span></div>
+      <div class="cheat-row"><span class="ck">Pipeline trigger source</span><span class="cv">$CI_PIPELINE_SOURCE</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">🎯 Rules Patterns</h4>
+      <div class="cheat-row"><span class="ck">Chỉ chạy main</span><span class="cv">if: $CI_COMMIT_BRANCH == "main"</span></div>
+      <div class="cheat-row"><span class="ck">Chỉ chạy tags</span><span class="cv">if: $CI_COMMIT_TAG</span></div>
+      <div class="cheat-row"><span class="ck">Chỉ MR pipeline</span><span class="cv">if: $CI_MERGE_REQUEST_IID</span></div>
+      <div class="cheat-row"><span class="ck">Khi file thay đổi</span><span class="cv">changes: ["src/**/*.java"]</span></div>
+      <div class="cheat-row"><span class="ck">Bỏ qua Draft MR</span><span class="cv">if: title =~ /^Draft:/ → never</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-4">📐 Templates</h4>
+      <div class="cheat-row"><span class="ck">Kế thừa job</span><span class="cv">extends: .base-job</span></div>
+      <div class="cheat-row"><span class="ck">Include từ project</span><span class="cv">include: project: repo</span></div>
+      <div class="cheat-row"><span class="ck">Include built-in</span><span class="cv">include: template: SAST.gitlab-ci.yml</span></div>
+      <div class="cheat-row"><span class="ck">YAML Anchor define</span><span class="cv">&amp;anchor_name</span></div>
+      <div class="cheat-row"><span class="ck">YAML Anchor use</span><span class="cv">*anchor_name</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-5">⚡ Optimization</h4>
+      <div class="cheat-row"><span class="ck">Shallow clone</span><span class="cv">GIT_DEPTH: "1"</span></div>
+      <div class="cheat-row"><span class="ck">Nhanh hơn clone</span><span class="cv">GIT_STRATEGY: fetch</span></div>
+      <div class="cheat-row"><span class="ck">Song song hóa</span><span class="cv">needs: [job-name]</span></div>
+      <div class="cheat-row"><span class="ck">Cache Maven</span><span class="cv">paths: [.m2/repository]</span></div>
+      <div class="cheat-row"><span class="ck">Pass vars giữa jobs</span><span class="cv">artifacts.reports.dotenv</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Lộ trình xây dựng CI/CD từ đầu</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Tạo .gitlab-ci.yml đơn giản nhất</h4><p>Bắt đầu với 3 stages (build, test, deploy), 1 job mỗi stage. Đảm bảo pipeline chạy được. Không cần perfect ngay từ đầu.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Thêm Docker build và GitLab Registry</h4><p>Build Docker image, push lên GitLab Container Registry tích hợp sẵn. Dùng <code>$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</code> làm image tag.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Tách pipeline thành templates</h4><p>Tạo repo <code>ci-templates</code>, chuyển common jobs vào đó. Dùng <code>include: project</code> trong từng project. Một lần fix, tất cả projects được cập nhật.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Deploy tự động lên dev, manual lên prod</h4><p>Dev auto-deploy trên push to main. Staging và Prod là manual gate với <code>when: manual</code> và <code>resource_group</code>. Dùng GitLab Environments để track deployments.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Thêm Security Scanning</h4><p>Include <code>template: Security/SAST.gitlab-ci.yml</code> và <code>Secret-Detection.gitlab-ci.yml</code>. Kết quả hiện trực tiếp trong MR Security tab.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>Optimize: cache, DAG, parallel</h4><p>Thêm Maven/Gradle cache, dùng <code>needs</code> thay stage dependencies, enable <code>interruptible: true</code>. Mục tiêu: pipeline dưới 5 phút cho feature branches.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px">
+      <strong style="color:var(--text)">Tài nguyên tham khảo:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://docs.gitlab.com/ee/ci/yaml/" style="color:var(--g1)">GitLab CI YAML Reference</a> &nbsp;·&nbsp;
+        <a href="https://docs.gitlab.com/ee/ci/variables/predefined_variables.html" style="color:var(--g1)">Predefined Variables</a> &nbsp;·&nbsp;
+        <a href="https://docs.gitlab.com/runner/" style="color:var(--g1)">GitLab Runner Docs</a> &nbsp;·&nbsp;
+        <a href="https://docs.gitlab.com/ee/ci/examples/" style="color:var(--g1)">CI/CD Examples</a> &nbsp;·&nbsp;
+        <a href="https://docs.gitlab.com/ee/user/application_security/" style="color:var(--g1)">Application Security</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <span>🦊 GitLab &amp; GitLab CI/CD · DevOps · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">21 chủ đề · .gitlab-ci.yml · Templates · K8s Deploy · Security</span>
+</div>
+</div><!-- /main -->
+
+<script>
+window.addEventListener('scroll', () => {
+  const el = document.documentElement;
+  document.getElementById('pbar').style.width =
+    (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
+});
+const sections = document.querySelectorAll('.section[id]');
+const links = document.querySelectorAll('.nav-link');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-28% 0px -60% 0px' });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>
