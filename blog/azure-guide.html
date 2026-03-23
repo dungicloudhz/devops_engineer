@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Azure — Hướng dẫn toàn tập · Cloud & DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  --az1:#0078d4;--az1-dim:rgba(0,120,212,.12);--az1-glow:rgba(0,120,212,.28);
+  --az2:#50e6ff;--az2-dim:rgba(80,230,255,.11);--az2-glow:rgba(80,230,255,.26);
+  --az3:#ffb900;--az3-dim:rgba(255,185,0,.11);--az3-glow:rgba(255,185,0,.26);
+  --az4:#7fba00;--az4-dim:rgba(127,186,0,.11);--az4-glow:rgba(127,186,0,.26);
+  --az5:#e74856;--az5-dim:rgba(231,72,86,.11);--az5-glow:rgba(231,72,86,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--az1),#004a8a);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--az1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--az1),var(--az2),var(--az3),var(--az4),var(--az5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--az1-dim);color:var(--az1)}.ngh-2{background:var(--az2-dim);color:var(--az2)}
+.ngh-3{background:var(--az3-dim);color:var(--az3)}.ngh-4{background:var(--az4-dim);color:var(--az4)}
+.ngh-5{background:var(--az5-dim);color:var(--az5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(0,120,212,.07);border-left-color:var(--az1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(0,120,212,.13) 0%,transparent 62%),
+  radial-gradient(ellipse 45% 55% at 12% 82%,rgba(80,230,255,.07) 0%,transparent 55%),
+  radial-gradient(ellipse 35% 45% at 50% 50%,rgba(255,185,0,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,120,212,.1) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--az1-dim);border:1px solid rgba(0,120,212,.35);color:var(--az1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--az1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--az1)}
+.h-grad{background:linear-gradient(135deg,var(--az1) 0%,var(--az2) 55%,var(--az3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--az1-dim);color:var(--az1)}.chip-2{background:var(--az2-dim);color:var(--az2)}
+.chip-3{background:var(--az3-dim);color:var(--az3)}.chip-4{background:var(--az4-dim);color:var(--az4)}
+.chip-5{background:var(--az5-dim);color:var(--az5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--az1-dim);border:1px solid rgba(0,120,212,.28)}.cb-1::before{background:linear-gradient(90deg,var(--az1),var(--az2))}
+.cb-2{background:var(--az2-dim);border:1px solid rgba(80,230,255,.28)}.cb-2::before{background:linear-gradient(90deg,var(--az2),var(--az1))}
+.cb-3{background:var(--az3-dim);border:1px solid rgba(255,185,0,.28)}.cb-3::before{background:linear-gradient(90deg,var(--az3),var(--az2))}
+.cb-4{background:var(--az4-dim);border:1px solid rgba(127,186,0,.28)}.cb-4::before{background:linear-gradient(90deg,var(--az4),var(--az1))}
+.cb-5{background:var(--az5-dim);border:1px solid rgba(231,72,86,.28)}.cb-5::before{background:linear-gradient(90deg,var(--az5),var(--az3))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--az1-dim);color:var(--az1)}.cb-2 .cb-badge{background:var(--az2-dim);color:var(--az2)}
+.cb-3 .cb-badge{background:var(--az3-dim);color:var(--az3)}.cb-4 .cb-badge{background:var(--az4-dim);color:var(--az4)}
+.cb-5 .cb-badge{background:var(--az5-dim);color:var(--az5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--az1);background:var(--az1-dim);border:1px solid var(--az1-glow)}
+.st-2{color:var(--az2);background:var(--az2-dim);border:1px solid var(--az2-glow)}
+.st-3{color:var(--az3);background:var(--az3-dim);border:1px solid var(--az3-glow)}
+.st-4{color:var(--az4);background:var(--az4-dim);border:1px solid var(--az4-glow)}
+.st-5{color:var(--az5);background:var(--az5-dim);border:1px solid var(--az5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--az1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--az1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--az1-dim);color:var(--az1)}.ct-2{background:var(--az2-dim);color:var(--az2)}
+.ct-3{background:var(--az3-dim);color:var(--az3)}.ct-4{background:var(--az4-dim);color:var(--az4)}
+.ct-5{background:var(--az5-dim);color:var(--az5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+.az-kw{color:#0078d4;font-weight:700}.az-str{color:#c3e88d}.az-cmt{color:#546e7a;font-style:italic}
+.az-flag{color:#ffcb6b}.az-val{color:#f78c6c}.az-ok{color:#40d88e}.az-err{color:#ff6584}
+.az-svc{color:#50e6ff;font-weight:600}.az-rg{color:#ffb900}.az-id{color:#c792ea}.az-key{color:#89ddff}
+.tc-prompt{color:#89ddff}.tc-cmd{color:#82aaff}.tc-flag{color:#ffcb6b}
+.tc-path{color:#c3e88d}.tc-arg{color:#f78c6c}.tc-cmt{color:#546e7a;font-style:italic}
+.tc-out{color:#546e7a}.tc-ok{color:#40d88e}.tc-err{color:#ff6584}.tc-pipe{color:#89ddff}.tc-var{color:#c792ea}
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:rgba(127,186,0,.08);border:1px solid rgba(127,186,0,.22);color:#4a8a00}
+.i-warn{background:rgba(255,185,0,.08);border:1px solid rgba(255,185,0,.22);color:#a07000}
+.i-tip{background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.22);color:#0060a8}
+.i-note{background:rgba(80,230,255,.07);border:1px solid rgba(80,230,255,.2);color:#0099bb}
+.i-err{background:rgba(231,72,86,.07);border:1px solid rgba(231,72,86,.2);color:#cc3040}
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--az1)}.rw-2::before{background:var(--az2)}.rw-3::before{background:var(--az3)}
+.rw-4::before{background:var(--az4)}.rw-5::before{background:var(--az5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--az1)}.rw-2 .rw-label{color:var(--az2)}.rw-3 .rw-label{color:var(--az3)}
+.rw-4 .rw-label{color:var(--az4)}.rw-5 .rw-label{color:var(--az5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmp-bad{background:rgba(231,72,86,.06);border:1px solid rgba(231,72,86,.2);border-radius:11px;padding:16px}
+.cmp-good{background:rgba(127,186,0,.06);border:1px solid rgba(127,186,0,.2);border-radius:11px;padding:16px}
+.cmp-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cmp-bad .cmp-label{color:var(--az5)}.cmp-good .cmp-label{color:var(--az4)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--az2)}
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--az1);background:var(--az1-dim);border:2px solid var(--az1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--az1)}.h4-2{color:var(--az2)}.h4-3{color:var(--az3)}.h4-4{color:var(--az4)}.h4-5{color:var(--az5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;gap:8px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted);flex-shrink:0}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--az2);text-align:right}
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(0,120,212,.1);color:var(--az1);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid,.compare{grid-template-columns:1fr}}
+</style></head>
+<body>
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand"><div class="logo-icon">🔷</div>
+      <div class="logo-text"><h2>Microsoft Azure</h2><p>Cloud Platform · DevOps</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Nền tảng</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🔷</span> Azure là gì? Kiến trúc</a>
+    <a href="#s1" class="nav-link"><span class="ico">🏛️</span> Resource Group &amp; ARM</a>
+    <a href="#s2" class="nav-link"><span class="ico">🔐</span> Azure AD &amp; RBAC</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🔵 Compute</div>
+    <a href="#s3" class="nav-link"><span class="ico">🖥️</span> Virtual Machines</a>
+    <a href="#s4" class="nav-link"><span class="ico">📦</span> AKS — Kubernetes</a>
+    <a href="#s5" class="nav-link"><span class="ico">⚡</span> Azure Functions</a>
+    <a href="#s6" class="nav-link"><span class="ico">🚀</span> App Service &amp; Container Apps</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🔵 Storage &amp; Database</div>
+    <a href="#s7" class="nav-link"><span class="ico">💾</span> Azure Storage (Blob/Queue/Table)</a>
+    <a href="#s8" class="nav-link"><span class="ico">🗄️</span> Azure SQL &amp; PostgreSQL</a>
+    <a href="#s9" class="nav-link"><span class="ico">🔴</span> Cosmos DB &amp; Redis Cache</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Networking</div>
+    <a href="#s10" class="nav-link"><span class="ico">🌐</span> Virtual Network &amp; Subnets</a>
+    <a href="#s11" class="nav-link"><span class="ico">⚖️</span> Load Balancer &amp; App Gateway</a>
+    <a href="#s12" class="nav-link"><span class="ico">🌍</span> DNS &amp; CDN &amp; Front Door</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟢 Messaging &amp; Integration</div>
+    <a href="#s13" class="nav-link"><span class="ico">📨</span> Service Bus &amp; Event Hub</a>
+    <a href="#s14" class="nav-link"><span class="ico">🔑</span> Key Vault &amp; Managed Identity</a>
+    <a href="#s15" class="nav-link"><span class="ico">📊</span> API Management</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🔴 DevOps &amp; Monitoring</div>
+    <a href="#s16" class="nav-link"><span class="ico">🔁</span> Azure DevOps &amp; Pipelines</a>
+    <a href="#s17" class="nav-link"><span class="ico">📦</span> ACR &amp; GitHub Actions</a>
+    <a href="#s18" class="nav-link"><span class="ico">📊</span> Monitor &amp; App Insights</a>
+    <a href="#s19" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> Microsoft Azure · Cloud Infrastructure · DevOps · Enterprise</div>
+  <h1><span class="h-acc">Microsoft</span><br><span class="h-grad">Azure Cloud</span></h1>
+  <p class="hero-desc">Hướng dẫn Azure từ cơ bản đến nâng cao — Resource Groups, Azure AD, AKS, Azure SQL, Service Bus, Key Vault, Azure DevOps và kiến trúc production thực tế với ví dụ cụ thể.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">Azure AD &amp; RBAC</span>
+    <span class="chip chip-2">AKS &amp; App Service</span>
+    <span class="chip chip-3">SQL &amp; Cosmos DB</span>
+    <span class="chip chip-4">VNet &amp; Networking</span>
+    <span class="chip chip-r">Key Vault</span>
+    <span class="chip chip-5">Azure DevOps</span>
+  </div>
+</div>
+<div class="content">
+<!-- S0: OVERVIEW -->
+<div class="section" id="s0">
+  <div class="sec-head"><span class="sec-tag st-1">OVERVIEW</span>
+    <div><h2 class="sec-title">Azure là gì? — Kiến trúc &amp; Global Infrastructure</h2>
+    <p class="sec-sub">Cloud platform của Microsoft, 60+ Regions, mạnh về enterprise &amp; .NET / Java</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Azure vs AWS vs GCP — Khi nào chọn Azure?</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🏢</div><div class="card-title" style="color:var(--az1)">Enterprise Integration</div><div class="card-desc">Microsoft 365, Active Directory, Teams, Dynamics 365 — nếu công ty đang dùng MS ecosystem.</div></div>
+      <div class="card"><div class="card-icon">🔐</div><div class="card-title" style="color:var(--az2)">Hybrid Cloud</div><div class="card-desc">Azure Arc, Azure Stack — kết nối on-premise với cloud tốt nhất trong 3 nhà cung cấp.</div></div>
+      <div class="card"><div class="card-icon">🤖</div><div class="card-title" style="color:var(--az3)">AI &amp; Machine Learning</div><div class="card-desc">Azure OpenAI (GPT-4), Cognitive Services, Azure ML — leading AI platform.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Azure Hierarchy — Subscription → Resource Group → Resource</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--az1),var(--az2),var(--az3),var(--az4))"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="background:rgba(0,120,212,.1);border:2px solid rgba(0,120,212,.4);border-radius:10px;padding:12px 18px">
+          <div style="font-size:10px;font-weight:800;color:var(--az1);text-transform:uppercase;margin-bottom:4px">🏦 Management Group</div>
+          <div style="font-size:12px;color:var(--muted)">Nhóm nhiều Subscriptions. Áp dụng Policy ở cấp cao nhất. VD: Company-wide policy.</div>
+        </div>
+        <div style="padding-left:24px">
+          <div style="background:rgba(80,230,255,.08);border:1px solid rgba(80,230,255,.3);border-radius:10px;padding:12px 18px">
+            <div style="font-size:10px;font-weight:800;color:var(--az2);text-transform:uppercase;margin-bottom:4px">💳 Subscription</div>
+            <div style="font-size:12px;color:var(--muted)">Đơn vị billing. Mỗi team/department có subscription riêng. VD: <code>sub-production</code>, <code>sub-development</code></div>
+          </div>
+          <div style="padding-left:24px;margin-top:8px">
+            <div style="background:rgba(255,185,0,.08);border:1px solid rgba(255,185,0,.3);border-radius:10px;padding:12px 18px">
+              <div style="font-size:10px;font-weight:800;color:var(--az3);text-transform:uppercase;margin-bottom:4px">📁 Resource Group</div>
+              <div style="font-size:12px;color:var(--muted)">Container logic nhóm resources liên quan. Deploy/delete toàn bộ cùng lúc. VD: <code>rg-order-service-prod</code></div>
+            </div>
+            <div style="padding-left:24px;margin-top:8px">
+              <div style="background:rgba(127,186,0,.07);border:1px solid rgba(127,186,0,.25);border-radius:10px;padding:12px 18px">
+                <div style="font-size:10px;font-weight:800;color:var(--az4);text-transform:uppercase;margin-bottom:4px">⚙️ Resources</div>
+                <div style="font-size:12px;color:var(--muted)">VM, AKS Cluster, SQL Database, Storage Account, Key Vault... — tất cả nằm trong Resource Group</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Azure CLI — Setup và commands cơ bản</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Azure CLI — install, login, navigate</span><span class="cb-tag ct-1">CLI</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Cài Azure CLI ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install azure-cli           <span class="tc-cmt"># macOS</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> -sL https://aka.ms/InstallAzureCLIDeb | sudo bash  <span class="tc-cmt"># Ubuntu</span>
+
+<span class="tc-cmt"># ── Login ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> login                           <span class="tc-cmt"># mở browser để xác thực</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> login <span class="tc-flag">--use-device-code</span>         <span class="tc-cmt"># khi không có browser (CI/CD, SSH)</span>
+
+<span class="tc-cmt"># ── Xem và chọn Subscription ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> account list <span class="tc-flag">--output</span> table
+<span class="tc-out">Name                     State    IsDefault
+-----------------------  -------  ---------
+Production Subscription  Enabled  True
+Development Subscription Enabled  False</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> account set <span class="tc-flag">--subscription</span> <span class="tc-str">"Production Subscription"</span>
+
+<span class="tc-cmt"># ── Tạo Resource Group ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> group create \
+    <span class="tc-flag">--name</span>     rg-order-service-prod \
+    <span class="tc-flag">--location</span> southeastasia             <span class="tc-cmt"># Singapore region</span>
+<span class="tc-ok">{ "name": "rg-order-service-prod", "location": "southeastasia", "provisioningState": "Succeeded" }</span>
+
+<span class="tc-cmt"># ── Xem resources trong group ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> resource list <span class="tc-flag">--resource-group</span> rg-order-service-prod <span class="tc-flag">--output</span> table
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> resource list <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--query</span> <span class="tc-str">"[].{Name:name, Type:type, Location:location}"</span>
+
+<span class="tc-cmt"># ── Các regions phổ biến ở Đông Nam Á ──</span>
+<span class="tc-cmt"># southeastasia  → Singapore (gần Việt Nam nhất)</span>
+<span class="tc-cmt"># eastasia       → Hong Kong</span>
+<span class="tc-cmt"># japaneast      → Tokyo</span>
+<span class="tc-cmt"># australiaeast  → Sydney</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S1: RESOURCE GROUP & ARM -->
+<div class="section" id="s1">
+  <div class="sec-head"><span class="sec-tag st-1">ARM</span>
+    <div><h2 class="sec-title">Resource Group &amp; ARM Templates</h2>
+    <p class="sec-sub">Tổ chức resources, ARM Templates / Bicep — Infrastructure as Code của Azure</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bicep — Azure native IaC (đơn giản hơn ARM JSON)</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">main.bicep — deploy Storage Account + App Service</span><span class="cb-tag ct-1">Bicep</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt">// ── main.bicep — Azure Bicep IaC ──</span>
+<span class="az-kw">param</span> <span class="az-svc">location</span> string = resourceGroup().location
+<span class="az-kw">param</span> <span class="az-svc">environment</span> string = <span class="az-str">'prod'</span>
+<span class="az-kw">param</span> <span class="az-svc">appName</span> string = <span class="az-str">'order-service'</span>
+
+<span class="az-kw">var</span> storageAccountName = <span class="az-str">'${replace(appName, '-', '')}${environment}sa'</span>
+<span class="az-kw">var</span> appServicePlanName = <span class="az-str">'${appName}-${environment}-plan'</span>
+
+<span class="tc-cmt">// Storage Account</span>
+<span class="az-kw">resource</span> <span class="az-svc">storageAccount</span> <span class="az-str">'Microsoft.Storage/storageAccounts@2023-01-01'</span> = {
+  <span class="az-key">name</span>:     storageAccountName
+  <span class="az-key">location</span>: location
+  <span class="az-key">sku</span>:      { <span class="az-key">name</span>: <span class="az-str">'Standard_LRS'</span> }
+  <span class="az-key">kind</span>:     <span class="az-str">'StorageV2'</span>
+  <span class="az-key">properties</span>: {
+    <span class="az-key">supportsHttpsTrafficOnly</span>:  <span class="az-kw">true</span>
+    <span class="az-key">minimumTlsVersion</span>:         <span class="az-str">'TLS1_2'</span>
+    <span class="az-key">allowBlobPublicAccess</span>:     <span class="az-kw">false</span>
+  }
+}
+
+<span class="tc-cmt">// App Service Plan</span>
+<span class="az-kw">resource</span> <span class="az-svc">appServicePlan</span> <span class="az-str">'Microsoft.Web/serverfarms@2022-09-01'</span> = {
+  <span class="az-key">name</span>:     appServicePlanName
+  <span class="az-key">location</span>: location
+  <span class="az-key">sku</span>:      { <span class="az-key">name</span>: <span class="az-str">'P1v3'</span>, <span class="az-key">tier</span>: <span class="az-str">'PremiumV3'</span>, <span class="az-key">capacity</span>: 2 }
+  <span class="az-key">kind</span>:     <span class="az-str">'linux'</span>
+  <span class="az-key">properties</span>: { <span class="az-key">reserved</span>: <span class="az-kw">true</span> }
+}
+
+<span class="az-kw">output</span> storageAccountId string = storageAccount.id
+<span class="az-kw">output</span> appServicePlanId string = appServicePlan.id
+
+<span class="tc-cmt">// ── Deploy ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> deployment group create \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--template-file</span>  main.bicep \
+    <span class="tc-flag">--parameters</span>     environment=prod appName=order-service
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> bicep build <span class="tc-flag">--file</span> main.bicep  <span class="tc-cmt"># compile → ARM JSON</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> deployment group what-if <span class="tc-flag">--resource-group</span> rg-prod <span class="tc-flag">--template-file</span> main.bicep  <span class="tc-cmt"># preview</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2: AZURE AD & RBAC -->
+<div class="section" id="s2">
+  <div class="sec-head"><span class="sec-tag st-1">IDENTITY</span>
+    <div><h2 class="sec-title">Azure AD &amp; RBAC — Identity &amp; Access</h2>
+    <p class="sec-sub">Entra ID, Service Principals, Managed Identity, RBAC Roles</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Managed Identity — không cần lưu credentials</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Managed Identity + RBAC + Service Principal</span><span class="cb-tag ct-1">Identity</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── RBAC Built-in Roles quan trọng ──</span>
+<span class="tc-cmt"># Owner         → full quyền kể cả gán roles</span>
+<span class="tc-cmt"># Contributor   → tạo/sửa resources, không gán roles</span>
+<span class="tc-cmt"># Reader        → chỉ đọc</span>
+<span class="tc-cmt"># AcrPull       → pull Docker images từ ACR</span>
+<span class="tc-cmt"># AcrPush       → push images lên ACR</span>
+<span class="tc-cmt"># Storage Blob Data Contributor → đọc/ghi Blob storage</span>
+<span class="tc-cmt"># Key Vault Secrets User → đọc secrets từ Key Vault</span>
+
+<span class="tc-cmt"># ── Gán role cho user ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> role assignment create \
+    <span class="tc-flag">--assignee</span>   alice@company.com \
+    <span class="tc-flag">--role</span>       <span class="tc-str">"Contributor"</span> \
+    <span class="tc-flag">--scope</span>      /subscriptions/SUB-ID/resourceGroups/rg-order-service-prod
+
+<span class="tc-cmt"># ── Tạo Service Principal (cho CI/CD) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> ad sp create-for-rbac \
+    <span class="tc-flag">--name</span>   sp-gitlab-ci \
+    <span class="tc-flag">--role</span>   Contributor \
+    <span class="tc-flag">--scopes</span> /subscriptions/SUB-ID/resourceGroups/rg-order-service-prod
+<span class="tc-out">{
+  "appId":       "CLIENT_ID",
+  "password":    "CLIENT_SECRET",
+  "tenant":      "TENANT_ID",
+  "displayName": "sp-gitlab-ci"
+}</span>
+<span class="tc-cmt"># Lưu credentials vào GitLab CI/CD Variables (không commit code!)</span>
+
+<span class="tc-cmt"># ── Managed Identity — App lấy secrets KHÔNG cần password! ──</span>
+<span class="tc-cmt"># 1. Enable System Assigned Managed Identity cho App Service</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> webapp identity assign \
+    <span class="tc-flag">--name</span>           order-service-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod
+<span class="tc-out">{ "principalId": "OBJECT_ID", "type": "SystemAssigned" }</span>
+
+<span class="tc-cmt"># 2. Gán role cho Managed Identity đọc Key Vault</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> keyvault set-policy \
+    <span class="tc-flag">--name</span>          kv-order-prod \
+    <span class="tc-flag">--object-id</span>     OBJECT_ID \
+    <span class="tc-flag">--secret-permissions</span> get list
+
+<span class="tc-cmt"># 3. Java code đọc Key Vault KHÔNG cần credentials</span>
+<span class="az-kw">var</span> client = <span class="az-kw">new</span> SecretClient(
+    <span class="az-kw">new</span> Uri(<span class="az-str">"https://kv-order-prod.vault.azure.net/"</span>),
+    <span class="az-kw">new</span> DefaultAzureCredential());  <span class="tc-cmt">// tự detect Managed Identity</span>
+KeyVaultSecret secret = client.getSecret(<span class="az-str">"db-password"</span>);</pre></div>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Managed Identity = zero credentials:</strong> App Service/VM/AKS Pod có Managed Identity → tự động lấy access token từ Azure metadata service → không cần lưu Client ID/Secret trong config hoặc environment variable. Đây là best practice cho production!</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-1">
+  <div class="cb-icon">🖥️</div>
+  <div><div class="cb-badge">COMPUTE</div>
+  <div class="cb-title">VM · AKS · Azure Functions · App Service</div>
+  <div class="cb-sub">Tất cả options để chạy code trên Azure</div></div>
+</div>
+
+<!-- S3: VIRTUAL MACHINES -->
+<div class="section" id="s3">
+  <div class="sec-head"><span class="sec-tag st-1">VM</span>
+    <div><h2 class="sec-title">Azure Virtual Machines</h2>
+    <p class="sec-sub">VM Series, VM Scale Sets, Availability Sets/Zones, Spot VMs</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">VM Series — chọn đúng size</div>
+    <table class="tbl">
+      <thead><tr><th>Series</th><th>Dùng cho</th><th>Ví dụ</th><th>vCPU/RAM</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--az1)">B-series</strong></td><td>Dev/test, burst workloads (burstable)</td><td>Standard_B2s</td><td>2 vCPU / 4 GB — ~$30/tháng</td></tr>
+        <tr><td><strong style="color:var(--az2)">D-series</strong></td><td>General purpose — web servers, apps</td><td>Standard_D4s_v5</td><td>4 vCPU / 16 GB — ~$180/tháng</td></tr>
+        <tr><td><strong style="color:var(--az3)">E-series</strong></td><td>Memory optimized — caching, analytics</td><td>Standard_E8s_v5</td><td>8 vCPU / 64 GB</td></tr>
+        <tr><td><strong style="color:var(--az4)">F-series</strong></td><td>Compute optimized — batch, rendering</td><td>Standard_F8s_v2</td><td>8 vCPU / 16 GB</td></tr>
+        <tr><td><strong style="color:var(--az5)">N-series</strong></td><td>GPU — AI, ML, graphics</td><td>Standard_NC4as_T4_v3</td><td>4 vCPU / 28 GB + T4 GPU</td></tr>
+      </tbody>
+    </table>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Virtual Machine — tạo, kết nối, VM Scale Sets</span><span class="cb-tag ct-1">VM</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo VM Ubuntu ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> vm create \
+    <span class="tc-flag">--resource-group</span>    rg-order-service-prod \
+    <span class="tc-flag">--name</span>              vm-web-01 \
+    <span class="tc-flag">--image</span>             Ubuntu2204 \
+    <span class="tc-flag">--size</span>              Standard_D2s_v5 \
+    <span class="tc-flag">--admin-username</span>    azureuser \
+    <span class="tc-flag">--ssh-key-values</span>    ~/.ssh/id_rsa.pub \
+    <span class="tc-flag">--vnet-name</span>         vnet-prod \
+    <span class="tc-flag">--subnet</span>            snet-private \
+    <span class="tc-flag">--nsg</span>               nsg-web \
+    <span class="tc-flag">--assign-identity</span>   [system]  \        <span class="tc-cmt"># enable Managed Identity</span>
+    <span class="tc-flag">--custom-data</span>       @cloud-init.yaml \ <span class="tc-cmt"># script chạy khi khởi động</span>
+    <span class="tc-flag">--tags</span>              Environment=prod Project=order-service
+<span class="tc-ok">{ "publicIpAddress": "20.197.xxx.xxx", ... }</span>
+
+<span class="tc-cmt"># ── cloud-init.yaml ──</span>
+#cloud-config
+<span class="az-kw">packages</span>:
+  - nginx
+  - openjdk-21-jre-headless
+<span class="az-kw">runcmd</span>:
+  - <span class="az-str">"az login --identity"</span>                           <span class="tc-cmt"># login với Managed Identity</span>
+  - <span class="az-str">"az storage blob download --account-name stprod --container-name deploy --name app.jar --file /opt/app.jar"</span>
+  - <span class="az-str">"systemctl enable --now nginx"</span>
+
+<span class="tc-cmt"># ── SSH và management ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> vm list <span class="tc-flag">--resource-group</span> rg-order-service-prod <span class="tc-flag">--output</span> table
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> vm start   <span class="tc-flag">--name</span> vm-web-01 <span class="tc-flag">--resource-group</span> rg-order-service-prod
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> vm stop    <span class="tc-flag">--name</span> vm-web-01 <span class="tc-flag">--resource-group</span> rg-order-service-prod
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> vm deallocate <span class="tc-flag">--name</span> vm-web-01 <span class="tc-flag">--resource-group</span> rg-prod  <span class="tc-cmt"># dừng billing</span>
+
+<span class="tc-cmt"># Kết nối không cần SSH public IP — Azure Bastion</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network bastion ssh \
+    <span class="tc-flag">--name</span>           bastion-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--target-resource-id</span> /subscriptions/.../vm-web-01 \
+    <span class="tc-flag">--auth-type</span>      ssh-key \
+    <span class="tc-flag">--username</span>       azureuser \
+    <span class="tc-flag">--ssh-key</span>        ~/.ssh/id_rsa
+
+<span class="tc-cmt"># ── VM Scale Sets — auto scale với load balancer ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> vmss create \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--name</span>           vmss-web \
+    <span class="tc-flag">--image</span>          Ubuntu2204 \
+    <span class="tc-flag">--vm-sku</span>         Standard_D2s_v5 \
+    <span class="tc-flag">--instance-count</span> 3 \
+    <span class="tc-flag">--lb</span>             lb-web-prod \
+    <span class="tc-flag">--custom-data</span>    @cloud-init.yaml
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> monitor autoscale create \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--resource</span>       vmss-web \
+    <span class="tc-flag">--resource-type</span>  Microsoft.Compute/virtualMachineScaleSets \
+    <span class="tc-flag">--min-count</span>      2 <span class="tc-flag">--max-count</span> 10 <span class="tc-flag">--count</span> 3</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S4: AKS -->
+<div class="section" id="s4">
+  <div class="sec-head"><span class="sec-tag st-1">AKS</span>
+    <div><h2 class="sec-title">AKS — Azure Kubernetes Service</h2>
+    <p class="sec-sub">Managed Kubernetes cluster, node pools, KEDA, Workload Identity</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tạo AKS Cluster production-ready</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">AKS — create cluster, node pools, deploy Spring Boot</span><span class="cb-tag ct-1">AKS</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo AKS Cluster ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> aks create \
+    <span class="tc-flag">--resource-group</span>            rg-order-service-prod \
+    <span class="tc-flag">--name</span>                      aks-prod \
+    <span class="tc-flag">--kubernetes-version</span>        1.28 \
+    <span class="tc-flag">--node-count</span>                3 \
+    <span class="tc-flag">--node-vm-size</span>              Standard_D4s_v5 \
+    <span class="tc-flag">--zones</span>                     1 2 3 \             <span class="tc-cmt"># multi-AZ</span>
+    <span class="tc-flag">--network-plugin</span>            azure \
+    <span class="tc-flag">--network-policy</span>            azure \
+    <span class="tc-flag">--enable-managed-identity</span> \
+    <span class="tc-flag">--enable-oidc-issuer</span> \                        <span class="tc-cmt"># Workload Identity</span>
+    <span class="tc-flag">--enable-workload-identity</span> \
+    <span class="tc-flag">--attach-acr</span>                acr-company-prod \  <span class="tc-cmt"># quyền pull images từ ACR</span>
+    <span class="tc-flag">--enable-cluster-autoscaler</span> \
+    <span class="tc-flag">--min-count</span>                 2 \
+    <span class="tc-flag">--max-count</span>                 10 \
+    <span class="tc-flag">--generate-ssh-keys</span>
+<span class="tc-ok">AKS cluster created. Provisioning state: Succeeded.</span>
+
+<span class="tc-cmt"># ── Lấy kubeconfig ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> aks get-credentials \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--name</span>           aks-prod
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get nodes
+<span class="tc-out">NAME                       STATUS  ROLES  AGE  VERSION
+aks-nodepool-12345678-0    Ready   agent  5m   v1.28.3
+aks-nodepool-12345678-1    Ready   agent  5m   v1.28.3
+aks-nodepool-12345678-2    Ready   agent  5m   v1.28.3</span>
+
+<span class="tc-cmt"># ── Thêm GPU Node Pool cho ML workloads ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> aks nodepool add \
+    <span class="tc-flag">--cluster-name</span>  aks-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--name</span>          gpupool \
+    <span class="tc-flag">--node-vm-size</span>  Standard_NC4as_T4_v3 \
+    <span class="tc-flag">--node-count</span>    1 \
+    <span class="tc-flag">--node-taints</span>   sku=gpu:NoSchedule \
+    <span class="tc-flag">--labels</span>        accelerator=nvidia
+
+<span class="tc-cmt"># ── Workload Identity — Pod lấy secrets không cần credentials ──</span>
+<span class="tc-cmt"># Tạo Managed Identity</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> identity create <span class="tc-flag">--name</span> id-order-service <span class="tc-flag">--resource-group</span> rg-prod
+<span class="tc-prompt">$</span> <span class="tc-var">CLIENT_ID</span>=$(az identity show <span class="tc-flag">--name</span> id-order-service <span class="tc-flag">-g</span> rg-prod <span class="tc-flag">--query</span> clientId <span class="tc-flag">-o</span> tsv)
+<span class="tc-cmt"># Gán role Key Vault</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> role assignment create \
+    <span class="tc-flag">--assignee</span> $CLIENT_ID \
+    <span class="tc-flag">--role</span>     <span class="tc-str">"Key Vault Secrets User"</span> \
+    <span class="tc-flag">--scope</span>    /subscriptions/.../resourceGroups/rg-prod/providers/Microsoft.KeyVault/vaults/kv-order-prod
+<span class="tc-cmt"># Federated credential → K8s ServiceAccount dùng được Identity</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> identity federated-credential create \
+    <span class="tc-flag">--name</span>       federated-order-service \
+    <span class="tc-flag">--identity-name</span> id-order-service \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--issuer</span>     $(az aks show -g rg-prod -n aks-prod --query oidcIssuerProfile.issuerUrl -o tsv) \
+    <span class="tc-flag">--subject</span>    system:serviceaccount:production:order-service-sa</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S5: AZURE FUNCTIONS -->
+<div class="section" id="s5">
+  <div class="sec-head"><span class="sec-tag st-1">FUNCTIONS</span>
+    <div><h2 class="sec-title">Azure Functions — Serverless</h2>
+    <p class="sec-sub">Event-driven, pay per execution, triggers: HTTP, Service Bus, Timer, Blob</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Triggers &amp; Bindings — cách Azure Functions hoạt động</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Azure Functions — Java examples với Triggers</span><span class="cb-tag ct-1">Functions</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt">// ── HTTP Trigger — REST API serverless ──</span>
+<span class="az-kw">@FunctionName</span>(<span class="az-str">"GetOrder"</span>)
+<span class="az-kw">public</span> HttpResponseMessage run(
+    <span class="az-kw">@HttpTrigger</span>(name = <span class="az-str">"req"</span>, methods = {HttpMethod.GET},
+                 route = <span class="az-str">"orders/{orderId}"</span>,
+                 authLevel = AuthorizationLevel.FUNCTION)
+    HttpRequestMessage&lt;Optional&lt;String&gt;&gt; request,
+    <span class="az-kw">@TableInput</span>(name = <span class="az-str">"orders"</span>, tableName = <span class="az-str">"orders"</span>,
+               rowKey = <span class="az-str">"{orderId}"</span>, partitionKey = <span class="az-str">"order"</span>,
+               connection = <span class="az-str">"AzureWebJobsStorage"</span>)
+    Order order,
+    ExecutionContext context) {
+    <span class="az-kw">if</span> (order == <span class="az-kw">null</span>) {
+        <span class="az-kw">return</span> request.createResponseBuilder(HttpStatus.NOT_FOUND).build();
+    }
+    <span class="az-kw">return</span> request.createResponseBuilder(HttpStatus.OK)
+        .body(order).header(<span class="az-str">"Content-Type"</span>, <span class="az-str">"application/json"</span>).build();
+}
+
+<span class="tc-cmt">// ── Service Bus Trigger — process messages ──</span>
+<span class="az-kw">@FunctionName</span>(<span class="az-str">"ProcessOrderMessage"</span>)
+<span class="az-kw">public void</span> processOrder(
+    <span class="az-kw">@ServiceBusTrigger</span>(name = <span class="az-str">"msg"</span>,
+                       queueName = <span class="az-str">"order-processing"</span>,
+                       connection = <span class="az-str">"ServiceBusConnection"</span>)
+    String messageBody,
+    ExecutionContext context) {
+    context.getLogger().info(<span class="az-str">"Processing: "</span> + messageBody);
+    orderService.process(messageBody);
+}
+
+<span class="tc-cmt">// ── Timer Trigger — cron job ──</span>
+<span class="az-kw">@FunctionName</span>(<span class="az-str">"DailyReport"</span>)
+<span class="az-kw">public void</span> run(
+    <span class="az-kw">@TimerTrigger</span>(name = <span class="az-str">"timer"</span>, schedule = <span class="az-str">"0 0 2 * * *"</span>)  <span class="tc-cmt">// 2AM mỗi ngày</span>
+    String timerInfo, ExecutionContext context) {
+    reportService.generateDaily();
+}
+
+<span class="tc-cmt"># ── Deploy Function App ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> functionapp create \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--name</span>           func-order-processor \
+    <span class="tc-flag">--storage-account</span> storderprod \
+    <span class="tc-flag">--consumption-plan-location</span> southeastasia \  <span class="tc-cmt"># pay-per-use</span>
+    <span class="tc-flag">--runtime</span>        java \
+    <span class="tc-flag">--runtime-version</span> 21 \
+    <span class="tc-flag">--functions-version</span> 4 \
+    <span class="tc-flag">--assign-identity</span> [system]  <span class="tc-cmt"># Managed Identity</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">func</span> azure functionapp publish func-order-processor  <span class="tc-cmt"># deploy</span></pre></div>
+    </div>
+    <div class="info i-note">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Hosting Plans:</strong> <strong>Consumption</strong> (pay per call, scale to 0) · <strong>Premium</strong> (no cold start, VNet integration) · <strong>Dedicated</strong> (App Service Plan, chạy cùng VM). Với Java Spring Boot, Premium plan được khuyên vì giảm cold start từ 10-15s xuống &lt;1s.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: APP SERVICE & CONTAINER APPS -->
+<div class="section" id="s6">
+  <div class="sec-head"><span class="sec-tag st-1">APP SERVICE</span>
+    <div><h2 class="sec-title">App Service &amp; Container Apps</h2>
+    <p class="sec-sub">App Service: PaaS cho web apps · Container Apps: serverless containers với KEDA</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">App Service — deploy Spring Boot nhanh nhất</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">App Service — deploy Java Spring Boot container</span><span class="cb-tag ct-1">App Service</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo App Service Plan + Web App ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> appservice plan create \
+    <span class="tc-flag">--name</span>           asp-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--is-linux</span> \
+    <span class="tc-flag">--sku</span>            P1v3 \                  <span class="tc-cmt"># 1 vCPU, 1.75GB RAM</span>
+    <span class="tc-flag">--number-of-workers</span> 2
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> webapp create \
+    <span class="tc-flag">--name</span>              order-service-prod \
+    <span class="tc-flag">--resource-group</span>    rg-order-service-prod \
+    <span class="tc-flag">--plan</span>              asp-order-prod \
+    <span class="tc-flag">--deployment-container-image-name</span> \
+        acrcompanyprod.azurecr.io/order-service:v2.1.0
+
+<span class="tc-cmt"># ── Cấu hình App Settings (Environment Variables) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> webapp config appsettings set \
+    <span class="tc-flag">--name</span>           order-service-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--settings</span> \
+        SPRING_PROFILES_ACTIVE=prod \
+        APPLICATIONINSIGHTS_CONNECTION_STRING=@Microsoft.KeyVault(VaultName=kv-order-prod;SecretName=appinsights-connstr) \
+        DB_PASSWORD=@Microsoft.KeyVault(VaultName=kv-order-prod;SecretName=db-password)
+<span class="tc-cmt"># @Microsoft.KeyVault(...) → App Service tự lấy từ Key Vault!</span>
+
+<span class="tc-cmt"># ── Deployment Slots — Blue/Green deployment ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> webapp deployment slot create \
+    <span class="tc-flag">--name</span>           order-service-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--slot</span>           staging
+
+<span class="tc-cmt"># Deploy lên staging slot trước</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> webapp config container set \
+    <span class="tc-flag">--name</span>           order-service-prod \
+    <span class="tc-flag">--slot</span>           staging \
+    <span class="tc-flag">--docker-image</span>   acrcompanyprod.azurecr.io/order-service:v2.2.0
+
+<span class="tc-cmt"># Swap staging → production (zero downtime!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> webapp deployment slot swap \
+    <span class="tc-flag">--name</span>           order-service-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--slot</span>           staging \
+    <span class="tc-flag">--target-slot</span>    production
+
+<span class="tc-cmt"># ── Auto Scale App Service ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> monitor autoscale create \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--resource</span>       /subscriptions/.../serverfarms/asp-order-prod \
+    <span class="tc-flag">--min-count</span> 2 <span class="tc-flag">--max-count</span> 10 <span class="tc-flag">--count</span> 3
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> monitor autoscale rule create \
+    <span class="tc-flag">--resource-group</span>    rg-prod \
+    <span class="tc-flag">--autoscale-name</span>    autoscale-asp-order \
+    <span class="tc-flag">--scale</span>             out 1 \
+    <span class="tc-flag">--condition</span>         <span class="tc-str">"CpuPercentage > 70 avg 5m"</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-2">
+  <div class="cb-icon">💾</div>
+  <div><div class="cb-badge">STORAGE &amp; DATABASE</div>
+  <div class="cb-title">Azure Storage · SQL · PostgreSQL · Cosmos DB · Redis</div>
+  <div class="cb-sub">Từ object storage đến relational, NoSQL và in-memory caching</div></div>
+</div>
+
+<!-- S7: AZURE STORAGE -->
+<div class="section" id="s7">
+  <div class="sec-head"><span class="sec-tag st-2">STORAGE</span>
+    <div><h2 class="sec-title">Azure Storage — Blob, Queue, Table, Files</h2>
+    <p class="sec-sub">Object storage, SAS tokens, CDN integration, lifecycle management</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">4 loại Azure Storage và khi nào dùng</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">📦</div><div class="card-title" style="color:var(--az1)">Blob Storage</div><div class="card-desc">Files, images, videos, backups, logs. Giống S3 của AWS.</div></div>
+      <div class="card"><div class="card-icon">📬</div><div class="card-title" style="color:var(--az2)">Queue Storage</div><div class="card-desc">Message queue đơn giản. Tối đa 64KB/message. Cho decoupled jobs.</div></div>
+      <div class="card"><div class="card-icon">📊</div><div class="card-title" style="color:var(--az3)">Table Storage</div><div class="card-desc">NoSQL key-value. Rẻ, scalable. Logs, telemetry, semi-structured data.</div></div>
+      <div class="card"><div class="card-icon">📁</div><div class="card-title" style="color:var(--az4)">Azure Files</div><div class="card-desc">SMB/NFS file shares. Mount vào Windows/Linux VMs. Shared storage.</div></div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Blob Storage — create, upload, SAS tokens, Java SDK</span><span class="cb-tag ct-2">Blob</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Storage Account ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> storage account create \
+    <span class="tc-flag">--name</span>              storderserviceprod \
+    <span class="tc-flag">--resource-group</span>    rg-order-service-prod \
+    <span class="tc-flag">--location</span>          southeastasia \
+    <span class="tc-flag">--sku</span>               Standard_GRS \       <span class="tc-cmt"># Geo-redundant storage</span>
+    <span class="tc-flag">--kind</span>              StorageV2 \
+    <span class="tc-flag">--access-tier</span>       Hot \
+    <span class="tc-flag">--min-tls-version</span>   TLS1_2 \
+    <span class="tc-flag">--allow-blob-public-access</span> false
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> storage container create \
+    <span class="tc-flag">--name</span>               uploads \
+    <span class="tc-flag">--account-name</span>       storderserviceprod \
+    <span class="tc-flag">--public-access</span>      off
+
+<span class="tc-cmt"># ── Upload / Download ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> storage blob upload \
+    <span class="tc-flag">--account-name</span> storderserviceprod \
+    <span class="tc-flag">--container-name</span> uploads \
+    <span class="tc-flag">--name</span>           reports/2024-01.pdf \
+    <span class="tc-flag">--file</span>           ./report.pdf \
+    <span class="tc-flag">--auth-mode</span>      login       <span class="tc-cmt"># dùng Azure AD, không cần key</span>
+
+<span class="tc-cmt"># ── SAS Token — chia sẻ file tạm thời (1 giờ) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> storage blob generate-sas \
+    <span class="tc-flag">--account-name</span>   storderserviceprod \
+    <span class="tc-flag">--container-name</span> uploads \
+    <span class="tc-flag">--name</span>           reports/2024-01.pdf \
+    <span class="tc-flag">--permissions</span>    r \              <span class="tc-cmt"># r=read, w=write, d=delete</span>
+    <span class="tc-flag">--expiry</span>         2024-03-15T12:00:00Z \
+    <span class="tc-flag">--auth-mode</span>      login <span class="tc-flag">--as-user</span>
+<span class="tc-ok">https://storderserviceprod.blob.core.windows.net/uploads/reports/2024-01.pdf?sv=2023-01-03&amp;se=2024-03-15...&amp;sig=xxx</span>
+
+<span class="tc-cmt">// ── Java SDK — Blob Storage ──</span>
+BlobServiceClient serviceClient = <span class="az-kw">new</span> BlobServiceClientBuilder()
+    .endpoint(<span class="az-str">"https://storderserviceprod.blob.core.windows.net"</span>)
+    .credential(<span class="az-kw">new</span> DefaultAzureCredentialBuilder().build())  <span class="tc-cmt">// Managed Identity</span>
+    .buildClient();
+
+BlobContainerClient container = serviceClient.getBlobContainerClient(<span class="az-str">"uploads"</span>);
+BlobClient blob = container.getBlobClient(<span class="az-str">"reports/2024-01.pdf"</span>);
+blob.uploadFromFile(<span class="az-str">"/tmp/report.pdf"</span>, <span class="az-kw">true</span>);  <span class="tc-cmt">// upload, overwrite=true</span>
+String downloadUrl = blob.generateSasUrl(                  <span class="tc-cmt">// presigned URL</span>
+    <span class="az-kw">new</span> BlobServiceSasSignatureValues(OffsetDateTime.now().plusHours(<span class="az-val">1</span>), BlobSasPermission.<span class="az-kw">parse</span>(<span class="az-str">"r"</span>)));
+
+<span class="tc-cmt"># ── Lifecycle Policy — auto-tier giảm chi phí ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> storage account management-policy create \
+    <span class="tc-flag">--account-name</span>   storderserviceprod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--policy</span>         @lifecycle.json
+<span class="tc-cmt"># lifecycle.json: Hot → Cool sau 30 ngày, Cool → Archive sau 90 ngày</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S8: AZURE SQL & POSTGRESQL -->
+<div class="section" id="s8">
+  <div class="sec-head"><span class="sec-tag st-2">DATABASE</span>
+    <div><h2 class="sec-title">Azure SQL &amp; PostgreSQL Flexible Server</h2>
+    <p class="sec-sub">Managed relational databases, geo-replication, point-in-time restore</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Azure Database for PostgreSQL Flexible Server</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">PostgreSQL Flexible Server — tạo, kết nối, Spring Boot</span><span class="cb-tag ct-2">PostgreSQL</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo PostgreSQL Flexible Server ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> postgres flexible-server create \
+    <span class="tc-flag">--resource-group</span>        rg-order-service-prod \
+    <span class="tc-flag">--name</span>                  psql-order-prod \
+    <span class="tc-flag">--location</span>              southeastasia \
+    <span class="tc-flag">--tier</span>                  Burstable \         <span class="tc-cmt"># Burstable, GeneralPurpose, MemoryOptimized</span>
+    <span class="tc-flag">--sku-name</span>              Standard_B2ms \
+    <span class="tc-flag">--version</span>               16 \
+    <span class="tc-flag">--storage-size</span>          32 \               <span class="tc-cmt"># GB</span>
+    <span class="tc-flag">--admin-user</span>            pgadmin \
+    <span class="tc-flag">--admin-password</span>        $(az keyvault secret show \
+        --vault-name kv-order-prod --name db-password --query value -o tsv) \
+    <span class="tc-flag">--database-name</span>         shopdb \
+    <span class="tc-flag">--high-availability</span>     ZoneRedundant \    <span class="tc-cmt"># Multi-AZ standby</span>
+    <span class="tc-flag">--zone</span>                  1 \
+    <span class="tc-flag">--standby-zone</span>          2 \
+    <span class="tc-flag">--vnet</span>                  vnet-prod \
+    <span class="tc-flag">--subnet</span>                snet-database \
+    <span class="tc-flag">--private-dns-zone</span>      psql-order-prod.private.postgres.database.azure.com \
+    <span class="tc-flag">--backup-retention</span>      7 \
+    <span class="tc-flag">--geo-redundant-backup</span>  Disabled
+
+<span class="tc-cmt"># ── Backup và Restore ──</span>
+<span class="tc-cmt"># Point-in-time restore (tự động, không cần backup thủ công!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> postgres flexible-server restore \
+    <span class="tc-flag">--resource-group</span>   rg-prod \
+    <span class="tc-flag">--name</span>             psql-order-restored \
+    <span class="tc-flag">--source-server</span>    psql-order-prod \
+    <span class="tc-flag">--restore-time</span>     2024-03-14T10:00:00Z   <span class="tc-cmt"># restore về thời điểm cụ thể</span>
+
+<span class="tc-cmt"># ── Kết nối Spring Boot ──</span>
+<span class="az-kw">spring</span>.datasource.url=jdbc:postgresql://psql-order-prod.postgres.database.azure.com:5432/shopdb?sslmode=require
+<span class="az-kw">spring</span>.datasource.username=pgadmin
+<span class="az-kw">spring</span>.datasource.password=${DB_PASSWORD}  <span class="tc-cmt"># từ Key Vault</span>
+
+<span class="tc-cmt"># ── Kết nối passwordless với Managed Identity ──</span>
+<span class="tc-cmt"># Tạo Azure AD user trong PostgreSQL</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> postgres flexible-server ad-admin create \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--server-name</span>    psql-order-prod \
+    <span class="tc-flag">--display-name</span>   id-order-service \
+    <span class="tc-flag">--object-id</span>      $(az identity show -n id-order-service -g rg-prod --query principalId -o tsv)
+<span class="tc-cmt"># Spring Boot kết nối không cần password!</span>
+<span class="az-kw">spring</span>.datasource.url=jdbc:postgresql://psql-order-prod.postgres.database.azure.com:5432/shopdb
+<span class="az-kw">spring</span>.cloud.azure.credential.managed-identity-enabled=true</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S9: COSMOS DB & REDIS -->
+<div class="section" id="s9">
+  <div class="sec-head"><span class="sec-tag st-2">NOSQL</span>
+    <div><h2 class="sec-title">Cosmos DB &amp; Azure Cache for Redis</h2>
+    <p class="sec-sub">Cosmos DB: multi-model NoSQL global · Redis Cache: in-memory caching</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cosmos DB — Global distributed NoSQL</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cosmos DB — create, CRUD, Java SDK, Redis Cache</span><span class="cb-tag ct-2">Cosmos/Redis</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Cosmos DB (API NoSQL) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> cosmosdb create \
+    <span class="tc-flag">--name</span>           cosmos-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--default-consistency-level</span> Session \
+    <span class="tc-flag">--locations</span>      regionName=southeastasia failoverPriority=0 isZoneRedundant=True \
+    <span class="tc-flag">--locations</span>      regionName=eastasia failoverPriority=1 isZoneRedundant=False \
+    <span class="tc-flag">--enable-automatic-failover</span> true \
+    <span class="tc-flag">--kind</span>           GlobalDocumentDB  <span class="tc-cmt"># NoSQL API</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> cosmosdb sql container create \
+    <span class="tc-flag">--account-name</span>    cosmos-order-prod \
+    <span class="tc-flag">--database-name</span>   shopdb \
+    <span class="tc-flag">--name</span>            orders \
+    <span class="tc-flag">--partition-key-path</span> /userId \        <span class="tc-cmt"># partition key — quan trọng!</span>
+    <span class="tc-flag">--throughput</span>      1000              <span class="tc-cmt"># RU/s (Request Units)</span>
+
+<span class="tc-cmt">// ── Java SDK — CRUD Cosmos DB ──</span>
+CosmosClient client = <span class="az-kw">new</span> CosmosClientBuilder()
+    .endpoint(<span class="az-str">"https://cosmos-order-prod.documents.azure.com:443/"</span>)
+    .credential(<span class="az-kw">new</span> DefaultAzureCredentialBuilder().build())  <span class="tc-cmt">// Managed Identity</span>
+    .consistencyLevel(ConsistencyLevel.SESSION)
+    .buildClient();
+
+CosmosContainer container = client.getDatabase(<span class="az-str">"shopdb"</span>).getContainer(<span class="az-str">"orders"</span>);
+
+<span class="tc-cmt">// Upsert</span>
+container.upsertItem(<span class="az-kw">new</span> Order(<span class="az-str">"ORD-001"</span>, <span class="az-str">"USR-123"</span>, <span class="az-str">"PENDING"</span>));
+
+<span class="tc-cmt">// Query với SQL-like syntax</span>
+CosmosPagedIterable&lt;Order&gt; results = container.queryItems(
+    <span class="az-str">"SELECT * FROM orders o WHERE o.userId = 'USR-123' AND o.status = 'PENDING'"</span>,
+    <span class="az-kw">new</span> CosmosQueryRequestOptions(), Order.<span class="az-kw">class</span>);
+
+<span class="tc-cmt"># ── Azure Cache for Redis ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> redis create \
+    <span class="tc-flag">--name</span>           redis-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--location</span>       southeastasia \
+    <span class="tc-flag">--sku</span>            Standard \
+    <span class="tc-flag">--vm-size</span>        c1 \               <span class="tc-cmt"># 1GB RAM</span>
+    <span class="tc-flag">--redis-version</span>  7 \
+    <span class="tc-flag">--minimum-tls-version</span> 1.2
+
+<span class="tc-cmt"># Lấy connection string</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> redis list-keys <span class="tc-flag">--name</span> redis-order-prod <span class="tc-flag">--resource-group</span> rg-prod
+<span class="tc-cmt"># Spring Boot connection:</span>
+<span class="az-kw">spring</span>.data.redis.host=redis-order-prod.redis.cache.windows.net
+<span class="az-kw">spring</span>.data.redis.port=6380
+<span class="az-kw">spring</span>.data.redis.password=${REDIS_KEY}  <span class="tc-cmt"># từ Key Vault</span>
+<span class="az-kw">spring</span>.data.redis.ssl.enabled=true</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-3">
+  <div class="cb-icon">🌐</div>
+  <div><div class="cb-badge">NETWORKING</div>
+  <div class="cb-title">VNet · NSG · Load Balancer · App Gateway · CDN</div>
+  <div class="cb-sub">Mạng riêng ảo, bảo mật, cân bằng tải, CDN toàn cầu</div></div>
+</div>
+
+<!-- S10: VNET -->
+<div class="section" id="s10">
+  <div class="sec-head"><span class="sec-tag st-3">VNET</span>
+    <div><h2 class="sec-title">Virtual Network — Mạng riêng trên Azure</h2>
+    <p class="sec-sub">VNet, Subnets, NSG, VNet Peering, Private Endpoints</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">VNet Architecture — Hub &amp; Spoke pattern</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:22px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--az1),var(--az2),var(--az3))"></div>
+      <div style="margin-top:8px">
+        <div style="text-align:center;margin-bottom:10px;font-size:12px;color:var(--muted)">🌐 Internet → Azure Firewall (Hub VNet)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="background:rgba(0,120,212,.08);border:2px solid rgba(0,120,212,.3);border-radius:10px;padding:12px">
+            <div style="font-size:9px;font-weight:800;color:var(--az1);text-transform:uppercase;margin-bottom:8px">🔵 Hub VNet (10.0.0.0/16)</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.9">
+              snet-gateway (VPN GW)<br>snet-firewall<br>snet-bastion
+            </div>
+          </div>
+          <div style="background:rgba(80,230,255,.06);border:1px solid rgba(80,230,255,.25);border-radius:10px;padding:12px">
+            <div style="font-size:9px;font-weight:800;color:var(--az2);text-transform:uppercase;margin-bottom:8px">🔵 Spoke 1 — App (10.1.0.0/16)</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.9">
+              snet-app (AKS)<br>snet-appgw (App GW)<br>snet-private (DB)
+            </div>
+          </div>
+          <div style="background:rgba(255,185,0,.06);border:1px solid rgba(255,185,0,.25);border-radius:10px;padding:12px">
+            <div style="font-size:9px;font-weight:800;color:var(--az3);text-transform:uppercase;margin-bottom:8px">🟡 Spoke 2 — Data (10.2.0.0/16)</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.9">
+              snet-sql (SQL Server)<br>snet-redis<br>snet-storage
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--muted)">↕ VNet Peering (Hub ↔ Spoke 1, Hub ↔ Spoke 2, traffic via Firewall)</div>
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">VNet — tạo network, NSG, Private Endpoint</span><span class="cb-tag ct-3">VNet</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo VNet và Subnets ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network vnet create \
+    <span class="tc-flag">--name</span>           vnet-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--address-prefix</span> 10.1.0.0/16 \
+    <span class="tc-flag">--subnet-name</span>    snet-appgw \
+    <span class="tc-flag">--subnet-prefix</span>  10.1.1.0/24
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network vnet subnet create \
+    <span class="tc-flag">--vnet-name</span>       vnet-order-prod \
+    <span class="tc-flag">--resource-group</span>  rg-order-service-prod \
+    <span class="tc-flag">--name</span>            snet-aks \
+    <span class="tc-flag">--address-prefix</span>  10.1.10.0/23          <span class="tc-cmt"># /23 = 510 addresses cho K8s pods</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network vnet subnet create \
+    <span class="tc-flag">--vnet-name</span>       vnet-order-prod \
+    <span class="tc-flag">--resource-group</span>  rg-order-service-prod \
+    <span class="tc-flag">--name</span>            snet-private \
+    <span class="tc-flag">--address-prefix</span>  10.1.20.0/24 \
+    <span class="tc-flag">--disable-private-endpoint-network-policies</span> true  <span class="tc-cmt"># cần cho Private Endpoints</span>
+
+<span class="tc-cmt"># ── NSG — Network Security Group ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network nsg create <span class="tc-flag">--name</span> nsg-aks <span class="tc-flag">--resource-group</span> rg-prod
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network nsg rule create \
+    <span class="tc-flag">--nsg-name</span>        nsg-aks \
+    <span class="tc-flag">--resource-group</span>  rg-prod \
+    <span class="tc-flag">--name</span>            AllowHTTPS \
+    <span class="tc-flag">--priority</span>        100 \
+    <span class="tc-flag">--direction</span>       Inbound \
+    <span class="tc-flag">--access</span>          Allow \
+    <span class="tc-flag">--protocol</span>        Tcp \
+    <span class="tc-flag">--source-address-prefixes</span>    <span class="tc-str">"*"</span> \
+    <span class="tc-flag">--destination-port-ranges</span>    443
+
+<span class="tc-cmt"># ── Private Endpoint — kết nối PostgreSQL không qua internet ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network private-endpoint create \
+    <span class="tc-flag">--name</span>            pe-psql-order \
+    <span class="tc-flag">--resource-group</span>  rg-prod \
+    <span class="tc-flag">--vnet-name</span>       vnet-order-prod \
+    <span class="tc-flag">--subnet</span>          snet-private \
+    <span class="tc-flag">--private-connection-resource-id</span> \
+        /subscriptions/.../psql-order-prod \
+    <span class="tc-flag">--group-id</span>        postgresqlServer \
+    <span class="tc-flag">--connection-name</span> psql-private-connection
+<span class="tc-cmt"># Kết quả: app trong VNet kết nối qua private IP, không qua internet</span>
+<span class="tc-cmt"># DNS tự động: psql-order-prod.private.postgres.database.azure.com → 10.1.20.5</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S11: LOAD BALANCER & APP GATEWAY -->
+<div class="section" id="s11">
+  <div class="sec-head"><span class="sec-tag st-3">LB</span>
+    <div><h2 class="sec-title">Load Balancer &amp; Application Gateway</h2>
+    <p class="sec-sub">L4 Load Balancer · L7 App Gateway · WAF · URL routing</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Application Gateway — L7 với WAF và path routing</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Application Gateway WAF v2 — HTTPS + path routing</span><span class="cb-tag ct-3">App Gateway</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Application Gateway với WAF ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network application-gateway create \
+    <span class="tc-flag">--name</span>                     appgw-order-prod \
+    <span class="tc-flag">--resource-group</span>           rg-order-service-prod \
+    <span class="tc-flag">--location</span>                 southeastasia \
+    <span class="tc-flag">--sku</span>                      WAF_v2 \           <span class="tc-cmt"># WAF_v2 = App GW + WAF</span>
+    <span class="tc-flag">--capacity</span>                 2 \                <span class="tc-cmt"># 2 instances</span>
+    <span class="tc-flag">--vnet-name</span>                vnet-order-prod \
+    <span class="tc-flag">--subnet</span>                   snet-appgw \
+    <span class="tc-flag">--frontend-port</span>            443 \
+    <span class="tc-flag">--http-settings-port</span>       8080 \
+    <span class="tc-flag">--http-settings-protocol</span>   Http \
+    <span class="tc-flag">--servers</span>                  10.1.10.5 10.1.10.6 \  <span class="tc-cmt"># AKS pod IPs</span>
+    <span class="tc-flag">--cert-file</span>                ./tls.pfx \
+    <span class="tc-flag">--cert-password</span>            $CERT_PASS
+
+<span class="tc-cmt"># ── Cấu hình URL path routing ──</span>
+<span class="tc-cmt"># /api/orders/*  → order-service backend pool</span>
+<span class="tc-cmt"># /api/payments/* → payment-service backend pool</span>
+<span class="tc-cmt"># /*             → frontend backend pool</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network application-gateway url-path-map rule create \
+    <span class="tc-flag">--gateway-name</span>      appgw-order-prod \
+    <span class="tc-flag">--resource-group</span>    rg-prod \
+    <span class="tc-flag">--path-map-name</span>     url-routing \
+    <span class="tc-flag">--name</span>              order-service-rule \
+    <span class="tc-flag">--paths</span>             /api/orders/* \
+    <span class="tc-flag">--address-pool</span>      order-service-pool \
+    <span class="tc-flag">--http-settings</span>     order-service-settings
+
+<span class="tc-cmt"># ── WAF Policy — bảo vệ khỏi OWASP Top 10 ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network application-gateway waf-policy create \
+    <span class="tc-flag">--name</span>           waf-policy-order \
+    <span class="tc-flag">--resource-group</span> rg-prod
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network application-gateway waf-policy managed-rule ruleset add \
+    <span class="tc-flag">--policy-name</span>    waf-policy-order \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--type</span>           OWASP <span class="tc-flag">--version</span> 3.2   <span class="tc-cmt"># OWASP Core Rule Set</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S12: DNS & CDN & FRONT DOOR -->
+<div class="section" id="s12">
+  <div class="sec-head"><span class="sec-tag st-3">DNS &amp; CDN</span>
+    <div><h2 class="sec-title">Azure DNS &amp; Front Door &amp; CDN</h2>
+    <p class="sec-sub">Azure DNS, Azure Front Door (global load balancer + CDN), Azure CDN</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Azure Front Door — Global Load Balancer + CDN + WAF</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Azure DNS + Front Door + CDN setup</span><span class="cb-tag ct-3">DNS/CDN</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Azure DNS Zone ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network dns zone create \
+    <span class="tc-flag">--name</span>           company.com \
+    <span class="tc-flag">--resource-group</span> rg-dns
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network dns record-set a add-record \
+    <span class="tc-flag">--zone-name</span>      company.com \
+    <span class="tc-flag">--resource-group</span> rg-dns \
+    <span class="tc-flag">--record-set-name</span> api \
+    <span class="tc-flag">--ipv4-address</span>   20.197.xxx.xxx
+
+<span class="tc-cmt"># CNAME trỏ về App Service:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> network dns record-set cname set-record \
+    <span class="tc-flag">--zone-name</span>      company.com \
+    <span class="tc-flag">--resource-group</span> rg-dns \
+    <span class="tc-flag">--record-set-name</span> app \
+    <span class="tc-flag">--cname</span>          order-service-prod.azurewebsites.net
+
+<span class="tc-cmt"># ── Azure Front Door (Standard/Premium) ──</span>
+<span class="tc-cmt"># Front Door = Global CDN + Load Balancer + WAF + DDoS</span>
+<span class="tc-cmt"># Route traffic đến origin gần nhất, failover tự động</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> afd profile create \
+    <span class="tc-flag">--profile-name</span>   afd-company-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--sku-name</span>       Standard_AzureFrontDoor
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> afd origin-group create \
+    <span class="tc-flag">--origin-group-name</span>  backend-pool \
+    <span class="tc-flag">--profile-name</span>       afd-company-prod \
+    <span class="tc-flag">--resource-group</span>     rg-prod \
+    <span class="tc-flag">--probe-request-type</span> HEAD \
+    <span class="tc-flag">--probe-protocol</span>     Https \
+    <span class="tc-flag">--probe-interval-in-seconds</span> 30
+
+<span class="tc-cmt"># Thêm origins (có thể là App Service, AKS Ingress, VMs)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> afd origin create \
+    <span class="tc-flag">--origin-name</span>       order-service-sg \
+    <span class="tc-flag">--origin-group-name</span> backend-pool \
+    <span class="tc-flag">--profile-name</span>      afd-company-prod \
+    <span class="tc-flag">--resource-group</span>    rg-prod \
+    <span class="tc-flag">--host-name</span>         order-service-prod.azurewebsites.net \
+    <span class="tc-flag">--priority</span>          1 \
+    <span class="tc-flag">--weight</span>            1000 \
+    <span class="tc-flag">--origin-host-header</span> order-service-prod.azurewebsites.net
+
+<span class="tc-cmt"># Front Door: Singapore → 20ms, US East → 250ms
+# CDN cache static content tại 60+ PoPs toàn cầu</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-4">
+  <div class="cb-icon">📨</div>
+  <div><div class="cb-badge">MESSAGING &amp; INTEGRATION</div>
+  <div class="cb-title">Service Bus · Event Hub · Key Vault · API Management</div>
+  <div class="cb-sub">Decoupled messaging, secrets management, API gateway</div></div>
+</div>
+
+<!-- S13: SERVICE BUS & EVENT HUB -->
+<div class="section" id="s13">
+  <div class="sec-head"><span class="sec-tag st-4">MESSAGING</span>
+    <div><h2 class="sec-title">Service Bus &amp; Event Hub</h2>
+    <p class="sec-sub">Service Bus: enterprise messaging (giống AWS SQS/SNS) · Event Hub: big data streaming (giống Kafka)</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Service Bus vs Event Hub — chọn đúng</div>
+    <div class="compare">
+      <div style="background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--az1);margin-bottom:10px">📨 Azure Service Bus</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          <strong style="color:var(--text)">Enterprise messaging</strong><br>
+          Queues (point-to-point) &amp; Topics (pub/sub)<br>
+          Sessions, Dead-letter queue, Transactions<br>
+          At-least-once delivery<br>
+          Max 256KB message (Premium: 100MB)<br>
+          <em>Dùng: orders, payments, workflow</em>
+        </div>
+      </div>
+      <div style="background:rgba(127,186,0,.07);border:1px solid rgba(127,186,0,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--az4);margin-bottom:10px">🌊 Azure Event Hub</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          <strong style="color:var(--text)">Big data streaming</strong> — Kafka-compatible<br>
+          Partitions, Consumer Groups<br>
+          Millions events/second<br>
+          Replay events (retention 7 ngày)<br>
+          Capture to Azure Storage/Data Lake<br>
+          <em>Dùng: telemetry, logs, clickstream</em>
+        </div>
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Service Bus + Event Hub — create và Spring Boot integration</span><span class="cb-tag ct-4">Messaging</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Service Bus Namespace + Queue + Topic ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> servicebus namespace create \
+    <span class="tc-flag">--name</span>           sb-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--location</span>       southeastasia \
+    <span class="tc-flag">--sku</span>            Standard
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> servicebus queue create \
+    <span class="tc-flag">--namespace-name</span>   sb-order-prod \
+    <span class="tc-flag">--resource-group</span>   rg-prod \
+    <span class="tc-flag">--name</span>             order-processing \
+    <span class="tc-flag">--enable-dead-lettering-on-message-expiration</span> true \
+    <span class="tc-flag">--max-delivery-count</span> 3 \               <span class="tc-cmt"># retry 3 lần rồi → DLQ</span>
+    <span class="tc-flag">--lock-duration</span>      PT5M             <span class="tc-cmt"># message lock 5 phút</span>
+
+<span class="tc-cmt"># ── Topic + Subscriptions (pub/sub fan-out) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> servicebus topic create \
+    <span class="tc-flag">--namespace-name</span> sb-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--name</span>           order-events
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> servicebus topic subscription create \
+    <span class="tc-flag">--namespace-name</span>  sb-order-prod \
+    <span class="tc-flag">--resource-group</span>  rg-prod \
+    <span class="tc-flag">--topic-name</span>      order-events \
+    <span class="tc-flag">--name</span>            inventory-service-sub
+
+<span class="tc-cmt">// ── Spring Boot Service Bus ──</span>
+<span class="tc-cmt">// Producer</span>
+<span class="az-kw">@Autowired</span>
+ServiceBusSenderClient senderClient;  <span class="tc-cmt">// Azure Spring Boot Starter</span>
+
+<span class="az-kw">public void</span> publishOrderCreated(Order order) {
+    ServiceBusMessage message = <span class="az-kw">new</span> ServiceBusMessage(
+        <span class="az-kw">new</span> ObjectMapper().writeValueAsBytes(order));
+    message.setSubject(<span class="az-str">"order.created"</span>);
+    message.setMessageId(order.getId());
+    senderClient.sendMessage(message);
+}
+
+<span class="tc-cmt">// Consumer (listener)</span>
+<span class="az-kw">@ServiceBusListener</span>(destination = <span class="az-str">"order-processing"</span>)
+<span class="az-kw">public void</span> processOrder(String messageBody) {
+    Order order = objectMapper.readValue(messageBody, Order.<span class="az-kw">class</span>);
+    orderService.process(order);
+}
+
+<span class="tc-cmt"># application.yml:</span>
+<span class="az-kw">spring</span>.cloud.azure.servicebus.connection-string=${SERVICE_BUS_CONN_STR}
+<span class="tc-cmt"># Hoặc passwordless với Managed Identity:</span>
+<span class="az-kw">spring</span>.cloud.azure.servicebus.namespace=sb-order-prod
+<span class="az-kw">spring</span>.cloud.azure.credential.managed-identity-enabled=true
+
+<span class="tc-cmt"># ── Event Hub (Kafka-compatible) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> eventhubs namespace create \
+    <span class="tc-flag">--name</span>           evh-telemetry-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--sku</span>            Standard \
+    <span class="tc-flag">--enable-kafka</span> \  <span class="tc-cmt"># Kafka-compatible API</span>
+    <span class="tc-flag">--location</span>       southeastasia
+<span class="tc-cmt"># Dùng Spring Kafka với Event Hub bằng Kafka protocol!</span>
+<span class="az-kw">spring</span>.kafka.bootstrap-servers=evh-telemetry-prod.servicebus.windows.net:9093
+<span class="az-kw">spring</span>.kafka.properties.sasl.mechanism=PLAIN
+<span class="az-kw">spring</span>.kafka.properties.security.protocol=SASL_SSL</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S14: KEY VAULT & MANAGED IDENTITY -->
+<div class="section" id="s14">
+  <div class="sec-head"><span class="sec-tag st-4">KEY VAULT</span>
+    <div><h2 class="sec-title">Azure Key Vault — Secrets, Keys &amp; Certificates</h2>
+    <p class="sec-sub">Quản lý secrets tập trung, tự động rotate, zero-touch credentials</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Key Vault — tạo, lưu secrets, tích hợp Spring Boot</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Key Vault — CRUD secrets + Spring Boot integration</span><span class="cb-tag ct-4">KeyVault</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Key Vault ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> keyvault create \
+    <span class="tc-flag">--name</span>           kv-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--location</span>       southeastasia \
+    <span class="tc-flag">--sku</span>            standard \
+    <span class="tc-flag">--enable-rbac-authorization</span> \    <span class="tc-cmt"># dùng RBAC thay Access Policies</span>
+    <span class="tc-flag">--enable-soft-delete</span> \
+    <span class="tc-flag">--retention-days</span> 90 \
+    <span class="tc-flag">--enable-purge-protection</span>       <span class="tc-cmt"># không xóa vĩnh viễn được (compliance)</span>
+
+<span class="tc-cmt"># Chỉ cho phép access qua Private Endpoint (không qua internet!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> keyvault update \
+    <span class="tc-flag">--name</span>           kv-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--default-action</span> Deny \
+    <span class="tc-flag">--bypass</span>         AzureServices
+
+<span class="tc-cmt"># ── Lưu secrets ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> keyvault secret set \
+    <span class="tc-flag">--vault-name</span> kv-order-prod \
+    <span class="tc-flag">--name</span>       db-password \
+    <span class="tc-flag">--value</span>      <span class="tc-str">"$uP3rS3cr3t!"</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> keyvault secret set \
+    <span class="tc-flag">--vault-name</span> kv-order-prod \
+    <span class="tc-flag">--name</span>       redis-connection-string \
+    <span class="tc-flag">--value</span>      <span class="tc-str">"redis-order-prod.redis.cache.windows.net:6380,password=xxx,ssl=True"</span>
+
+<span class="tc-cmt"># ── Đọc secret ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> keyvault secret show \
+    <span class="tc-flag">--vault-name</span> kv-order-prod \
+    <span class="tc-flag">--name</span>       db-password \
+    <span class="tc-flag">--query</span>      value <span class="tc-flag">--output</span> tsv
+
+<span class="tc-cmt"># ── Spring Boot + Azure Spring Boot Starter for Key Vault ──</span>
+<span class="tc-cmt"># pom.xml:</span>
+<span class="tc-cmt"># &lt;dependency&gt;</span>
+<span class="tc-cmt">#   &lt;groupId&gt;com.azure.spring&lt;/groupId&gt;</span>
+<span class="tc-cmt">#   &lt;artifactId&gt;spring-cloud-azure-starter-keyvault-secrets&lt;/artifactId&gt;</span>
+<span class="tc-cmt"># &lt;/dependency&gt;</span>
+
+<span class="tc-cmt"># application.yml:</span>
+<span class="az-kw">spring</span>.cloud.azure.keyvault.secret.property-sources[0].endpoint=https://kv-order-prod.vault.azure.net/
+<span class="az-kw">spring</span>.cloud.azure.credential.managed-identity-enabled=true
+
+<span class="tc-cmt"># Tất cả secrets trong Key Vault tự động available như properties!</span>
+<span class="az-kw">spring</span>.datasource.password=${db-password}        <span class="tc-cmt"># từ Key Vault key "db-password"</span>
+<span class="az-kw">spring</span>.data.redis.password=${redis-access-key}    <span class="tc-cmt"># từ Key Vault</span>
+
+<span class="tc-cmt">// Java code dùng @Value như bình thường:</span>
+<span class="az-kw">@Value</span>(<span class="az-str">"${db-password}"</span>)
+<span class="az-kw">private</span> String dbPassword;  <span class="tc-cmt">// Azure tự inject từ Key Vault!</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S15: API MANAGEMENT -->
+<div class="section" id="s15">
+  <div class="sec-head"><span class="sec-tag st-4">APIM</span>
+    <div><h2 class="sec-title">Azure API Management — API Gateway</h2>
+    <p class="sec-sub">Rate limiting, authentication, transformation, developer portal</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">APIM — deploy và cấu hình policies</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">API Management — tạo APIM, import API, policies</span><span class="cb-tag ct-4">APIM</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo APIM instance ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> apim create \
+    <span class="tc-flag">--name</span>               apim-company-prod \
+    <span class="tc-flag">--resource-group</span>     rg-order-service-prod \
+    <span class="tc-flag">--location</span>           southeastasia \
+    <span class="tc-flag">--publisher-email</span>    admin@company.com \
+    <span class="tc-flag">--publisher-name</span>     <span class="tc-str">"Company Dev"</span> \
+    <span class="tc-flag">--sku-name</span>           Developer   <span class="tc-cmt"># Developer, Basic, Standard, Premium</span>
+
+<span class="tc-cmt"># ── Import API từ OpenAPI spec ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> apim api import \
+    <span class="tc-flag">--service-name</span>    apim-company-prod \
+    <span class="tc-flag">--resource-group</span>  rg-prod \
+    <span class="tc-flag">--path</span>            orders \
+    <span class="tc-flag">--specification-format</span> OpenApi \
+    <span class="tc-flag">--specification-url</span>    https://order-service-prod.azurewebsites.net/v3/api-docs
+
+<span class="tc-cmt"># ── APIM Policy — rate limiting + JWT validation ──</span>
+<span class="az-kw">&lt;policies&gt;</span>
+  <span class="az-kw">&lt;inbound&gt;</span>
+    <span class="az-cmt">&lt;!-- Rate limiting: 1000 requests per minute per subscription --&gt;</span>
+    <span class="az-kw">&lt;rate-limit</span> <span class="az-key">calls</span>=<span class="az-str">"1000"</span> <span class="az-key">renewal-period</span>=<span class="az-str">"60"</span><span class="az-kw">/&gt;</span>
+
+    <span class="az-cmt">&lt;!-- JWT validation --&gt;</span>
+    <span class="az-kw">&lt;validate-jwt</span> <span class="az-key">header-name</span>=<span class="az-str">"Authorization"</span> <span class="az-key">require-scheme</span>=<span class="az-str">"Bearer"</span><span class="az-kw">&gt;</span>
+      <span class="az-kw">&lt;openid-config</span> <span class="az-key">url</span>=<span class="az-str">"https://login.microsoftonline.com/TENANT/.well-known/openid-configuration"</span><span class="az-kw">/&gt;</span>
+      <span class="az-kw">&lt;audiences&gt;&lt;audience&gt;</span>CLIENT_ID<span class="az-kw">&lt;/audience&gt;&lt;/audiences&gt;</span>
+    <span class="az-kw">&lt;/validate-jwt&gt;</span>
+
+    <span class="az-cmt">&lt;!-- Set backend URL --&gt;</span>
+    <span class="az-kw">&lt;set-backend-service</span> <span class="az-key">backend-id</span>=<span class="az-str">"order-service"</span><span class="az-kw">/&gt;</span>
+  <span class="az-kw">&lt;/inbound&gt;</span>
+  <span class="az-kw">&lt;outbound&gt;</span>
+    <span class="az-cmt">&lt;!-- Remove internal headers --&gt;</span>
+    <span class="az-kw">&lt;set-header</span> <span class="az-key">name</span>=<span class="az-str">"X-Internal-Auth"</span> <span class="az-key">exists-action</span>=<span class="az-str">"delete"</span><span class="az-kw">/&gt;</span>
+  <span class="az-kw">&lt;/outbound&gt;</span>
+<span class="az-kw">&lt;/policies&gt;</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-5">
+  <div class="cb-icon">🔁</div>
+  <div><div class="cb-badge">DEVOPS &amp; MONITORING</div>
+  <div class="cb-title">Azure DevOps · ACR · GitHub Actions · Monitor</div>
+  <div class="cb-sub">CI/CD pipelines, container registry, observability toàn diện</div></div>
+</div>
+
+<!-- S16: AZURE DEVOPS -->
+<div class="section" id="s16">
+  <div class="sec-head"><span class="sec-tag st-5">DEVOPS</span>
+    <div><h2 class="sec-title">Azure DevOps — CI/CD Pipelines</h2>
+    <p class="sec-sub">Pipelines, Repos, Boards, Artifacts — platform DevOps all-in-one của Microsoft</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Azure Pipelines — YAML pipeline cho Spring Boot → AKS</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">azure-pipelines.yml — Build → Push ACR → Deploy AKS</span><span class="cb-tag ct-5">DevOps</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># azure-pipelines.yml</span>
+<span class="az-key">trigger</span>:
+  <span class="az-key">branches</span>:
+    <span class="az-key">include</span>: [main, release/*]
+  <span class="az-key">paths</span>:
+    <span class="az-key">exclude</span>: [docs/*, README.md]
+
+<span class="az-key">variables</span>:
+  <span class="az-val">ACR_NAME</span>:        acrcompanyprod
+  <span class="az-val">IMAGE_NAME</span>:      order-service
+  <span class="az-val">K8S_NAMESPACE</span>:   production
+  <span class="az-val">IMAGE_TAG</span>:       $(Build.BuildId)
+
+<span class="az-key">stages</span>:
+- <span class="az-key">stage</span>: Build
+  <span class="az-key">jobs</span>:
+  - <span class="az-key">job</span>: BuildAndTest
+    <span class="az-key">pool</span>:
+      <span class="az-key">vmImage</span>: ubuntu-latest
+    <span class="az-key">steps</span>:
+    - <span class="az-key">task</span>: JavaToolInstaller@0
+      <span class="az-key">inputs</span>:
+        <span class="az-key">versionSpec</span>: <span class="az-str">"21"</span>
+        <span class="az-key">jdkArchitectureOption</span>: x64
+
+    - <span class="az-key">script</span>: mvn test --no-transfer-progress
+      <span class="az-key">displayName</span>: <span class="az-str">"Run Unit Tests"</span>
+
+    - <span class="az-key">task</span>: PublishTestResults@2
+      <span class="az-key">inputs</span>:
+        <span class="az-key">testResultsFormat</span>: JUnit
+        <span class="az-key">testResultsFiles</span>: <span class="az-str">"**/surefire-reports/*.xml"</span>
+
+    - <span class="az-key">task</span>: Maven@3
+      <span class="az-key">inputs</span>:
+        <span class="az-key">goals</span>: <span class="az-str">"package -DskipTests"</span>
+
+    - <span class="az-key">task</span>: Docker@2
+      <span class="az-key">displayName</span>: Build and Push to ACR
+      <span class="az-key">inputs</span>:
+        <span class="az-key">command</span>:              buildAndPush
+        <span class="az-key">containerRegistry</span>:    acr-service-connection
+        <span class="az-key">repository</span>:           $(IMAGE_NAME)
+        <span class="az-key">dockerfile</span>:           Dockerfile
+        <span class="az-key">tags</span>: |
+          $(IMAGE_TAG)
+          latest
+
+- <span class="az-key">stage</span>: DeployDev
+  <span class="az-key">dependsOn</span>: Build
+  <span class="az-key">condition</span>: succeeded()
+  <span class="az-key">jobs</span>:
+  - <span class="az-key">deployment</span>: DeployToAKS
+    <span class="az-key">environment</span>: <span class="az-str">"development"</span>
+    <span class="az-key">strategy</span>:
+      <span class="az-key">runOnce</span>:
+        <span class="az-key">deploy</span>:
+          <span class="az-key">steps</span>:
+          - <span class="az-key">task</span>: HelmDeploy@0
+            <span class="az-key">inputs</span>:
+              <span class="az-key">connectionType</span>:      Azure Resource Manager
+              <span class="az-key">azureSubscription</span>:   AzureServiceConnection
+              <span class="az-key">azureResourceGroup</span>:  rg-order-service-prod
+              <span class="az-key">kubernetesCluster</span>:   aks-prod
+              <span class="az-key">namespace</span>:           $(K8S_NAMESPACE)
+              <span class="az-key">command</span>:             upgrade
+              <span class="az-key">chartType</span>:           filepath
+              <span class="az-key">chartPath</span>:           ./helm/order-service
+              <span class="az-key">overrideValues</span>:      image.tag=$(IMAGE_TAG),replicaCount=3
+              <span class="az-key">install</span>:             true
+              <span class="az-key">waitForExecution</span>:    true</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S17: ACR & GITHUB ACTIONS -->
+<div class="section" id="s17">
+  <div class="sec-head"><span class="sec-tag st-5">ACR</span>
+    <div><h2 class="sec-title">ACR &amp; GitHub Actions — Container Registry</h2>
+    <p class="sec-sub">Azure Container Registry, vulnerability scanning, GitHub Actions integration</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">ACR setup và GitHub Actions workflow</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">ACR + GitHub Actions — OIDC passwordless CI/CD</span><span class="cb-tag ct-5">ACR/GHA</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Azure Container Registry ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> acr create \
+    <span class="tc-flag">--name</span>            acrcompanyprod \
+    <span class="tc-flag">--resource-group</span>  rg-order-service-prod \
+    <span class="tc-flag">--sku</span>             Premium \           <span class="tc-cmt"># Basic, Standard, Premium</span>
+    <span class="tc-flag">--admin-enabled</span>   false \             <span class="tc-cmt"># dùng RBAC, không dùng admin account</span>
+    <span class="tc-flag">--zone-redundancy</span> Enabled \           <span class="tc-cmt"># Premium only</span>
+    <span class="tc-flag">--public-network-enabled</span> false        <span class="tc-cmt"># private registry</span>
+
+<span class="tc-cmt"># ── Bật vulnerability scanning ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> security assessment-metadata create \
+    <span class="tc-flag">--name</span>        container-image-vulnerabilities \
+    <span class="tc-flag">--display-name</span> <span class="tc-str">"ACR Vulnerability Assessment"</span>
+
+<span class="tc-cmt"># ── Push image lên ACR ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> acr login <span class="tc-flag">--name</span> acrcompanyprod
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag order-service:v2.1.0 acrcompanyprod.azurecr.io/order-service:v2.1.0
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> push acrcompanyprod.azurecr.io/order-service:v2.1.0
+
+<span class="tc-cmt"># ── GitHub Actions với OIDC (không cần Azure credentials trong secret!) ──</span>
+<span class="tc-cmt"># .github/workflows/deploy.yml</span>
+<span class="az-key">name</span>: Build and Deploy
+
+<span class="az-key">on</span>:
+  <span class="az-key">push</span>:
+    <span class="az-key">branches</span>: [main]
+
+<span class="az-key">permissions</span>:
+  <span class="az-key">id-token</span>: write   <span class="tc-cmt"># required for OIDC</span>
+  <span class="az-key">contents</span>: read
+
+<span class="az-key">jobs</span>:
+  <span class="az-key">build-deploy</span>:
+    <span class="az-key">runs-on</span>: ubuntu-latest
+    <span class="az-key">steps</span>:
+    - <span class="az-key">uses</span>: actions/checkout@v4
+
+    - <span class="az-key">name</span>: Login Azure với OIDC (không cần secrets!)
+      <span class="az-key">uses</span>: azure/login@v1
+      <span class="az-key">with</span>:
+        <span class="az-key">client-id</span>:       ${{ vars.AZURE_CLIENT_ID }}
+        <span class="az-key">tenant-id</span>:       ${{ vars.AZURE_TENANT_ID }}
+        <span class="az-key">subscription-id</span>: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+    - <span class="az-key">name</span>: Build and Push to ACR
+      <span class="az-key">run</span>: |
+        az acr build \
+          --registry acrcompanyprod \
+          --image order-service:${{ github.sha }} \
+          --file Dockerfile .
+
+    - <span class="az-key">name</span>: Deploy to AKS
+      <span class="az-key">uses</span>: azure/aks-set-context@v3
+      <span class="az-key">with</span>:
+        <span class="az-key">resource-group</span>: rg-order-service-prod
+        <span class="az-key">cluster-name</span>:   aks-prod
+
+    - <span class="az-key">name</span>: Helm Deploy
+      <span class="az-key">run</span>: |
+        helm upgrade --install order-service ./helm/order-service \
+          --namespace production \
+          --set image.tag=${{ github.sha }} \
+          --wait --timeout 5m --atomic</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S18: AZURE MONITOR & APP INSIGHTS -->
+<div class="section" id="s18">
+  <div class="sec-head"><span class="sec-tag st-5">MONITOR</span>
+    <div><h2 class="sec-title">Azure Monitor &amp; Application Insights</h2>
+    <p class="sec-sub">Metrics, Logs, Alerts, Application Performance Monitoring, distributed tracing</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Application Insights — APM cho Spring Boot</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Application Insights + Azure Monitor — setup và alerts</span><span class="cb-tag ct-5">Monitor</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Application Insights ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> monitor app-insights component create \
+    <span class="tc-flag">--app</span>            appinsights-order-prod \
+    <span class="tc-flag">--resource-group</span> rg-order-service-prod \
+    <span class="tc-flag">--location</span>       southeastasia \
+    <span class="tc-flag">--kind</span>           web \
+    <span class="tc-flag">--workspace</span>      /subscriptions/.../workspaces/logs-order-prod
+<span class="tc-out">{ "connectionString": "InstrumentationKey=xxx;IngestionEndpoint=https://...;LiveEndpoint=..." }</span>
+
+<span class="tc-cmt"># ── Spring Boot — App Insights với Java Agent (zero-code!) ──</span>
+<span class="tc-cmt"># Download agent:</span>
+<span class="tc-prompt">$</span> wget https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.5.1/applicationinsights-agent-3.5.1.jar
+<span class="tc-cmt"># Start JVM với agent:</span>
+<span class="tc-prompt">$</span> java <span class="tc-flag">-javaagent</span>:applicationinsights-agent-3.5.1.jar <span class="tc-flag">-jar</span> app.jar
+<span class="tc-cmt"># applicationinsights.json:</span>
+{
+  <span class="az-key">"connectionString"</span>: <span class="az-str">"InstrumentationKey=xxx..."</span>,
+  <span class="az-key">"role"</span>: { <span class="az-key">"name"</span>: <span class="az-str">"order-service"</span> },
+  <span class="az-key">"sampling"</span>: { <span class="az-key">"percentage"</span>: 10 },  <span class="tc-cmt">// 10% sampling cho prod</span>
+  <span class="az-key">"preview"</span>: { <span class="az-key">"profiler"</span>: { <span class="az-key">"enabled"</span>: <span class="az-kw">true</span> } }
+}
+<span class="tc-cmt"># Tự động track: HTTP requests, DB queries, exceptions, custom metrics!</span>
+<span class="tc-cmt"># Distributed tracing: order-service → payment-service → DB → Cache</span>
+
+<span class="tc-cmt"># ── Azure Monitor Alerts ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> monitor metrics alert create \
+    <span class="tc-flag">--name</span>            alert-high-cpu-order \
+    <span class="tc-flag">--resource-group</span>  rg-order-service-prod \
+    <span class="tc-flag">--scopes</span>          /subscriptions/.../resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod \
+    <span class="tc-flag">--description</span>     <span class="tc-str">"AKS CPU > 80%"</span> \
+    <span class="tc-flag">--condition</span>       <span class="tc-str">"avg Percentage CPU > 80"</span> \
+    <span class="tc-flag">--window-size</span>     5m \
+    <span class="tc-flag">--evaluation-frequency</span> 1m \
+    <span class="tc-flag">--severity</span>        2 \
+    <span class="tc-flag">--action</span>          /subscriptions/.../actionGroups/ag-ops-prod
+
+<span class="tc-cmt"># ── Action Group — gửi alert đến Slack/Teams ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">az</span> monitor action-group create \
+    <span class="tc-flag">--name</span>           ag-ops-prod \
+    <span class="tc-flag">--resource-group</span> rg-prod \
+    <span class="tc-flag">--action</span>         email email-ops ops@company.com \
+    <span class="tc-flag">--action</span>         webhook teams-webhook https://company.webhook.office.com/...
+
+<span class="tc-cmt"># ── KQL — Kusto Query Language cho Log Analytics ──</span>
+<span class="tc-cmt"># Tìm errors trong 1 giờ qua</span>
+requests
+<span class="az-kw">| where</span> timestamp <span class="az-kw">&gt;</span> ago(1h)
+<span class="az-kw">| where</span> resultCode <span class="az-kw">==</span> <span class="az-str">"500"</span>
+<span class="az-kw">| project</span> timestamp, name, url, resultCode, duration, cloud_RoleName
+<span class="az-kw">| order by</span> timestamp <span class="az-kw">desc</span>
+<span class="az-kw">| top</span> 50
+
+<span class="tc-cmt"># Average response time by endpoint</span>
+requests
+<span class="az-kw">| summarize</span> avg(duration), count() <span class="az-kw">by</span> name
+<span class="az-kw">| order by</span> avg_duration <span class="az-kw">desc</span>
+<span class="az-kw">| top</span> 10</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S19: CHEAT SHEET -->
+<div class="section" id="s19">
+  <div class="sec-head"><span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — Azure toàn tập</h2>
+    <p class="sec-sub">Tra cứu nhanh commands, services và patterns quan trọng nhất</p></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card"><h4 class="h4-1">🔷 CLI Basics</h4>
+      <div class="cheat-row"><span class="ck">Login</span><span class="cv">az login</span></div>
+      <div class="cheat-row"><span class="ck">Set subscription</span><span class="cv">az account set --subscription "Name"</span></div>
+      <div class="cheat-row"><span class="ck">Tạo resource group</span><span class="cv">az group create -n rg-name -l southeastasia</span></div>
+      <div class="cheat-row"><span class="ck">List resources</span><span class="cv">az resource list -g rg-name -o table</span></div>
+      <div class="cheat-row"><span class="ck">Xóa resource group</span><span class="cv">az group delete -n rg-name --yes</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-1">🔐 IAM &amp; Identity</h4>
+      <div class="cheat-row"><span class="ck">Get caller info</span><span class="cv">az account show</span></div>
+      <div class="cheat-row"><span class="ck">Assign role</span><span class="cv">az role assignment create --assignee user --role Contributor --scope /rg</span></div>
+      <div class="cheat-row"><span class="ck">Enable MI for VM</span><span class="cv">az vm identity assign -n vm-name -g rg-name</span></div>
+      <div class="cheat-row"><span class="ck">Create SP</span><span class="cv">az ad sp create-for-rbac --name sp-name --role Contributor</span></div>
+      <div class="cheat-row"><span class="ck">List role assignments</span><span class="cv">az role assignment list --assignee user@company.com</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-2">🖥️ Compute</h4>
+      <div class="cheat-row"><span class="ck">Tạo VM</span><span class="cv">az vm create -n vm-name -g rg --image Ubuntu2204 --size Standard_D2s_v5</span></div>
+      <div class="cheat-row"><span class="ck">AKS credentials</span><span class="cv">az aks get-credentials -g rg -n aks-name</span></div>
+      <div class="cheat-row"><span class="ck">Deploy App Service</span><span class="cv">az webapp config container set --name app --docker-image image</span></div>
+      <div class="cheat-row"><span class="ck">Swap slots</span><span class="cv">az webapp deployment slot swap -n app -g rg --slot staging</span></div>
+      <div class="cheat-row"><span class="ck">AKS scale</span><span class="cv">az aks scale -n aks-name -g rg --node-count 5</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-2">💾 Storage &amp; DB</h4>
+      <div class="cheat-row"><span class="ck">Upload blob</span><span class="cv">az storage blob upload --account-name st --container c --name key --file f</span></div>
+      <div class="cheat-row"><span class="ck">Gen SAS</span><span class="cv">az storage blob generate-sas --permissions r --expiry 2024-12-31</span></div>
+      <div class="cheat-row"><span class="ck">Create PostgreSQL</span><span class="cv">az postgres flexible-server create -n psql -g rg</span></div>
+      <div class="cheat-row"><span class="ck">Restore DB</span><span class="cv">az postgres flexible-server restore --source-server psql-prod --restore-time T</span></div>
+      <div class="cheat-row"><span class="ck">Redis list keys</span><span class="cv">az redis list-keys -n redis-name -g rg</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-3">🌐 Networking</h4>
+      <div class="cheat-row"><span class="ck">Create VNet</span><span class="cv">az network vnet create -n vnet-name -g rg --address-prefix 10.0.0.0/16</span></div>
+      <div class="cheat-row"><span class="ck">Create subnet</span><span class="cv">az network vnet subnet create -n snet --vnet-name vnet --address-prefix 10.0.1.0/24</span></div>
+      <div class="cheat-row"><span class="ck">NSG rule</span><span class="cv">az network nsg rule create --nsg-name nsg -n rule --priority 100 --port 443</span></div>
+      <div class="cheat-row"><span class="ck">VNet Peering</span><span class="cv">az network vnet peering create -n peer --vnet-name vnet1 --remote-vnet vnet2</span></div>
+      <div class="cheat-row"><span class="ck">DNS record</span><span class="cv">az network dns record-set a add-record -z company.com -n api --ipv4 x.x.x.x</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-4">🔑 Key Vault</h4>
+      <div class="cheat-row"><span class="ck">Tạo Key Vault</span><span class="cv">az keyvault create -n kv-name -g rg --sku standard</span></div>
+      <div class="cheat-row"><span class="ck">Lưu secret</span><span class="cv">az keyvault secret set --vault-name kv -n key --value val</span></div>
+      <div class="cheat-row"><span class="ck">Đọc secret</span><span class="cv">az keyvault secret show --vault-name kv -n key --query value -o tsv</span></div>
+      <div class="cheat-row"><span class="ck">Grant access</span><span class="cv">az keyvault set-policy --name kv --object-id id --secret-permissions get list</span></div>
+      <div class="cheat-row"><span class="ck">List secrets</span><span class="cv">az keyvault secret list --vault-name kv -o table</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-5">📦 ACR &amp; Containers</h4>
+      <div class="cheat-row"><span class="ck">ACR Login</span><span class="cv">az acr login -n acrname</span></div>
+      <div class="cheat-row"><span class="ck">Build in cloud</span><span class="cv">az acr build --registry acrname --image img:tag .</span></div>
+      <div class="cheat-row"><span class="ck">List images</span><span class="cv">az acr repository list -n acrname</span></div>
+      <div class="cheat-row"><span class="ck">Attach AKS→ACR</span><span class="cv">az aks update -n aks -g rg --attach-acr acrname</span></div>
+      <div class="cheat-row"><span class="ck">Delete image</span><span class="cv">az acr repository delete -n acrname --image img:tag</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-5">📊 Monitor</h4>
+      <div class="cheat-row"><span class="ck">Tạo alert</span><span class="cv">az monitor metrics alert create -n alert-name -g rg --condition "avg CPU > 80"</span></div>
+      <div class="cheat-row"><span class="ck">List alerts</span><span class="cv">az monitor metrics alert list -g rg -o table</span></div>
+      <div class="cheat-row"><span class="ck">Query logs</span><span class="cv">az monitor log-analytics query -w workspace-id --analytics-query "query"</span></div>
+      <div class="cheat-row"><span class="ck">App Insights</span><span class="cv">az monitor app-insights query --app appinsights-name -q "requests | top 10"</span></div>
+      <div class="cheat-row"><span class="ck">Autoscale</span><span class="cv">az monitor autoscale create -g rg --resource asp-name --min-count 2 --max-count 10</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">AWS vs Azure — Bảng so sánh dịch vụ tương đương</div>
+    <table class="tbl">
+      <thead><tr><th>AWS</th><th>Azure Tương đương</th><th>Mô tả</th></tr></thead>
+      <tbody>
+        <tr><td><code>EC2</code></td><td><code>Virtual Machines</code></td><td>IaaS compute, virtual machines</td></tr>
+        <tr><td><code>ECS / EKS</code></td><td><code>ACI / AKS</code></td><td>Managed containers / Kubernetes</td></tr>
+        <tr><td><code>Lambda</code></td><td><code>Azure Functions</code></td><td>Serverless compute</td></tr>
+        <tr><td><code>Elastic Beanstalk</code></td><td><code>App Service</code></td><td>PaaS for web apps</td></tr>
+        <tr><td><code>S3</code></td><td><code>Azure Blob Storage</code></td><td>Object storage</td></tr>
+        <tr><td><code>RDS</code></td><td><code>Azure Database for PostgreSQL</code></td><td>Managed relational DB</td></tr>
+        <tr><td><code>DynamoDB</code></td><td><code>Cosmos DB</code></td><td>Managed NoSQL database</td></tr>
+        <tr><td><code>ElastiCache</code></td><td><code>Azure Cache for Redis</code></td><td>Managed Redis/Memcached</td></tr>
+        <tr><td><code>VPC</code></td><td><code>Virtual Network (VNet)</code></td><td>Private network</td></tr>
+        <tr><td><code>ALB</code></td><td><code>Application Gateway</code></td><td>L7 load balancer</td></tr>
+        <tr><td><code>Route 53</code></td><td><code>Azure DNS</code></td><td>DNS management</td></tr>
+        <tr><td><code>CloudFront</code></td><td><code>Azure Front Door / CDN</code></td><td>CDN &amp; global load balancer</td></tr>
+        <tr><td><code>SQS</code></td><td><code>Service Bus Queue</code></td><td>Message queue</td></tr>
+        <tr><td><code>SNS</code></td><td><code>Service Bus Topic</code></td><td>Pub/Sub messaging</td></tr>
+        <tr><td><code>Kinesis / MSK</code></td><td><code>Event Hub</code></td><td>Event streaming</td></tr>
+        <tr><td><code>Secrets Manager</code></td><td><code>Key Vault</code></td><td>Secrets &amp; key management</td></tr>
+        <tr><td><code>IAM Roles</code></td><td><code>Managed Identity + RBAC</code></td><td>Identity &amp; access management</td></tr>
+        <tr><td><code>CloudWatch</code></td><td><code>Azure Monitor + App Insights</code></td><td>Monitoring &amp; observability</td></tr>
+        <tr><td><code>ECR</code></td><td><code>Azure Container Registry (ACR)</code></td><td>Container image registry</td></tr>
+        <tr><td><code>CloudFormation</code></td><td><code>ARM Templates / Bicep</code></td><td>Infrastructure as Code</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Lộ trình học Azure — từ zero đến production</div>
+    <div class="steps">
+      <div class="step"><div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Tạo tài khoản và explore Azure Portal</h4>
+        <p>Free account: $200 credit 30 ngày + nhiều services free 1 năm. Cài Azure CLI. Tạo Resource Group đầu tiên. Thử tạo VM nhỏ và xóa đi. Hiểu billing model.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Azure AD, RBAC và Managed Identity</h4>
+        <p>Hiểu Subscription → Resource Group hierarchy. Tạo Service Principal. Enable Managed Identity cho VM. Gán RBAC role. Đây là nền tảng security của Azure.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>App Service và Azure Database</h4>
+        <p>Deploy Spring Boot lên App Service từ Docker container. Tạo Azure Database for PostgreSQL trong VNet. Dùng Key Vault lưu DB password. Cấu hình App Settings lấy từ Key Vault.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>VNet, NSG và Private Endpoints</h4>
+        <p>Tạo VNet với public/private subnets. NSG rules. Đặt PostgreSQL sau Private Endpoint — chỉ accessible từ VNet. App Service tích hợp VNet. Hiểu Hub &amp; Spoke pattern.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>AKS và Azure Container Registry</h4>
+        <p>Tạo ACR. Build &amp; push Docker image. Tạo AKS cluster. Attach ACR với AKS. Deploy Helm chart. Cấu hình Workload Identity cho pods lấy secrets từ Key Vault.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>Azure DevOps / GitHub Actions và Monitor</h4>
+        <p>Tạo CI/CD pipeline tự động: test → build Docker → push ACR → deploy AKS. Cấu hình Application Insights cho distributed tracing. Tạo Alerts gửi Teams/Slack khi có lỗi.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px"><strong style="color:var(--text)">Tài nguyên tham khảo:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://docs.microsoft.com/azure/" style="color:var(--az1)">Azure Documentation</a> &nbsp;·&nbsp;
+        <a href="https://learn.microsoft.com/azure/" style="color:var(--az1)">Microsoft Learn (Free)</a> &nbsp;·&nbsp;
+        <a href="https://azure.microsoft.com/pricing/calculator/" style="color:var(--az1)">Pricing Calculator</a> &nbsp;·&nbsp;
+        <a href="https://azure.microsoft.com/free/" style="color:var(--az1)">Azure Free Account</a> &nbsp;·&nbsp;
+        <a href="https://github.com/Azure/azure-cli" style="color:var(--az1)">Azure CLI GitHub</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+<div class="footer">
+  <span>🔷 Microsoft Azure · Cloud Infrastructure · DevOps · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">19 chủ đề · AD → AKS → SQL → VNet → DevOps → Monitor</span>
+</div>
+</div><!-- /main -->
+<script>
+window.addEventListener('scroll',()=>{const e=document.documentElement;document.getElementById('pbar').style.width=(e.scrollTop/(e.scrollHeight-e.clientHeight)*100)+'%'});
+const sections=document.querySelectorAll('.section[id]'),links=document.querySelectorAll('.nav-link');
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+id))}})},{rootMargin:'-28% 0px -60% 0px'});
+sections.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>

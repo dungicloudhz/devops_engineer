@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Cloud Platform (GCP) — Hướng dẫn toàn tập · Cloud & DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);
+  --g1:#4285f4;--g1-dim:rgba(66,133,244,.12);--g1-glow:rgba(66,133,244,.28);
+  --g2:#ea4335;--g2-dim:rgba(234,67,53,.11);--g2-glow:rgba(234,67,53,.26);
+  --g3:#fbbc05;--g3-dim:rgba(251,188,5,.11);--g3-glow:rgba(251,188,5,.26);
+  --g4:#34a853;--g4-dim:rgba(52,168,83,.11);--g4-glow:rgba(52,168,83,.26);
+  --g5:#00bcd4;--g5-dim:rgba(0,188,212,.11);--g5-glow:rgba(0,188,212,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--g1),#1a56b0);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--g1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--g1-dim);color:var(--g1)}.ngh-2{background:var(--g2-dim);color:var(--g2)}
+.ngh-3{background:var(--g3-dim);color:var(--g3)}.ngh-4{background:var(--g4-dim);color:var(--g4)}
+.ngh-5{background:var(--g5-dim);color:var(--g5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(66,133,244,.07);border-left-color:var(--g1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(66,133,244,.13) 0%,transparent 62%),
+  radial-gradient(ellipse 45% 55% at 12% 82%,rgba(52,168,83,.08) 0%,transparent 55%),
+  radial-gradient(ellipse 35% 45% at 50% 50%,rgba(251,188,5,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(66,133,244,.10) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--g1-dim);border:1px solid rgba(66,133,244,.35);color:var(--g1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--g1)}
+.h-grad{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 30%,var(--g3) 60%,var(--g4) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--g1-dim);color:var(--g1)}.chip-2{background:var(--g2-dim);color:var(--g2)}
+.chip-3{background:var(--g3-dim);color:var(--g3)}.chip-4{background:var(--g4-dim);color:var(--g4)}
+.chip-5{background:var(--g5-dim);color:var(--g5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--g1-dim);border:1px solid rgba(66,133,244,.28)}.cb-1::before{background:linear-gradient(90deg,var(--g1),var(--g5))}
+.cb-2{background:var(--g2-dim);border:1px solid rgba(234,67,53,.28)}.cb-2::before{background:linear-gradient(90deg,var(--g2),var(--g3))}
+.cb-3{background:var(--g3-dim);border:1px solid rgba(251,188,5,.28)}.cb-3::before{background:linear-gradient(90deg,var(--g3),var(--g4))}
+.cb-4{background:var(--g4-dim);border:1px solid rgba(52,168,83,.28)}.cb-4::before{background:linear-gradient(90deg,var(--g4),var(--g1))}
+.cb-5{background:var(--g5-dim);border:1px solid rgba(0,188,212,.28)}.cb-5::before{background:linear-gradient(90deg,var(--g5),var(--g4))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--g1-dim);color:var(--g1)}.cb-2 .cb-badge{background:var(--g2-dim);color:var(--g2)}
+.cb-3 .cb-badge{background:var(--g3-dim);color:var(--g3)}.cb-4 .cb-badge{background:var(--g4-dim);color:var(--g4)}
+.cb-5 .cb-badge{background:var(--g5-dim);color:var(--g5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--g1);background:var(--g1-dim);border:1px solid var(--g1-glow)}
+.st-2{color:var(--g2);background:var(--g2-dim);border:1px solid var(--g2-glow)}
+.st-3{color:var(--g3);background:var(--g3-dim);border:1px solid var(--g3-glow)}
+.st-4{color:var(--g4);background:var(--g4-dim);border:1px solid var(--g4-glow)}
+.st-5{color:var(--g5);background:var(--g5-dim);border:1px solid var(--g5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--g1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--g1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--g1-dim);color:var(--g1)}.ct-2{background:var(--g2-dim);color:var(--g2)}
+.ct-3{background:var(--g3-dim);color:var(--g3)}.ct-4{background:var(--g4-dim);color:var(--g4)}
+.ct-5{background:var(--g5-dim);color:var(--g5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+.gc-kw{color:#4285f4;font-weight:700}.gc-str{color:#c3e88d}.gc-cmt{color:#546e7a;font-style:italic}
+.gc-flag{color:#ffcb6b}.gc-val{color:#f78c6c}.gc-ok{color:#40d88e}.gc-err{color:#ff6584}
+.gc-svc{color:#00bcd4;font-weight:600}.gc-proj{color:#fbbc05}.gc-id{color:#c792ea}.gc-key{color:#89ddff}
+.gc-ann{color:#34a853}.gc-yaml{color:#89ddff}
+.tc-prompt{color:#89ddff}.tc-cmd{color:#82aaff}.tc-flag{color:#ffcb6b}
+.tc-path{color:#c3e88d}.tc-arg{color:#f78c6c}.tc-cmt{color:#546e7a;font-style:italic}
+.tc-out{color:#546e7a}.tc-ok{color:#40d88e}.tc-err{color:#ff6584}.tc-pipe{color:#89ddff}.tc-var{color:#c792ea}
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:rgba(52,168,83,.08);border:1px solid rgba(52,168,83,.22);color:#1e8040}
+.i-warn{background:rgba(251,188,5,.08);border:1px solid rgba(251,188,5,.22);color:#9a7200}
+.i-tip{background:rgba(66,133,244,.08);border:1px solid rgba(66,133,244,.22);color:#2050b0}
+.i-note{background:rgba(0,188,212,.07);border:1px solid rgba(0,188,212,.2);color:#0099bb}
+.i-err{background:rgba(234,67,53,.07);border:1px solid rgba(234,67,53,.2);color:#bb2020}
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--g1)}.rw-2::before{background:var(--g2)}.rw-3::before{background:var(--g3)}
+.rw-4::before{background:var(--g4)}.rw-5::before{background:var(--g5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--g1)}.rw-2 .rw-label{color:var(--g2)}.rw-3 .rw-label{color:var(--g3)}
+.rw-4 .rw-label{color:var(--g4)}.rw-5 .rw-label{color:var(--g5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmp-bad{background:rgba(234,67,53,.06);border:1px solid rgba(234,67,53,.2);border-radius:11px;padding:16px}
+.cmp-good{background:rgba(52,168,83,.06);border:1px solid rgba(52,168,83,.2);border-radius:11px;padding:16px}
+.cmp-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cmp-bad .cmp-label{color:var(--g2)}.cmp-good .cmp-label{color:var(--g4)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--g5)}
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--g1);background:var(--g1-dim);border:2px solid var(--g1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--g1)}.h4-2{color:var(--g2)}.h4-3{color:var(--g3)}.h4-4{color:var(--g4)}.h4-5{color:var(--g5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;gap:8px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted);flex-shrink:0}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g5);text-align:right}
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(66,133,244,.1);color:var(--g1);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid,.compare{grid-template-columns:1fr}}
+</style></head>
+<body>
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand"><div class="logo-icon">🌐</div>
+      <div class="logo-text"><h2>Google Cloud</h2><p>GCP · Cloud Platform · DevOps</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Nền tảng</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🌐</span> GCP là gì? Global Infra</a>
+    <a href="#s1" class="nav-link"><span class="ico">🏗️</span> Projects &amp; IAM</a>
+    <a href="#s2" class="nav-link"><span class="ico">⚡</span> gcloud CLI</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🔵 Compute</div>
+    <a href="#s3" class="nav-link"><span class="ico">🖥️</span> Compute Engine (GCE)</a>
+    <a href="#s4" class="nav-link"><span class="ico">☸️</span> GKE — Kubernetes Engine</a>
+    <a href="#s5" class="nav-link"><span class="ico">⚡</span> Cloud Functions &amp; Run</a>
+    <a href="#s6" class="nav-link"><span class="ico">🚀</span> App Engine &amp; Cloud Run</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🔴 Storage &amp; Database</div>
+    <a href="#s7" class="nav-link"><span class="ico">🪣</span> Cloud Storage (GCS)</a>
+    <a href="#s8" class="nav-link"><span class="ico">🗄️</span> Cloud SQL &amp; AlloyDB</a>
+    <a href="#s9" class="nav-link"><span class="ico">🌍</span> Spanner &amp; Firestore</a>
+    <a href="#s10" class="nav-link"><span class="ico">🔴</span> Memorystore — Redis</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Networking</div>
+    <a href="#s11" class="nav-link"><span class="ico">🌐</span> VPC &amp; Subnets</a>
+    <a href="#s12" class="nav-link"><span class="ico">⚖️</span> Load Balancing &amp; CDN</a>
+    <a href="#s13" class="nav-link"><span class="ico">🌍</span> Cloud DNS &amp; Cloud Armor</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟢 Messaging &amp; Data</div>
+    <a href="#s14" class="nav-link"><span class="ico">📨</span> Pub/Sub — Messaging</a>
+    <a href="#s15" class="nav-link"><span class="ico">🌊</span> Dataflow &amp; BigQuery</a>
+    <a href="#s16" class="nav-link"><span class="ico">🔑</span> Secret Manager &amp; KMS</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🔵 DevOps &amp; Observability</div>
+    <a href="#s17" class="nav-link"><span class="ico">📦</span> Artifact Registry &amp; CI/CD</a>
+    <a href="#s18" class="nav-link"><span class="ico">📊</span> Cloud Monitoring &amp; Logging</a>
+    <a href="#s19" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> Google Cloud Platform · GKE · BigQuery · Pub/Sub · Cloud Run</div>
+  <h1><span class="h-acc">Google</span><br><span class="h-grad">Cloud Platform</span></h1>
+  <p class="hero-desc">Hướng dẫn GCP từ cơ bản đến nâng cao — IAM, Compute Engine, GKE, Cloud Run, Cloud SQL, Pub/Sub, BigQuery, Secret Manager, Cloud Monitoring — mỗi service có ví dụ cụ thể và dễ hiểu.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">IAM &amp; Projects</span>
+    <span class="chip chip-2">GKE &amp; Cloud Run</span>
+    <span class="chip chip-3">BigQuery</span>
+    <span class="chip chip-4">Cloud SQL</span>
+    <span class="chip chip-5">Pub/Sub &amp; Dataflow</span>
+    <span class="chip chip-r">Secret Manager</span>
+  </div>
+</div>
+<div class="content">
+<!-- S0 OVERVIEW -->
+<div class="section" id="s0">
+  <div class="sec-head"><span class="sec-tag st-1">OVERVIEW</span>
+    <div><h2 class="sec-title">GCP là gì? — Global Infrastructure</h2>
+    <p class="sec-sub">Cloud platform của Google, 38 Regions, mạnh về Data/AI/ML, Kubernetes và networking</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tại sao chọn GCP? — 3 điểm mạnh độc đáo</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🤖</div><div class="card-title" style="color:var(--g1)">AI &amp; ML First-class</div><div class="card-desc">Vertex AI, BigQuery ML, AutoML, TPU chips — AI infrastructure của Google Search, YouTube, Gmail.</div></div>
+      <div class="card"><div class="card-icon">📊</div><div class="card-title" style="color:var(--g3)">Data &amp; Analytics</div><div class="card-desc">BigQuery serverless data warehouse, Pub/Sub streaming, Dataflow — tốt nhất cho analytics workloads.</div></div>
+      <div class="card"><div class="card-icon">☸️</div><div class="card-title" style="color:var(--g4)">Kubernetes Native</div><div class="card-desc">Google phát minh Kubernetes. GKE (Google Kubernetes Engine) là K8s tốt nhất trên cloud.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GCP Resource Hierarchy — Organization → Project → Resources</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3),var(--g4))"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="background:rgba(66,133,244,.1);border:2px solid rgba(66,133,244,.4);border-radius:10px;padding:12px 18px">
+          <div style="font-size:10px;font-weight:800;color:var(--g1);text-transform:uppercase;margin-bottom:4px">🏢 Organization (company.com)</div>
+          <div style="font-size:12px;color:var(--muted)">Gốc của hierarchy. Áp dụng Org Policy cho toàn công ty. Quản lý qua Google Workspace / Cloud Identity.</div>
+        </div>
+        <div style="padding-left:24px">
+          <div style="background:rgba(251,188,5,.08);border:1px solid rgba(251,188,5,.3);border-radius:10px;padding:12px 18px">
+            <div style="font-size:10px;font-weight:800;color:var(--g3);text-transform:uppercase;margin-bottom:4px">📂 Folders (Dev / Staging / Production)</div>
+            <div style="font-size:12px;color:var(--muted)">Nhóm Projects theo môi trường hoặc team. Áp dụng policies tại folder level.</div>
+          </div>
+          <div style="padding-left:24px;margin-top:8px">
+            <div style="background:rgba(234,67,53,.08);border:1px solid rgba(234,67,53,.3);border-radius:10px;padding:12px 18px">
+              <div style="font-size:10px;font-weight:800;color:var(--g2);text-transform:uppercase;margin-bottom:4px">📋 Projects (order-service-prod)</div>
+              <div style="font-size:12px;color:var(--muted)">Đơn vị billing và isolation cơ bản. Mỗi project có Project ID duy nhất. VD: <code>order-service-prod-12345</code></div>
+            </div>
+            <div style="padding-left:24px;margin-top:8px">
+              <div style="background:rgba(52,168,83,.07);border:1px solid rgba(52,168,83,.25);border-radius:10px;padding:12px 18px">
+                <div style="font-size:10px;font-weight:800;color:var(--g4);text-transform:uppercase;margin-bottom:4px">⚙️ Resources</div>
+                <div style="font-size:12px;color:var(--muted)">GCE VMs, GKE Clusters, Cloud SQL, Cloud Storage, Pub/Sub Topics... tất cả nằm trong Project</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Best practice:</strong> Tạo Project riêng cho mỗi môi trường (dev, staging, prod) — không phải chỉ 1 project cho tất cả. Billing alert per project dễ track cost. IAM per project dễ phân quyền.</div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GCP vs AWS vs Azure — Khi nào chọn GCP?</div>
+    <table class="tbl">
+      <thead><tr><th>Tiêu chí</th><th>GCP</th><th>AWS</th><th>Azure</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Kubernetes</strong></td><td style="color:var(--g4)">✅ Tốt nhất (GKE)</td><td>EKS (tốt)</td><td>AKS (tốt)</td></tr>
+        <tr><td><strong>Data/Analytics</strong></td><td style="color:var(--g4)">✅ Tốt nhất (BigQuery)</td><td>Redshift (tốt)</td><td>Synapse (tốt)</td></tr>
+        <tr><td><strong>AI/ML</strong></td><td style="color:var(--g4)">✅ Vertex AI + TPU</td><td>SageMaker</td><td>Azure ML + OpenAI</td></tr>
+        <tr><td><strong>Enterprise/AD</strong></td><td>Cloud Identity</td><td>IAM</td><td style="color:var(--g4)">✅ Tốt nhất (Active Directory)</td></tr>
+        <tr><td><strong>Ecosystem</strong></td><td>Vừa</td><td style="color:var(--g4)">✅ Tốt nhất (200+ services)</td><td>Tốt</td></tr>
+        <tr><td><strong>Pricing</strong></td><td style="color:var(--g4)">✅ Rẻ hơn, sustained use discount</td><td>Trung bình</td><td>Trung bình</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- S1 IAM -->
+<div class="section" id="s1">
+  <div class="sec-head"><span class="sec-tag st-1">IAM</span>
+    <div><h2 class="sec-title">GCP Projects &amp; IAM — Identity &amp; Access</h2>
+    <p class="sec-sub">Service Accounts, IAM Roles, Workload Identity, IAM conditions</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Service Account — credentials cho applications</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">IAM — Service Account, roles, Workload Identity</span><span class="cb-tag ct-1">IAM</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Project ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> projects create order-service-prod-12345 \
+    <span class="tc-flag">--name</span>   <span class="tc-str">"Order Service Production"</span> \
+    <span class="tc-flag">--folder</span> FOLDER_ID
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config set project order-service-prod-12345
+
+<span class="tc-cmt"># ── Tạo Service Account ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> iam service-accounts create order-service-sa \
+    <span class="tc-flag">--display-name</span> <span class="tc-str">"Order Service SA"</span> \
+    <span class="tc-flag">--project</span>     order-service-prod-12345
+<span class="tc-out">Created service account [order-service-sa@order-service-prod-12345.iam.gserviceaccount.com]</span>
+
+<span class="tc-cmt"># ── Gán IAM role ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> projects add-iam-policy-binding order-service-prod-12345 \
+    <span class="tc-flag">--member</span>  <span class="tc-str">"serviceAccount:order-service-sa@order-service-prod-12345.iam.gserviceaccount.com"</span> \
+    <span class="tc-flag">--role</span>    <span class="tc-str">"roles/cloudsql.client"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> projects add-iam-policy-binding order-service-prod-12345 \
+    <span class="tc-flag">--member</span>  <span class="tc-str">"serviceAccount:order-service-sa@..."</span> \
+    <span class="tc-flag">--role</span>    <span class="tc-str">"roles/storage.objectViewer"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> projects add-iam-policy-binding order-service-prod-12345 \
+    <span class="tc-flag">--member</span>  <span class="tc-str">"serviceAccount:order-service-sa@..."</span> \
+    <span class="tc-flag">--role</span>    <span class="tc-str">"roles/secretmanager.secretAccessor"</span>
+
+<span class="tc-cmt"># ── Workload Identity — GKE Pod không cần Service Account key file! ──</span>
+<span class="tc-cmt"># Link K8s ServiceAccount với GCP Service Account</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> iam service-accounts add-iam-policy-binding \
+    order-service-sa@order-service-prod-12345.iam.gserviceaccount.com \
+    <span class="tc-flag">--role</span>     roles/iam.workloadIdentityUser \
+    <span class="tc-flag">--member</span>   <span class="tc-str">"serviceAccount:order-service-prod-12345.svc.id.goog[production/order-service-sa]"</span>
+<span class="tc-cmt"># Annotate K8s ServiceAccount:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> annotate serviceaccount order-service-sa \
+    <span class="tc-flag">-n</span> production \
+    iam.gke.io/gcp-service-account=order-service-sa@order-service-prod-12345.iam.gserviceaccount.com
+<span class="tc-cmt"># Pods dùng SA này tự động có GCP credentials — không cần JSON key!</span>
+
+<span class="tc-cmt"># ── Các IAM roles phổ biến ──</span>
+<span class="tc-cmt"># roles/owner             → full control (tránh dùng)</span>
+<span class="tc-cmt"># roles/editor            → mọi thứ trừ IAM</span>
+<span class="tc-cmt"># roles/viewer            → chỉ đọc</span>
+<span class="tc-cmt"># roles/cloudsql.client   → kết nối Cloud SQL</span>
+<span class="tc-cmt"># roles/storage.objectAdmin → full GCS access</span>
+<span class="tc-cmt"># roles/run.invoker       → gọi Cloud Run service</span>
+<span class="tc-cmt"># roles/pubsub.publisher  → publish Pub/Sub messages</span>
+<span class="tc-cmt"># roles/secretmanager.secretAccessor → đọc secrets</span>
+<span class="tc-cmt"># roles/bigquery.dataViewer → read BigQuery data</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2 GCLOUD CLI -->
+<div class="section" id="s2">
+  <div class="sec-head"><span class="sec-tag st-1">CLI</span>
+    <div><h2 class="sec-title">gcloud CLI — Công cụ quản lý GCP</h2>
+    <p class="sec-sub">Install, config, essential commands cho mọi GCP service</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Setup và commands thường dùng</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">gcloud CLI — install, auth, config, essential commands</span><span class="cb-tag ct-1">gcloud</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Install ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">curl</span> https://sdk.cloud.google.com | bash
+<span class="tc-prompt">$</span> <span class="tc-cmd">exec</span> -l $SHELL
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> init
+
+<span class="tc-cmt"># ── Auth ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> auth login                          <span class="tc-cmt"># browser login</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> auth application-default login      <span class="tc-cmt"># cho local dev (ADC)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> auth activate-service-account \     <span class="tc-cmt"># dùng SA key (CI/CD)</span>
+    <span class="tc-flag">--key-file</span> service-account.json
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> auth list                           <span class="tc-cmt"># xem accounts đang đăng nhập</span>
+
+<span class="tc-cmt"># ── Config ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config set project order-service-prod-12345
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config set compute/region asia-southeast1    <span class="tc-cmt"># Singapore</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config set compute/zone   asia-southeast1-a
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config list                         <span class="tc-cmt"># xem config hiện tại</span>
+
+<span class="tc-cmt"># ── Multiple configs (như AWS profiles) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config configurations create prod
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config configurations create dev
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> config configurations activate prod
+
+<span class="tc-cmt"># ── Regions hay dùng ──</span>
+<span class="tc-cmt"># asia-southeast1    → Singapore (gần VN nhất, latency ~20ms)</span>
+<span class="tc-cmt"># asia-east1         → Taiwan</span>
+<span class="tc-cmt"># asia-northeast1    → Tokyo</span>
+<span class="tc-cmt"># us-central1        → Iowa</span>
+<span class="tc-cmt"># europe-west1       → Belgium</span>
+
+<span class="tc-cmt"># ── Useful commands ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> info                                <span class="tc-cmt"># debug info</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> services list <span class="tc-flag">--enabled</span>            <span class="tc-cmt"># APIs đang enable</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> services enable container.googleapis.com  <span class="tc-cmt"># enable GKE API</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> billing projects describe order-service-prod-12345
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute regions list               <span class="tc-cmt"># xem tất cả regions</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> projects list</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-1">
+  <div class="cb-icon">🖥️</div>
+  <div><div class="cb-badge">COMPUTE</div>
+  <div class="cb-title">Compute Engine · GKE · Cloud Functions · Cloud Run</div>
+  <div class="cb-sub">VMs, containers, serverless — tất cả options để chạy code trên GCP</div></div>
+</div>
+
+<!-- S3 GCE -->
+<div class="section" id="s3">
+  <div class="sec-head"><span class="sec-tag st-1">COMPUTE ENGINE</span>
+    <div><h2 class="sec-title">Compute Engine (GCE) — Virtual Machines</h2>
+    <p class="sec-sub">Machine types, Preemptible/Spot VMs, Instance Groups, Startup Scripts</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Machine Types — chọn đúng size</div>
+    <table class="tbl">
+      <thead><tr><th>Series</th><th>Dùng cho</th><th>Ví dụ</th><th>vCPU/RAM</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--g1)">E2 (Economy)</strong></td><td>Dev/test, low traffic web apps, cost-efficient</td><td>e2-standard-2</td><td>2 vCPU / 8 GB — ~$50/tháng</td></tr>
+        <tr><td><strong style="color:var(--g3)">N2 (General)</strong></td><td>Web servers, backends, databases</td><td>n2-standard-4</td><td>4 vCPU / 16 GB — ~$150/tháng</td></tr>
+        <tr><td><strong style="color:var(--g2)">C2 (Compute)</strong></td><td>CPU-intensive: gaming, HPC, batch processing</td><td>c2-standard-8</td><td>8 vCPU / 32 GB</td></tr>
+        <tr><td><strong style="color:var(--g4)">M3 (Memory)</strong></td><td>In-memory databases, SAP HANA</td><td>m3-ultramem-32</td><td>32 vCPU / 976 GB RAM</td></tr>
+        <tr><td><strong style="color:var(--g5)">A2 (Accelerator)</strong></td><td>ML training, inference</td><td>a2-highgpu-1g</td><td>12 vCPU + 1x A100 GPU</td></tr>
+      </tbody>
+    </table>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Compute Engine — tạo VM, startup script, managed instance group</span><span class="cb-tag ct-1">GCE</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo VM instance ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute instances create vm-web-01 \
+    <span class="tc-flag">--project</span>         order-service-prod-12345 \
+    <span class="tc-flag">--zone</span>            asia-southeast1-a \
+    <span class="tc-flag">--machine-type</span>    n2-standard-2 \
+    <span class="tc-flag">--image-family</span>    ubuntu-2204-lts \
+    <span class="tc-flag">--image-project</span>   ubuntu-os-cloud \
+    <span class="tc-flag">--boot-disk-size</span>  30GB \
+    <span class="tc-flag">--boot-disk-type</span>  pd-ssd \
+    <span class="tc-flag">--service-account</span> order-service-sa@order-service-prod-12345.iam.gserviceaccount.com \
+    <span class="tc-flag">--scopes</span>          cloud-platform \          <span class="tc-cmt"># cho phép dùng GCP APIs</span>
+    <span class="tc-flag">--tags</span>            http-server,backend \
+    <span class="tc-flag">--subnet</span>          subnet-private-asia-se1 \
+    <span class="tc-flag">--no-address</span> \                             <span class="tc-cmt"># không gán public IP</span>
+    <span class="tc-flag">--metadata-from-file</span> startup-script=startup.sh
+<span class="tc-ok">Created [https://www.googleapis.com/compute/v1/projects/.../instances/vm-web-01].</span>
+
+<span class="tc-cmt"># startup.sh — chạy khi VM khởi động lần đầu</span>
+<span class="tc-cmt">#!/bin/bash</span>
+<span class="gc-kw">set</span> -ex
+<span class="gc-kw">apt-get</span> update -y && apt-get install -y openjdk-21-jre-headless
+<span class="gc-kw">mkdir</span> -p /opt/app
+<span class="tc-cmt"># Lấy app từ GCS (dùng SA credentials, không cần key file!)</span>
+<span class="gc-kw">gsutil</span> cp gs://company-deploy/order-service/v2.1.0/app.jar /opt/app/app.jar
+<span class="gc-kw">systemctl</span> enable --now order-service
+
+<span class="tc-cmt"># ── SSH vào VM ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute ssh vm-web-01 <span class="tc-flag">--zone</span> asia-southeast1-a
+<span class="tc-cmt"># gcloud SSH tự tạo SSH key, không cần quản lý key thủ công!</span>
+<span class="tc-cmt"># Hoặc dùng IAP (Identity-Aware Proxy) — không cần public IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute ssh vm-web-01 <span class="tc-flag">--tunnel-through-iap</span>
+
+<span class="tc-cmt"># ── Preemptible VM (spot) — rẻ hơn 60-91% ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute instances create vm-batch-worker \
+    <span class="tc-flag">--preemptible</span> \                             <span class="tc-cmt"># bị terminate sau tối đa 24h</span>
+    <span class="tc-flag">--machine-type</span> n2-standard-8
+<span class="tc-cmt"># Dùng cho: batch processing, CI builds, ML training không quan trọng</span>
+
+<span class="tc-cmt"># ── Managed Instance Group — auto scaling ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute instance-templates create web-template \
+    <span class="tc-flag">--machine-type</span>  n2-standard-2 \
+    <span class="tc-flag">--image-family</span>  ubuntu-2204-lts \
+    <span class="tc-flag">--image-project</span> ubuntu-os-cloud \
+    <span class="tc-flag">--metadata-from-file</span> startup-script=startup.sh
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute instance-groups managed create web-mig \
+    <span class="tc-flag">--template</span>       web-template \
+    <span class="tc-flag">--size</span>           3 \
+    <span class="tc-flag">--region</span>         asia-southeast1
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute instance-groups managed set-autoscaling web-mig \
+    <span class="tc-flag">--region</span>         asia-southeast1 \
+    <span class="tc-flag">--min-num-replicas</span> 2 \
+    <span class="tc-flag">--max-num-replicas</span> 20 \
+    <span class="tc-flag">--target-cpu-utilization</span> 0.7</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S4 GKE -->
+<div class="section" id="s4">
+  <div class="sec-head"><span class="sec-tag st-1">GKE</span>
+    <div><h2 class="sec-title">GKE — Google Kubernetes Engine</h2>
+    <p class="sec-sub">Managed Kubernetes tốt nhất trên cloud — Autopilot mode, node pools, Workload Identity</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GKE Standard vs Autopilot</div>
+    <div class="compare">
+      <div style="background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--g1);margin-bottom:10px">🔧 GKE Standard</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          Tự quản lý node pools<br>
+          Chọn machine type, disk size<br>
+          Preemptible nodes để tiết kiệm<br>
+          ✅ Linh hoạt, kiểm soát cao<br>
+          ✅ Phù hợp workloads đặc biệt<br>
+          <em>Dùng khi: cần custom hardware, GPU</em>
+        </div>
+      </div>
+      <div style="background:rgba(52,168,83,.07);border:1px solid rgba(52,168,83,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--g4);margin-bottom:10px">🤖 GKE Autopilot</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          Google quản lý hoàn toàn nodes<br>
+          Pay per Pod, không per node<br>
+          Scale to 0 tự động<br>
+          ✅ Không lo node management<br>
+          ✅ Security hardened by default<br>
+          <em>Dùng khi: không muốn quản lý infra</em>
+        </div>
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">GKE — create cluster, node pools, deploy Spring Boot</span><span class="cb-tag ct-1">GKE</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Enable API và Tạo GKE Cluster ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> services enable container.googleapis.com
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> container clusters create-auto gke-prod \
+    <span class="tc-flag">--project</span>  order-service-prod-12345 \
+    <span class="tc-flag">--region</span>   asia-southeast1 \
+    <span class="tc-flag">--network</span>  vpc-prod \
+    <span class="tc-flag">--subnetwork</span> subnet-gke \
+    <span class="tc-flag">--workload-pool</span> order-service-prod-12345.svc.id.goog  <span class="tc-cmt"># Workload Identity</span>
+<span class="tc-ok">Creating cluster gke-prod... done.</span>
+
+<span class="tc-cmt"># ── Lấy kubeconfig ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> container clusters get-credentials gke-prod \
+    <span class="tc-flag">--region</span>  asia-southeast1 \
+    <span class="tc-flag">--project</span> order-service-prod-12345
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get nodes
+<span class="tc-out">NAME                              STATUS  ROLES  AGE  VERSION
+gk3-gke-prod-pool-xxxx-abc       Ready   agent  3m   v1.28.4-gke.1083001</span>
+
+<span class="tc-cmt"># ── Standard cluster với Node Pools ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> container clusters create gke-standard \
+    <span class="tc-flag">--project</span>         order-service-prod-12345 \
+    <span class="tc-flag">--region</span>          asia-southeast1 \
+    <span class="tc-flag">--num-nodes</span>       2 \
+    <span class="tc-flag">--machine-type</span>    n2-standard-4 \
+    <span class="tc-flag">--disk-size</span>       100 \
+    <span class="tc-flag">--enable-autoscaling</span> \
+    <span class="tc-flag">--min-nodes</span>       2 <span class="tc-flag">--max-nodes</span> 10 \
+    <span class="tc-flag">--workload-pool</span>   order-service-prod-12345.svc.id.goog \
+    <span class="tc-flag">--enable-ip-alias</span> \                          <span class="tc-cmt"># VPC-native cluster</span>
+    <span class="tc-flag">--network</span>         vpc-prod \
+    <span class="tc-flag">--subnetwork</span>      subnet-gke
+
+<span class="tc-cmt"># ── Thêm GPU node pool cho AI workloads ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> container node-pools create gpu-pool \
+    <span class="tc-flag">--cluster</span>         gke-standard \
+    <span class="tc-flag">--region</span>          asia-southeast1 \
+    <span class="tc-flag">--machine-type</span>    a2-highgpu-1g \
+    <span class="tc-flag">--accelerator</span>     type=nvidia-tesla-a100,count=1 \
+    <span class="tc-flag">--num-nodes</span>       1 \
+    <span class="tc-flag">--node-taints</span>     gpu=true:NoSchedule
+
+<span class="tc-cmt"># ── Deploy Spring Boot với Workload Identity ──</span>
+<span class="gc-yaml">apiVersion</span>: v1
+<span class="gc-yaml">kind</span>: ServiceAccount
+<span class="gc-yaml">metadata</span>:
+  <span class="gc-yaml">name</span>:      order-service-sa
+  <span class="gc-yaml">namespace</span>: production
+  <span class="gc-yaml">annotations</span>:
+    <span class="gc-ann">iam.gke.io/gcp-service-account</span>: <span class="gc-str">order-service-sa@order-service-prod-12345.iam.gserviceaccount.com</span>
+<span class="tc-cmt"># Pod dùng ServiceAccount này tự động có GCP credentials!</span>
+<span class="tc-cmt"># Kết nối Cloud SQL, đọc Secret Manager — không cần key file!</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S5 CLOUD FUNCTIONS -->
+<div class="section" id="s5">
+  <div class="sec-head"><span class="sec-tag st-1">FUNCTIONS</span>
+    <div><h2 class="sec-title">Cloud Functions &amp; Cloud Run Jobs</h2>
+    <p class="sec-sub">Serverless functions với HTTP, Pub/Sub, Event triggers</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cloud Functions Gen 2 — Java examples</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud Functions — HTTP, Pub/Sub, Storage triggers</span><span class="cb-tag ct-1">Functions</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt">// ── HTTP Function — REST API serverless ──</span>
+<span class="gc-kw">import</span> com.google.cloud.functions.HttpFunction;
+<span class="gc-kw">import</span> com.google.cloud.functions.HttpRequest;
+<span class="gc-kw">import</span> com.google.cloud.functions.HttpResponse;
+
+<span class="gc-kw">public class</span> GetOrder <span class="gc-kw">implements</span> HttpFunction {
+  <span class="gc-kw">@Override</span>
+  <span class="gc-kw">public void</span> service(HttpRequest request, HttpResponse response) <span class="gc-kw">throws</span> Exception {
+    String orderId = request.getQueryParameters()
+        .getOrDefault(<span class="gc-str">"orderId"</span>, List.of(<span class="gc-str">"unknown"</span>)).get(<span class="gc-ann">0</span>);
+    response.setContentType(<span class="gc-str">"application/json"</span>);
+    response.getWriter().write(<span class="gc-str">"{\"orderId\":\""</span> + orderId + <span class="gc-str">"\"}"</span>);
+  }
+}
+
+<span class="tc-cmt">// ── Pub/Sub Function ──</span>
+<span class="gc-kw">public class</span> ProcessOrder <span class="gc-kw">implements</span> RawBackgroundFunction {
+  <span class="gc-kw">@Override</span>
+  <span class="gc-kw">public void</span> accept(String json, Context context) {
+    <span class="gc-kw">byte</span>[] decoded = Base64.getDecoder().decode(
+        JsonParser.parseString(json).getAsJsonObject().get(<span class="gc-str">"data"</span>).getAsString());
+    String message = <span class="gc-kw">new</span> String(decoded, StandardCharsets.UTF_8);
+    System.out.println(<span class="gc-str">"Processing: "</span> + message);
+    orderService.process(message);
+  }
+}
+
+<span class="tc-cmt"># ── Deploy Cloud Function ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> functions deploy get-order \
+    <span class="tc-flag">--gen2</span> \
+    <span class="tc-flag">--runtime</span>             java21 \
+    <span class="tc-flag">--region</span>              asia-southeast1 \
+    <span class="tc-flag">--source</span>              . \
+    <span class="tc-flag">--entry-point</span>         com.company.GetOrder \
+    <span class="tc-flag">--trigger-http</span> \
+    <span class="tc-flag">--allow-unauthenticated</span> \
+    <span class="tc-flag">--service-account</span>     order-service-sa@...iam.gserviceaccount.com \
+    <span class="tc-flag">--memory</span>              512MB \
+    <span class="tc-flag">--max-instances</span>       100 \
+    <span class="tc-flag">--set-env-vars</span>        PROJECT_ID=order-service-prod-12345
+<span class="tc-ok">URL: https://asia-southeast1-order-service-prod-12345.cloudfunctions.net/get-order</span>
+
+<span class="tc-cmt"># Deploy Pub/Sub trigger</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> functions deploy process-order \
+    <span class="tc-flag">--gen2</span> \
+    <span class="tc-flag">--runtime</span>     java21 \
+    <span class="tc-flag">--entry-point</span> com.company.ProcessOrder \
+    <span class="tc-flag">--trigger-topic</span> order-created    <span class="tc-cmt"># Pub/Sub topic name</span>
+
+<span class="tc-cmt"># ── Cloud Scheduler — cron jobs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> scheduler jobs create http daily-report \
+    <span class="tc-flag">--location</span>  asia-southeast1 \
+    <span class="tc-flag">--schedule</span>  <span class="tc-str">"0 2 * * *"</span> \           <span class="tc-cmt"># 2AM mỗi ngày</span>
+    <span class="tc-flag">--time-zone</span> <span class="tc-str">"Asia/Ho_Chi_Minh"</span> \
+    <span class="tc-flag">--uri</span>       https://asia-southeast1-....cloudfunctions.net/daily-report \
+    <span class="tc-flag">--oidc-service-account-email</span> order-service-sa@...</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 CLOUD RUN -->
+<div class="section" id="s6">
+  <div class="sec-head"><span class="sec-tag st-1">CLOUD RUN</span>
+    <div><h2 class="sec-title">Cloud Run — Serverless Containers</h2>
+    <p class="sec-sub">Deploy bất kỳ container — scale to 0, pay per request, fully managed</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cloud Run — deploy Spring Boot container trong vài phút</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud Run — deploy, config, traffic splitting, jobs</span><span class="cb-tag ct-1">Cloud Run</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Deploy container lên Cloud Run ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run deploy order-service \
+    <span class="tc-flag">--image</span>          asia-southeast1-docker.pkg.dev/order-service-prod-12345/repo/order-service:v2.1.0 \
+    <span class="tc-flag">--region</span>         asia-southeast1 \
+    <span class="tc-flag">--platform</span>       managed \
+    <span class="tc-flag">--service-account</span> order-service-sa@...iam.gserviceaccount.com \
+    <span class="tc-flag">--port</span>           8080 \
+    <span class="tc-flag">--memory</span>         1Gi \
+    <span class="tc-flag">--cpu</span>            1 \
+    <span class="tc-flag">--min-instances</span>  1 \                    <span class="tc-cmt"># luôn warm, tránh cold start</span>
+    <span class="tc-flag">--max-instances</span>  100 \
+    <span class="tc-flag">--concurrency</span>    80 \                   <span class="tc-cmt"># 80 requests/instance</span>
+    <span class="tc-flag">--timeout</span>        60s \
+    <span class="tc-flag">--no-allow-unauthenticated</span> \           <span class="tc-cmt"># private service</span>
+    <span class="tc-flag">--set-env-vars</span>   SPRING_PROFILES_ACTIVE=prod \
+    <span class="tc-flag">--set-secrets</span>    DB_PASSWORD=db-password:latest  <span class="tc-cmt"># từ Secret Manager</span>
+<span class="tc-ok">Service [order-service] revision [order-service-00001] has been deployed and is serving 100% of traffic.
+URL: https://order-service-xyz-as.a.run.app</span>
+
+<span class="tc-cmt"># ── Connect Cloud SQL qua Cloud SQL Auth Proxy ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run services update order-service \
+    <span class="tc-flag">--add-cloudsql-instances</span> order-service-prod-12345:asia-southeast1:pg-order-prod
+<span class="tc-cmt"># Spring Boot kết nối: jdbc:postgresql:///shopdb?cloudSqlInstance=...&amp;socketFactory=...</span>
+
+<span class="tc-cmt"># ── Traffic splitting — Canary deployment ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run deploy order-service \
+    <span class="tc-flag">--image</span>   ...order-service:v2.2.0 \
+    <span class="tc-flag">--no-traffic</span>                           <span class="tc-cmt"># deploy nhưng chưa nhận traffic</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run services update-traffic order-service \
+    <span class="tc-flag">--to-revisions</span> order-service-00001=90,order-service-00002=10
+<span class="tc-cmt"># 90% → v2.1.0, 10% → v2.2.0 (canary)</span>
+<span class="tc-cmt"># Nếu ok → đẩy 100% sang v2.2.0</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run services update-traffic order-service <span class="tc-flag">--to-latest</span>
+
+<span class="tc-cmt"># ── Cloud Run Jobs — batch processing ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run jobs create db-migration \
+    <span class="tc-flag">--image</span>    ...migration:latest \
+    <span class="tc-flag">--region</span>   asia-southeast1 \
+    <span class="tc-flag">--tasks</span>    1 \
+    <span class="tc-flag">--max-retries</span> 3
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> run jobs execute db-migration  <span class="tc-cmt"># chạy job</span></pre></div>
+    </div>
+    <div class="info i-note">
+      <span class="info-ico">⚡</span>
+      <div><strong style="color:var(--text)">Cloud Run vs GKE — chọn gì?</strong> Cloud Run: zero ops, scale to 0, tốt cho HTTP services. GKE: phức tạp hơn nhưng full Kubernetes ecosystem, tốt khi cần customization hoặc non-HTTP workloads. Rule of thumb: dùng Cloud Run trước, migrate sang GKE nếu cần.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-2">
+  <div class="cb-icon">💾</div>
+  <div><div class="cb-badge">STORAGE &amp; DATABASE</div>
+  <div class="cb-title">Cloud Storage · Cloud SQL · Spanner · Firestore · Memorystore</div>
+  <div class="cb-sub">Object storage, relational, globally distributed, NoSQL và in-memory caching</div></div>
+</div>
+
+<!-- S7 GCS -->
+<div class="section" id="s7">
+  <div class="sec-head"><span class="sec-tag st-2">CLOUD STORAGE</span>
+    <div><h2 class="sec-title">Cloud Storage (GCS) — Object Storage</h2>
+    <p class="sec-sub">Unlimited object storage, 99.999999999% durability, lifecycle management</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GCS operations — buckets, objects, signed URLs</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud Storage — gsutil, Java SDK, signed URLs, lifecycle</span><span class="cb-tag ct-2">GCS</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Bucket ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> mb <span class="tc-flag">-p</span> order-service-prod-12345 \
+    <span class="tc-flag">-l</span> asia-southeast1 \
+    <span class="tc-flag">-b</span> on \                                   <span class="tc-cmt"># uniform bucket-level access</span>
+    gs://company-order-service-assets
+
+<span class="tc-cmt"># Tắt public access</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> policyonly set on gs://company-order-service-assets
+
+<span class="tc-cmt"># ── Upload / Download ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> cp ./app.jar gs://company-deploy/order-service/v2.1.0/app.jar
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> rsync <span class="tc-flag">-r</span> ./dist/ gs://company-website/
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> cp gs://company-assets/config.yml ./
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> ls <span class="tc-flag">-l</span> gs://company-assets/
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> du <span class="tc-flag">-sh</span> gs://company-assets/       <span class="tc-cmt"># total size</span>
+
+<span class="tc-cmt"># ── Signed URL — chia sẻ file tạm thời ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> signurl <span class="tc-flag">-d</span> 1h <span class="tc-flag">-m</span> GET \
+    service-account.json \
+    gs://company-assets/reports/2024-01.pdf
+<span class="tc-ok">https://storage.googleapis.com/company-assets/reports/2024-01.pdf?X-Goog-Signature=...</span>
+
+<span class="tc-cmt">// ── Java SDK ──</span>
+Storage storage = StorageOptions.newBuilder()
+    .setProjectId(<span class="gc-str">"order-service-prod-12345"</span>).build().getService();
+
+<span class="tc-cmt">// Upload</span>
+BlobId blobId = BlobId.of(<span class="gc-str">"company-assets"</span>, <span class="gc-str">"reports/2024-01.pdf"</span>);
+BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(<span class="gc-str">"application/pdf"</span>).build();
+storage.create(blobInfo, Files.readAllBytes(Paths.get(<span class="gc-str">"/tmp/report.pdf"</span>)));
+
+<span class="tc-cmt">// Signed URL (V4 Signing)</span>
+URL signedUrl = storage.signUrl(blobInfo, <span class="gc-ann">1</span>, TimeUnit.HOURS,
+    Storage.SignUrlOption.withV4Signature());
+
+<span class="tc-cmt"># ── Lifecycle Policy — auto-tier ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gsutil</span> lifecycle set lifecycle.json gs://company-logs
+<span class="tc-cmt"># lifecycle.json:</span>
+{
+  <span class="gc-key">"rule"</span>: [
+    {<span class="gc-key">"action"</span>:{<span class="gc-key">"type"</span>:<span class="gc-str">"SetStorageClass"</span>,<span class="gc-key">"storageClass"</span>:<span class="gc-str">"NEARLINE"</span>},
+     <span class="gc-key">"condition"</span>:{<span class="gc-key">"age"</span>:30}},
+    {<span class="gc-key">"action"</span>:{<span class="gc-key">"type"</span>:<span class="gc-str">"SetStorageClass"</span>,<span class="gc-key">"storageClass"</span>:<span class="gc-str">"COLDLINE"</span>},
+     <span class="gc-key">"condition"</span>:{<span class="gc-key">"age"</span>:90}},
+    {<span class="gc-key">"action"</span>:{<span class="gc-key">"type"</span>:<span class="gc-str">"Delete"</span>},
+     <span class="gc-key">"condition"</span>:{<span class="gc-key">"age"</span>:365}}
+  ]
+}
+<span class="tc-cmt"># Standard ($0.020/GB) → Nearline ($0.010) → Coldline ($0.004) → Delete</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S8 CLOUD SQL -->
+<div class="section" id="s8">
+  <div class="sec-head"><span class="sec-tag st-2">CLOUD SQL</span>
+    <div><h2 class="sec-title">Cloud SQL &amp; AlloyDB — Managed Relational DB</h2>
+    <p class="sec-sub">PostgreSQL, MySQL — fully managed, HA, automated backups, Cloud SQL Auth Proxy</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cloud SQL PostgreSQL — production setup</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud SQL — tạo, kết nối, Auth Proxy, Spring Boot</span><span class="cb-tag ct-2">Cloud SQL</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Cloud SQL PostgreSQL ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> sql instances create pg-order-prod \
+    <span class="tc-flag">--project</span>              order-service-prod-12345 \
+    <span class="tc-flag">--region</span>               asia-southeast1 \
+    <span class="tc-flag">--database-version</span>     POSTGRES_15 \
+    <span class="tc-flag">--tier</span>                 db-n1-standard-2 \  <span class="tc-cmt"># 2 vCPU, 7.5 GB RAM</span>
+    <span class="tc-flag">--availability-type</span>    REGIONAL \          <span class="tc-cmt"># HA với standby replica</span>
+    <span class="tc-flag">--storage-size</span>         50 \
+    <span class="tc-flag">--storage-auto-increase</span> \
+    <span class="tc-flag">--backup-start-time</span>    03:00 \
+    <span class="tc-flag">--retained-backups-count</span> 7 \
+    <span class="tc-flag">--no-assign-ip \</span>                            <span class="tc-cmt"># private IP only</span>
+    <span class="tc-flag">--network</span>              vpc-prod
+
+<span class="tc-cmt"># Tạo database và user</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> sql databases create shopdb <span class="tc-flag">--instance</span> pg-order-prod
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> sql users create order_user \
+    <span class="tc-flag">--instance</span>  pg-order-prod \
+    <span class="tc-flag">--password</span>  $(gcloud secrets versions access latest <span class="tc-flag">--secret</span> db-password)
+
+<span class="tc-cmt"># ── Cloud SQL Auth Proxy — kết nối an toàn từ local ──</span>
+<span class="tc-cmt"># Download proxy:</span>
+<span class="tc-prompt">$</span> wget https://dl.google.com/cloudsql/cloud-sql-proxy.linux.amd64 <span class="tc-flag">-O</span> cloud-sql-proxy
+<span class="tc-prompt">$</span> chmod +x cloud-sql-proxy
+<span class="tc-cmt"># Start proxy:</span>
+<span class="tc-prompt">$</span> ./cloud-sql-proxy order-service-prod-12345:asia-southeast1:pg-order-prod \
+    <span class="tc-flag">--port</span> 5432 <span class="tc-flag">&</span>
+<span class="tc-cmt"># Connect: jdbc:postgresql://127.0.0.1:5432/shopdb</span>
+
+<span class="tc-cmt"># ── Spring Boot + Cloud SQL — application.yml ──</span>
+<span class="gc-str">spring</span>:
+  <span class="gc-str">datasource</span>:
+    <span class="gc-str">url</span>: jdbc:postgresql:///shopdb?cloudSqlInstance=order-service-prod-12345:asia-southeast1:pg-order-prod&amp;socketFactory=com.google.cloud.sql.postgres.SocketFactory
+    <span class="gc-str">username</span>: order_user
+    <span class="gc-str">password</span>: ${DB_PASSWORD}           <span class="tc-cmt"># từ Secret Manager</span>
+
+<span class="tc-cmt"># pom.xml dependencies:</span>
+<span class="tc-cmt"># com.google.cloud.sql:postgres-socket-factory</span>
+<span class="tc-cmt"># Kết nối qua Unix socket — không cần open port 5432!</span>
+
+<span class="tc-cmt"># ── Point-in-time Recovery ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> sql instances clone pg-order-prod pg-order-restore \
+    <span class="tc-flag">--point-in-time</span> 2024-03-14T10:30:00.000Z
+
+<span class="tc-cmt"># ── AlloyDB — 4x faster than standard PostgreSQL ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> alloydb clusters create alloydb-order-prod \
+    <span class="tc-flag">--region</span>      asia-southeast1 \
+    <span class="tc-flag">--password</span>    $(gcloud secrets versions access latest <span class="tc-flag">--secret</span> db-password)
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> alloydb instances create primary \
+    <span class="tc-flag">--cluster</span>       alloydb-order-prod \
+    <span class="tc-flag">--instance-type</span> PRIMARY \
+    <span class="tc-flag">--cpu-count</span>     4</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S9 SPANNER & FIRESTORE -->
+<div class="section" id="s9">
+  <div class="sec-head"><span class="sec-tag st-2">SPANNER &amp; FIRESTORE</span>
+    <div><h2 class="sec-title">Cloud Spanner &amp; Firestore — Globally Distributed</h2>
+    <p class="sec-sub">Spanner: relational + global · Firestore: serverless NoSQL document database</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cloud Spanner — SQL at global scale</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud Spanner + Firestore — create và Java SDK</span><span class="cb-tag ct-2">Spanner/Firestore</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Cloud Spanner ──</span>
+<span class="tc-cmt"># Relational database + unlimited scale + 5 nines SLA</span>
+<span class="tc-cmt"># Tốt cho: financial systems, gaming, global inventory</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> spanner instances create spanner-order-prod \
+    <span class="tc-flag">--config</span>      regional-asia-southeast1 \
+    <span class="tc-flag">--description</span> <span class="tc-str">"Order Service Spanner"</span> \
+    <span class="tc-flag">--nodes</span>       3                          <span class="tc-cmt"># 3 nodes = 6000 QPS write</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> spanner databases create shopdb \
+    <span class="tc-flag">--instance</span> spanner-order-prod \
+    <span class="tc-flag">--ddl</span> <span class="tc-str">"CREATE TABLE orders (
+        order_id STRING(36) NOT NULL,
+        user_id  STRING(36) NOT NULL,
+        status   STRING(20),
+        amount   FLOAT64,
+        created_at TIMESTAMP OPTIONS (allow_commit_timestamp=true)
+    ) PRIMARY KEY (order_id)"</span>
+
+<span class="tc-cmt">// Java SDK — Spanner</span>
+SpannerOptions options = SpannerOptions.newBuilder().build();
+Spanner spanner = options.getService();
+DatabaseClient client = spanner.getDatabaseClient(
+    DatabaseId.of(<span class="gc-str">"order-service-prod-12345"</span>, <span class="gc-str">"spanner-order-prod"</span>, <span class="gc-str">"shopdb"</span>));
+
+<span class="tc-cmt">// Read-Write Transaction</span>
+client.readWriteTransaction().run(txn -> {
+    String sql = <span class="gc-str">"INSERT INTO orders (order_id, user_id, status, amount, created_at) "</span> +
+                 <span class="gc-str">"VALUES (@orderId, @userId, 'PENDING', @amount, PENDING_COMMIT_TIMESTAMP())"</span>;
+    Statement stmt = Statement.newBuilder(sql)
+        .bind(<span class="gc-str">"orderId"</span>).to(UUID.randomUUID().toString())
+        .bind(<span class="gc-str">"userId"</span>).to(userId)
+        .bind(<span class="gc-str">"amount"</span>).to(amount).build();
+    txn.executeUpdate(stmt);
+    <span class="gc-kw">return</span> null;
+});
+
+<span class="tc-cmt"># ── Firestore — NoSQL document database ──</span>
+<span class="tc-cmt"># Realtime sync, offline support, mobile-first</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> firestore databases create \
+    <span class="tc-flag">--location</span> asia-southeast1 \
+    <span class="tc-flag">--type</span>     firestore-native
+
+<span class="tc-cmt">// Java SDK — Firestore CRUD</span>
+Firestore db = FirestoreOptions.getDefaultInstance().getService();
+
+<span class="tc-cmt">// Create document</span>
+Map&lt;String, Object&gt; order = Map.of(
+    <span class="gc-str">"userId"</span>, <span class="gc-str">"USR-123"</span>,
+    <span class="gc-str">"status"</span>, <span class="gc-str">"PENDING"</span>,
+    <span class="gc-str">"amount"</span>, <span class="gc-ann">150000</span>,
+    <span class="gc-str">"createdAt"</span>, Timestamp.now());
+DocumentReference docRef = db.collection(<span class="gc-str">"orders"</span>).document(<span class="gc-str">"ORD-001"</span>);
+docRef.set(order).get();
+
+<span class="tc-cmt">// Query</span>
+Query query = db.collection(<span class="gc-str">"orders"</span>)
+    .whereEqualTo(<span class="gc-str">"userId"</span>, <span class="gc-str">"USR-123"</span>)
+    .whereEqualTo(<span class="gc-str">"status"</span>, <span class="gc-str">"PENDING"</span>)
+    .orderBy(<span class="gc-str">"createdAt"</span>, Direction.DESCENDING)
+    .limit(<span class="gc-ann">10</span>);
+QuerySnapshot results = query.get().get();</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S10 MEMORYSTORE -->
+<div class="section" id="s10">
+  <div class="sec-head"><span class="sec-tag st-2">MEMORYSTORE</span>
+    <div><h2 class="sec-title">Memorystore — Redis Cache</h2>
+    <p class="sec-sub">Managed Redis/Memcached, high availability, Spring Boot integration</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Memorystore Redis — tạo và kết nối</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Memorystore Redis — create, Spring Boot caching</span><span class="cb-tag ct-2">Redis</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Memorystore Redis ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> redis instances create redis-order-prod \
+    <span class="tc-flag">--project</span>     order-service-prod-12345 \
+    <span class="tc-flag">--region</span>      asia-southeast1 \
+    <span class="tc-flag">--zone</span>        asia-southeast1-a \
+    <span class="tc-flag">--tier</span>        standard \               <span class="tc-cmt"># standard = HA với failover replica</span>
+    <span class="tc-flag">--size</span>        1 \                     <span class="tc-cmt"># 1 GB</span>
+    <span class="tc-flag">--redis-version</span> redis_7_0 \
+    <span class="tc-flag">--network</span>     vpc-prod \
+    <span class="tc-flag">--enable-auth</span> \                       <span class="tc-cmt"># bật AUTH token</span>
+    <span class="tc-flag">--transit-encryption-mode</span> server-authentication
+
+<span class="tc-cmt"># ── Lấy connection details ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> redis instances describe redis-order-prod \
+    <span class="tc-flag">--region</span>  asia-southeast1 \
+    <span class="tc-flag">--format</span>  <span class="tc-str">"get(host,port,auth_string)"</span>
+<span class="tc-out">10.128.0.5  6379  AXqRm...</span>
+
+<span class="tc-cmt"># ── Spring Boot application.yml ──</span>
+<span class="gc-str">spring</span>:
+  <span class="gc-str">data</span>:
+    <span class="gc-str">redis</span>:
+      <span class="gc-str">host</span>:     10.128.0.5
+      <span class="gc-str">port</span>:     6379
+      <span class="gc-str">password</span>: ${REDIS_AUTH_STRING}
+      <span class="gc-str">ssl</span>:
+        <span class="gc-str">enabled</span>: <span class="gc-kw">true</span>
+
+<span class="tc-cmt"># ── Spring Boot caching ──</span>
+<span class="gc-kw">@Cacheable</span>(value = <span class="gc-str">"products"</span>, key = <span class="gc-str">"#productId"</span>)
+<span class="gc-kw">public</span> Product getProduct(String productId) {
+    <span class="gc-kw">return</span> productRepository.findById(productId).orElseThrow();
+}
+
+<span class="gc-kw">@CacheEvict</span>(value = <span class="gc-str">"products"</span>, key = <span class="gc-str">"#product.id"</span>)
+<span class="gc-kw">public</span> Product updateProduct(Product product) {
+    <span class="gc-kw">return</span> productRepository.save(product);
+}
+
+<span class="tc-cmt"># Rate limiting với Redis</span>
+<span class="gc-kw">public boolean</span> isRateLimited(String userId) {
+    String key = <span class="gc-str">"rate_limit:"</span> + userId;
+    Long count = redisTemplate.opsForValue().increment(key);
+    <span class="gc-kw">if</span> (count == <span class="gc-ann">1</span>) redisTemplate.expire(key, Duration.ofMinutes(<span class="gc-ann">1</span>));
+    <span class="gc-kw">return</span> count > <span class="gc-ann">100</span>;  <span class="tc-cmt">// 100 requests/minute</span>
+}</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-3">
+  <div class="cb-icon">🌐</div>
+  <div><div class="cb-badge">NETWORKING</div>
+  <div class="cb-title">VPC · Load Balancing · Cloud CDN · Cloud DNS · Armor</div>
+  <div class="cb-sub">Software-defined networking — Google global network backbone</div></div>
+</div>
+
+<!-- S11 VPC -->
+<div class="section" id="s11">
+  <div class="sec-head"><span class="sec-tag st-3">VPC</span>
+    <div><h2 class="sec-title">VPC &amp; Subnets — Software-defined Networking</h2>
+    <p class="sec-sub">Global VPC, Firewall rules, Private Google Access, VPC Peering</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">GCP VPC khác gì AWS VPC?</div>
+    <div class="rw-box rw-1">
+      <div class="rw-label">🌐 GCP Global VPC</div>
+      <div class="rw-title">GCP VPC là global — một VPC trải dài nhiều Regions</div>
+      <div class="rw-body">AWS VPC chỉ trong 1 Region. GCP VPC là <strong style="color:var(--text)">global</strong> — bạn có thể có subnets ở Singapore, Tokyo, US trong cùng 1 VPC và chúng tự động communicate với nhau qua Google's private backbone. Không cần VPC Peering hay Transit Gateway như AWS.</div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">VPC — tạo network, subnets, firewall rules</span><span class="cb-tag ct-3">VPC</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Custom VPC ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute networks create vpc-prod \
+    <span class="tc-flag">--project</span>        order-service-prod-12345 \
+    <span class="tc-flag">--subnet-mode</span>    custom \              <span class="tc-cmt"># không tự tạo subnets</span>
+    <span class="tc-flag">--bgp-routing-mode</span> regional
+
+<span class="tc-cmt"># ── Tạo Subnets ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute networks subnets create subnet-gke \
+    <span class="tc-flag">--network</span>         vpc-prod \
+    <span class="tc-flag">--region</span>          asia-southeast1 \
+    <span class="tc-flag">--range</span>           10.0.0.0/20 \        <span class="tc-cmt"># 4094 addresses cho GKE pods</span>
+    <span class="tc-flag">--secondary-range</span> pods=10.1.0.0/16,services=10.2.0.0/20 \  <span class="tc-cmt"># GKE secondary ranges</span>
+    <span class="tc-flag">--enable-private-ip-google-access</span>     <span class="tc-cmt"># access Google APIs không qua internet</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute networks subnets create subnet-private \
+    <span class="tc-flag">--network</span>   vpc-prod \
+    <span class="tc-flag">--region</span>    asia-southeast1 \
+    <span class="tc-flag">--range</span>     10.0.16.0/24 \
+    <span class="tc-flag">--enable-private-ip-google-access</span>
+
+<span class="tc-cmt"># ── Cloud NAT — private VMs ra internet ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute routers create router-prod \
+    <span class="tc-flag">--network</span> vpc-prod <span class="tc-flag">--region</span> asia-southeast1
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute routers nats create nat-prod \
+    <span class="tc-flag">--router</span>                    router-prod \
+    <span class="tc-flag">--region</span>                    asia-southeast1 \
+    <span class="tc-flag">--nat-all-subnet-ip-ranges</span>  \
+    <span class="tc-flag">--auto-allocate-nat-external-ips</span>
+
+<span class="tc-cmt"># ── Firewall Rules (thay vì Security Groups) ──</span>
+<span class="tc-cmt"># Tạo rule cho phép HTTP/HTTPS</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute firewall-rules create allow-https-lb \
+    <span class="tc-flag">--network</span>      vpc-prod \
+    <span class="tc-flag">--action</span>       allow \
+    <span class="tc-flag">--direction</span>    ingress \
+    <span class="tc-flag">--rules</span>        tcp:443 \
+    <span class="tc-flag">--source-ranges</span> 0.0.0.0/0 \
+    <span class="tc-flag">--target-tags</span>  https-server
+
+<span class="tc-cmt"># Internal traffic: App → DB</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute firewall-rules create allow-app-to-db \
+    <span class="tc-flag">--network</span>     vpc-prod \
+    <span class="tc-flag">--action</span>      allow \
+    <span class="tc-flag">--rules</span>       tcp:5432,tcp:6379 \
+    <span class="tc-flag">--source-tags</span> backend \
+    <span class="tc-flag">--target-tags</span> database
+
+<span class="tc-cmt"># Health check từ Google Load Balancer</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute firewall-rules create allow-health-check \
+    <span class="tc-flag">--network</span>       vpc-prod \
+    <span class="tc-flag">--action</span>        allow \
+    <span class="tc-flag">--rules</span>         tcp \
+    <span class="tc-flag">--source-ranges</span> 130.211.0.0/22,35.191.0.0/16  <span class="tc-cmt"># Google health check IPs</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S12 LOAD BALANCING -->
+<div class="section" id="s12">
+  <div class="sec-head"><span class="sec-tag st-3">LOAD BALANCER</span>
+    <div><h2 class="sec-title">Load Balancing &amp; Cloud CDN</h2>
+    <p class="sec-sub">Global HTTP(S) LB, Cloud CDN, NEGs — load balancing trên Google's global network</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Global HTTPS Load Balancer — setup đầy đủ</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">HTTPS Load Balancer + Cloud CDN + SSL Certificate</span><span class="cb-tag ct-3">LB/CDN</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Global HTTPS Load Balancer ──</span>
+<span class="tc-cmt"># 1. Reserve global static IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute addresses create lb-ipv4 <span class="tc-flag">--global --ip-version</span> IPV4
+<span class="tc-out">Created [lb-ipv4]. IP: 34.x.x.x</span>
+
+<span class="tc-cmt"># 2. Managed SSL Certificate (Google tự gia hạn!)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute ssl-certificates create ssl-cert-api \
+    <span class="tc-flag">--domains</span> api.company.com
+
+<span class="tc-cmt"># 3. Backend Service (Cloud Run NEG)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute network-endpoint-groups create neg-order-service \
+    <span class="tc-flag">--region</span>              asia-southeast1 \
+    <span class="tc-flag">--network-endpoint-type</span> serverless \
+    <span class="tc-flag">--cloud-run-service</span>   order-service
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute backend-services create bs-order-service \
+    <span class="tc-flag">--global</span> \
+    <span class="tc-flag">--load-balancing-scheme</span> EXTERNAL_MANAGED \
+    <span class="tc-flag">--enable-cdn</span> \                          <span class="tc-cmt"># bật Cloud CDN</span>
+    <span class="tc-flag">--cache-mode</span> CACHE_ALL_STATIC \
+    <span class="tc-flag">--default-ttl</span> 3600
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute backend-services add-backend bs-order-service \
+    <span class="tc-flag">--global</span> \
+    <span class="tc-flag">--network-endpoint-group</span>        neg-order-service \
+    <span class="tc-flag">--network-endpoint-group-region</span> asia-southeast1
+
+<span class="tc-cmt"># 4. URL Map — path-based routing</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute url-maps import url-map-prod \
+    <span class="tc-flag">--source</span> - \
+    <span class="tc-flag">--global</span> << EOF
+name: url-map-prod
+hostRules:
+- hosts: [api.company.com]
+  pathMatcher: api-routing
+pathMatchers:
+- name: api-routing
+  defaultService: bs-order-service
+  pathRules:
+  - paths: [/api/orders/*]
+    service: bs-order-service
+  - paths: [/api/payments/*]
+    service: bs-payment-service
+EOF
+
+<span class="tc-cmt"># 5. HTTPS Proxy → Forwarding Rule</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute target-https-proxies create https-proxy \
+    <span class="tc-flag">--url-map</span>          url-map-prod \
+    <span class="tc-flag">--ssl-certificates</span> ssl-cert-api
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute forwarding-rules create https-lb-rule \
+    <span class="tc-flag">--global</span> \
+    <span class="tc-flag">--target-https-proxy</span> https-proxy \
+    <span class="tc-flag">--address</span>            lb-ipv4 \
+    <span class="tc-flag">--ports</span>              443</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S13 DNS & ARMOR -->
+<div class="section" id="s13">
+  <div class="sec-head"><span class="sec-tag st-3">DNS &amp; ARMOR</span>
+    <div><h2 class="sec-title">Cloud DNS &amp; Cloud Armor — DNS &amp; WAF</h2>
+    <p class="sec-sub">Managed DNS, DNSSEC, Cloud Armor WAF bảo vệ khỏi DDoS và OWASP attacks</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cloud DNS và Cloud Armor</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud DNS + Cloud Armor WAF policy</span><span class="cb-tag ct-3">DNS/Armor</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Cloud DNS ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> dns managed-zones create company-zone \
+    <span class="tc-flag">--dns-name</span>   company.com. \
+    <span class="tc-flag">--description</span> <span class="tc-str">"Company DNS zone"</span> \
+    <span class="tc-flag">--dnssec-state</span> on
+
+<span class="tc-cmt"># Thêm A record trỏ về LB IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> dns record-sets create api.company.com. \
+    <span class="tc-flag">--zone</span> company-zone \
+    <span class="tc-flag">--type</span> A \
+    <span class="tc-flag">--ttl</span>  300 \
+    <span class="tc-flag">--rrdatas</span> 34.x.x.x        <span class="tc-cmt"># LB static IP</span>
+
+<span class="tc-cmt"># ── Cloud Armor — WAF + DDoS protection ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute security-policies create armor-policy-prod \
+    <span class="tc-flag">--description</span> <span class="tc-str">"Production WAF policy"</span>
+
+<span class="tc-cmt"># OWASP Top 10 rules</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute security-policies rules create 1000 \
+    <span class="tc-flag">--security-policy</span> armor-policy-prod \
+    <span class="tc-flag">--expression</span>      <span class="tc-str">"evaluatePreconfiguredExpr('sqli-v33-stable')"</span> \
+    <span class="tc-flag">--action</span>          deny-403 \
+    <span class="tc-flag">--description</span>     <span class="tc-str">"Block SQL injection"</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute security-policies rules create 1001 \
+    <span class="tc-flag">--security-policy</span> armor-policy-prod \
+    <span class="tc-flag">--expression</span>      <span class="tc-str">"evaluatePreconfiguredExpr('xss-v33-stable')"</span> \
+    <span class="tc-flag">--action</span>          deny-403
+
+<span class="tc-cmt"># Rate limiting — 100 requests/min per IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute security-policies rules create 2000 \
+    <span class="tc-flag">--security-policy</span>  armor-policy-prod \
+    <span class="tc-flag">--expression</span>       <span class="tc-str">"true"</span> \
+    <span class="tc-flag">--action</span>           rate-based-ban \
+    <span class="tc-flag">--rate-limit-threshold-count</span> 100 \
+    <span class="tc-flag">--rate-limit-threshold-interval-sec</span> 60 \
+    <span class="tc-flag">--ban-duration-sec</span> 600
+
+<span class="tc-cmt"># Attach policy vào Backend Service</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> compute backend-services update bs-order-service \
+    <span class="tc-flag">--global</span> \
+    <span class="tc-flag">--security-policy</span> armor-policy-prod</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-4">
+  <div class="cb-icon">📨</div>
+  <div><div class="cb-badge">MESSAGING &amp; DATA</div>
+  <div class="cb-title">Pub/Sub · Dataflow · BigQuery · Secret Manager</div>
+  <div class="cb-sub">Event streaming, data pipeline, data warehouse, secrets management</div></div>
+</div>
+
+<!-- S14 PUB/SUB -->
+<div class="section" id="s14">
+  <div class="sec-head"><span class="sec-tag st-4">PUB/SUB</span>
+    <div><h2 class="sec-title">Cloud Pub/Sub — Messaging &amp; Event Streaming</h2>
+    <p class="sec-sub">At-least-once delivery, fan-out, push/pull, dead letter topics</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Pub/Sub — create topics, subscriptions, Java SDK</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Pub/Sub — topics, subscriptions, Java producer/consumer</span><span class="cb-tag ct-4">Pub/Sub</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Topic và Subscriptions ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> pubsub topics create order-created
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> pubsub topics create order-created-dlq  <span class="tc-cmt"># Dead Letter Topic</span>
+
+<span class="tc-cmt"># Pull subscription cho inventory-service</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> pubsub subscriptions create inventory-service-sub \
+    <span class="tc-flag">--topic</span>                       order-created \
+    <span class="tc-flag">--ack-deadline</span>                60 \               <span class="tc-cmt"># 60s để process trước khi redeliver</span>
+    <span class="tc-flag">--max-delivery-attempts</span>       5 \                <span class="tc-cmt"># retry 5 lần rồi → DLQ</span>
+    <span class="tc-flag">--dead-letter-topic</span>           order-created-dlq \
+    <span class="tc-flag">--message-retention-duration</span>  7d
+
+<span class="tc-cmt"># Push subscription → Cloud Run endpoint</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> pubsub subscriptions create email-service-sub \
+    <span class="tc-flag">--topic</span>      order-created \
+    <span class="tc-flag">--push-endpoint</span> https://email-service-xyz.run.app/pubsub/push \
+    <span class="tc-flag">--push-auth-service-account</span> order-service-sa@...iam.gserviceaccount.com
+
+<span class="tc-cmt">// ── Java SDK — Publisher ──</span>
+Publisher publisher = Publisher.newBuilder(
+    TopicName.of(<span class="gc-str">"order-service-prod-12345"</span>, <span class="gc-str">"order-created"</span>)).build();
+
+ByteString data = ByteString.copyFromUtf8(
+    <span class="gc-kw">new</span> ObjectMapper().writeValueAsString(orderEvent));
+PubsubMessage message = PubsubMessage.newBuilder()
+    .setData(data)
+    .putAttributes(<span class="gc-str">"eventType"</span>, <span class="gc-str">"ORDER_CREATED"</span>)
+    .putAttributes(<span class="gc-str">"version"</span>, <span class="gc-str">"v1"</span>)
+    .build();
+ApiFuture&lt;String&gt; future = publisher.publish(message);
+String messageId = future.get();  <span class="tc-cmt">// block until published</span>
+
+<span class="tc-cmt">// ── Java SDK — Subscriber ──</span>
+MessageReceiver receiver = (message, consumer) -> {
+    String json = message.getData().toStringUtf8();
+    <span class="gc-kw">try</span> {
+        OrderEvent event = objectMapper.readValue(json, OrderEvent.<span class="gc-kw">class</span>);
+        inventoryService.reserve(event);
+        consumer.ack();                                <span class="tc-cmt">// success → ack</span>
+    } <span class="gc-kw">catch</span> (Exception e) {
+        consumer.nack();                               <span class="tc-cmt">// fail → nack → redeliver</span>
+    }
+};
+Subscriber subscriber = Subscriber.newBuilder(
+    SubscriptionName.of(<span class="gc-str">"order-service-prod-12345"</span>, <span class="gc-str">"inventory-service-sub"</span>),
+    receiver).build();
+subscriber.startAsync().awaitRunning();
+
+<span class="tc-cmt"># ── Spring Boot Pub/Sub ──</span>
+<span class="gc-kw">@Autowired</span> PubSubTemplate pubSubTemplate;
+
+<span class="tc-cmt">// Publish</span>
+pubSubTemplate.publish(<span class="gc-str">"order-created"</span>, orderEvent);
+
+<span class="tc-cmt">// Subscribe với annotation</span>
+<span class="gc-kw">@PubSubSubscriber</span>(<span class="gc-str">"inventory-service-sub"</span>)
+<span class="gc-kw">public void</span> handleOrderCreated(OrderEvent event) {
+    inventoryService.reserve(event);
+}</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S15 DATAFLOW & BIGQUERY -->
+<div class="section" id="s15">
+  <div class="sec-head"><span class="sec-tag st-4">BIG DATA</span>
+    <div><h2 class="sec-title">BigQuery &amp; Dataflow — Data Warehouse &amp; Pipeline</h2>
+    <p class="sec-sub">BigQuery: serverless SQL analytics · Dataflow: Apache Beam streaming/batch</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">BigQuery — SQL trên petabytes data trong vài giây</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">BigQuery — dataset, SQL queries, streaming insert</span><span class="cb-tag ct-4">BigQuery</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Dataset ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">bq</span> mk <span class="tc-flag">--dataset</span> \
+    <span class="tc-flag">--location</span>    asia-southeast1 \
+    <span class="tc-flag">--description</span> <span class="tc-str">"Order Service Analytics"</span> \
+    order-service-prod-12345:analytics
+
+<span class="tc-cmt"># Tạo Table với schema</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">bq</span> mk <span class="tc-flag">--table</span> \
+    order-service-prod-12345:analytics.orders \
+    order_id:STRING,user_id:STRING,status:STRING,amount:FLOAT64,created_at:TIMESTAMP,product_ids:ARRAY
+
+<span class="tc-cmt"># ── SQL Queries — analytics ──</span>
+<span class="tc-cmt"># Daily revenue report</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">bq</span> query <span class="tc-flag">--nouse_legacy_sql</span> <span class="tc-str">'
+SELECT
+  DATE(created_at, "Asia/Ho_Chi_Minh") AS order_date,
+  COUNT(*) AS total_orders,
+  SUM(amount) AS total_revenue,
+  AVG(amount) AS avg_order_value,
+  COUNTIF(status = "PAID") AS paid_orders
+FROM `order-service-prod-12345.analytics.orders`
+WHERE created_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+GROUP BY 1
+ORDER BY 1 DESC
+'</span>
+
+<span class="tc-cmt"># Top 10 users by revenue</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">bq</span> query <span class="tc-flag">--nouse_legacy_sql</span> <span class="tc-str">'
+SELECT
+  u.name,
+  COUNT(o.order_id) AS order_count,
+  SUM(o.amount) AS total_spent
+FROM `analytics.orders` o
+JOIN `analytics.users` u ON o.user_id = u.user_id
+WHERE o.status = "PAID"
+GROUP BY u.user_id, u.name
+ORDER BY total_spent DESC
+LIMIT 10
+'</span>
+
+<span class="tc-cmt">// ── Streaming Insert từ Java (real-time) ──</span>
+BigQuery bigquery = BigQueryOptions.getDefaultInstance().getService();
+TableId tableId = TableId.of(<span class="gc-str">"analytics"</span>, <span class="gc-str">"orders"</span>);
+
+Map&lt;String, Object&gt; row = Map.of(
+    <span class="gc-str">"order_id"</span>,   orderId,
+    <span class="gc-str">"user_id"</span>,    userId,
+    <span class="gc-str">"status"</span>,     <span class="gc-str">"PENDING"</span>,
+    <span class="gc-str">"amount"</span>,     amount,
+    <span class="gc-str">"created_at"</span>, Timestamp.now().toString());
+
+InsertAllResponse response = bigquery.insertAll(
+    InsertAllRequest.newBuilder(tableId).addRow(row).build());
+
+<span class="tc-cmt"># ── Dataflow — Pub/Sub → BigQuery pipeline ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> dataflow flex-template run pubsub-to-bq \
+    <span class="tc-flag">--project</span>            order-service-prod-12345 \
+    <span class="tc-flag">--region</span>             asia-southeast1 \
+    <span class="tc-flag">--template-file-gcs-location</span> \
+        gs://dataflow-templates-asia-southeast1/latest/flex/PubSub_to_BigQuery \
+    <span class="tc-flag">--parameters</span> \
+        inputTopic=projects/order-service-prod-12345/topics/order-created,\
+        outputTableSpec=order-service-prod-12345:analytics.orders_raw,\
+        useStorageWriteApi=true
+<span class="tc-cmt"># Dataflow tự scale workers, không cần manage servers</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S16 SECRET MANAGER -->
+<div class="section" id="s16">
+  <div class="sec-head"><span class="sec-tag st-4">SECRET MANAGER</span>
+    <div><h2 class="sec-title">Secret Manager &amp; KMS — Secrets &amp; Encryption</h2>
+    <p class="sec-sub">Lưu trữ secrets an toàn, versioning, rotation, CMEK encryption</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Secret Manager — create, access, Spring Boot integration</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Secret Manager — CRUD + Spring Boot auto-inject</span><span class="cb-tag ct-4">Secrets</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Enable API ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> services enable secretmanager.googleapis.com
+
+<span class="tc-cmt"># ── Tạo và lưu secrets ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">echo</span> <span class="tc-flag">-n</span> <span class="tc-str">"SuP3rS3cr3t!"</span> <span class="tc-pipe">|</span> gcloud secrets create db-password \
+    <span class="tc-flag">--data-file</span>   - \
+    <span class="tc-flag">--replication-policy</span> automatic
+<span class="tc-ok">Created secret [db-password].</span>
+
+<span class="tc-cmt"># Thêm version mới (rotation)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">echo</span> <span class="tc-flag">-n</span> <span class="tc-str">"N3wP@ssword!"</span> <span class="tc-pipe">|</span> gcloud secrets versions add db-password <span class="tc-flag">--data-file</span> -
+
+<span class="tc-cmt"># Lưu JSON secret</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> secrets create db-credentials \
+    <span class="tc-flag">--data-file</span> - << EOF
+{"username":"order_user","password":"SuP3rS3cr3t!","host":"10.0.16.5","port":5432}
+EOF
+
+<span class="tc-cmt"># ── Đọc secret ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> secrets versions access latest <span class="tc-flag">--secret</span> db-password
+<span class="tc-out">SuP3rS3cr3t!</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> secrets versions access latest <span class="tc-flag">--secret</span> db-credentials <span class="tc-pipe">|</span> jq .password
+<span class="tc-out">"SuP3rS3cr3t!"</span>
+
+<span class="tc-cmt">// ── Java SDK ──</span>
+SecretManagerServiceClient client = SecretManagerServiceClient.create();
+SecretVersionName secretVersionName = SecretVersionName.of(
+    <span class="gc-str">"order-service-prod-12345"</span>, <span class="gc-str">"db-password"</span>, <span class="gc-str">"latest"</span>);
+AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
+String secret = response.getPayload().getData().toStringUtf8();
+
+<span class="tc-cmt"># ── Spring Cloud GCP — auto-inject secrets ──</span>
+<span class="tc-cmt"># pom.xml: com.google.cloud:spring-cloud-gcp-starter-secretmanager</span>
+<span class="tc-cmt"># application.yml:</span>
+<span class="gc-str">spring</span>:
+  <span class="gc-str">datasource</span>:
+    <span class="gc-str">password</span>: ${sm://db-password}          <span class="tc-cmt"># tự động lấy từ Secret Manager!</span>
+  <span class="gc-str">data</span>:
+    <span class="gc-str">redis</span>:
+      <span class="gc-str">password</span>: ${sm://redis-auth-string}
+
+<span class="tc-cmt"># ── Cloud KMS — CMEK encryption ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> kms keyrings create keyring-order-prod \
+    <span class="tc-flag">--location</span> asia-southeast1
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> kms keys create key-db-encryption \
+    <span class="tc-flag">--keyring</span>    keyring-order-prod \
+    <span class="tc-flag">--location</span>   asia-southeast1 \
+    <span class="tc-flag">--purpose</span>    encryption \
+    <span class="tc-flag">--rotation-period</span> 90d  <span class="tc-cmt"># auto-rotate mỗi 90 ngày</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-5">
+  <div class="cb-icon">🔁</div>
+  <div><div class="cb-badge">DEVOPS &amp; OBSERVABILITY</div>
+  <div class="cb-title">Artifact Registry · Cloud Build · Cloud Monitoring</div>
+  <div class="cb-sub">Container registry, CI/CD, logging và observability toàn diện</div></div>
+</div>
+
+<!-- S17 ARTIFACT REGISTRY & CICD -->
+<div class="section" id="s17">
+  <div class="sec-head"><span class="sec-tag st-5">DEVOPS</span>
+    <div><h2 class="sec-title">Artifact Registry &amp; Cloud Build — CI/CD</h2>
+    <p class="sec-sub">Container registry, Cloud Build pipelines, GitHub Actions với Workload Identity</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Artifact Registry và Cloud Build pipeline</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Artifact Registry + Cloud Build + GitHub Actions OIDC</span><span class="cb-tag ct-5">CI/CD</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Artifact Registry ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> artifacts repositories create order-service-repo \
+    <span class="tc-flag">--repository-format</span> docker \
+    <span class="tc-flag">--location</span>          asia-southeast1 \
+    <span class="tc-flag">--description</span>       <span class="tc-str">"Order Service Docker images"</span>
+
+<span class="tc-cmt"># ── Docker login và push ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> auth configure-docker asia-southeast1-docker.pkg.dev
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag order-service:v2.1.0 \
+    asia-southeast1-docker.pkg.dev/order-service-prod-12345/order-service-repo/order-service:v2.1.0
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> push asia-southeast1-docker.pkg.dev/.../order-service:v2.1.0
+
+<span class="tc-cmt"># ── Cloud Build — CI pipeline ──</span>
+<span class="tc-cmt"># cloudbuild.yaml</span>
+<span class="gc-yaml">steps</span>:
+<span class="tc-cmt"># Bước 1: Unit tests</span>
+- <span class="gc-yaml">name</span>: <span class="gc-str">'maven:3.9-eclipse-temurin-21'</span>
+  <span class="gc-yaml">entrypoint</span>: mvn
+  <span class="gc-yaml">args</span>: [<span class="gc-str">'test'</span>, <span class="gc-str">'--no-transfer-progress'</span>]
+
+<span class="tc-cmt"># Bước 2: Build Docker image</span>
+- <span class="gc-yaml">name</span>: <span class="gc-str">'gcr.io/cloud-builders/docker'</span>
+  <span class="gc-yaml">args</span>:
+  - build
+  - <span class="gc-str">'-t'</span>
+  - <span class="gc-str">'asia-southeast1-docker.pkg.dev/$PROJECT_ID/order-service-repo/order-service:$COMMIT_SHA'</span>
+  - .
+
+<span class="tc-cmt"># Bước 3: Push lên Artifact Registry</span>
+- <span class="gc-yaml">name</span>: <span class="gc-str">'gcr.io/cloud-builders/docker'</span>
+  <span class="gc-yaml">args</span>: [<span class="gc-str">'push'</span>, <span class="gc-str">'asia-southeast1-docker.pkg.dev/$PROJECT_ID/order-service-repo/order-service:$COMMIT_SHA'</span>]
+
+<span class="tc-cmt"># Bước 4: Deploy lên Cloud Run</span>
+- <span class="gc-yaml">name</span>: <span class="gc-str">'gcr.io/cloud-builders/gcloud'</span>
+  <span class="gc-yaml">args</span>:
+  - run
+  - deploy
+  - order-service
+  - <span class="gc-str">'--image=asia-southeast1-docker.pkg.dev/$PROJECT_ID/order-service-repo/order-service:$COMMIT_SHA'</span>
+  - <span class="gc-str">'--region=asia-southeast1'</span>
+  - <span class="gc-str">'--platform=managed'</span>
+
+<span class="gc-yaml">images</span>:
+- <span class="gc-str">'asia-southeast1-docker.pkg.dev/$PROJECT_ID/order-service-repo/order-service:$COMMIT_SHA'</span>
+
+<span class="gc-yaml">options</span>:
+  <span class="gc-yaml">logging</span>: CLOUD_LOGGING_ONLY
+
+<span class="tc-cmt"># Trigger build khi push lên main branch</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> builds triggers create github \
+    <span class="tc-flag">--repo-name</span>    order-service \
+    <span class="tc-flag">--repo-owner</span>   company \
+    <span class="tc-flag">--branch-pattern</span> ^main$ \
+    <span class="tc-flag">--build-config</span>  cloudbuild.yaml
+
+<span class="tc-cmt"># ── GitHub Actions với Workload Identity (passwordless!) ──</span>
+<span class="tc-cmt"># .github/workflows/deploy.yml</span>
+<span class="gc-yaml">jobs</span>:
+  <span class="gc-yaml">deploy</span>:
+    <span class="gc-yaml">permissions</span>:
+      <span class="gc-yaml">id-token</span>: write
+      <span class="gc-yaml">contents</span>: read
+    <span class="gc-yaml">steps</span>:
+    - <span class="gc-yaml">uses</span>: <span class="gc-str">actions/checkout@v4</span>
+    - <span class="gc-yaml">id</span>: auth
+      <span class="gc-yaml">uses</span>: <span class="gc-str">google-github-actions/auth@v2</span>
+      <span class="gc-yaml">with</span>:
+        <span class="gc-yaml">workload_identity_provider</span>: <span class="gc-str">projects/123456/locations/global/workloadIdentityPools/github-pool/providers/github-provider</span>
+        <span class="gc-yaml">service_account</span>: <span class="gc-str">github-ci-sa@order-service-prod-12345.iam.gserviceaccount.com</span>
+    - <span class="gc-yaml">name</span>: <span class="gc-str">Deploy to Cloud Run</span>
+      <span class="gc-yaml">run</span>: |
+        gcloud run deploy order-service \
+          --image asia-southeast1-docker.pkg.dev/$PROJECT_ID/.../order-service:$GITHUB_SHA \
+          --region asia-southeast1 --platform managed</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S18 MONITORING -->
+<div class="section" id="s18">
+  <div class="sec-head"><span class="sec-tag st-5">MONITORING</span>
+    <div><h2 class="sec-title">Cloud Monitoring &amp; Logging — Observability</h2>
+    <p class="sec-sub">Metrics, Logs, Traces, Alerts, Dashboards — tất cả trong Google Cloud Observability</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cloud Monitoring — alerts và custom metrics</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cloud Monitoring + Logging — setup, alerts, custom metrics</span><span class="cb-tag ct-5">Monitoring</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># ── Tạo Alert Policy ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> monitoring alert-policies create \
+    <span class="tc-flag">--policy-from-file</span> alert-policy.json
+
+<span class="tc-cmt"># alert-policy.json:</span>
+{
+  <span class="gc-key">"displayName"</span>: <span class="gc-str">"Cloud Run — High latency"</span>,
+  <span class="gc-key">"combiner"</span>:     <span class="gc-str">"OR"</span>,
+  <span class="gc-key">"conditions"</span>: [{
+    <span class="gc-key">"displayName"</span>: <span class="gc-str">"P99 latency > 2s for 5 minutes"</span>,
+    <span class="gc-key">"conditionThreshold"</span>: {
+      <span class="gc-key">"filter"</span>:     <span class="gc-str">"resource.type = \"cloud_run_revision\" AND metric.type = \"run.googleapis.com/request_latencies\""</span>,
+      <span class="gc-key">"aggregations"</span>: [{
+        <span class="gc-key">"alignmentPeriod"</span>: <span class="gc-str">"300s"</span>,
+        <span class="gc-key">"perSeriesAligner"</span>: <span class="gc-str">"ALIGN_PERCENTILE_99"</span>
+      }],
+      <span class="gc-key">"comparison"</span>:  <span class="gc-str">"COMPARISON_GT"</span>,
+      <span class="gc-key">"thresholdValue"</span>: 2000,
+      <span class="gc-key">"duration"</span>:  <span class="gc-str">"300s"</span>
+    }
+  }],
+  <span class="gc-key">"notificationChannels"</span>: [<span class="gc-str">"projects/.../notificationChannels/CHANNEL_ID"</span>]
+}
+
+<span class="tc-cmt"># ── Notification Channel — gửi Slack ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> monitoring channels create \
+    <span class="tc-flag">--type</span>         slack \
+    <span class="tc-flag">--display-name</span> <span class="tc-str">"#alerts-production"</span> \
+    <span class="tc-flag">--channel-labels</span> auth_token=xoxb-xxx,channel_name=#alerts-production
+
+<span class="tc-cmt"># ── Cloud Logging — query logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> logging read \
+    <span class="tc-str">'resource.type="cloud_run_revision" AND severity>=ERROR AND timestamp>="2024-03-14T00:00:00Z"'</span> \
+    <span class="tc-flag">--project</span>  order-service-prod-12345 \
+    <span class="tc-flag">--format</span>   json \
+    <span class="tc-flag">--limit</span>    50 <span class="tc-pipe">|</span> jq '.[].jsonPayload.message'
+
+<span class="tc-cmt"># ── Log-based Metrics — custom metrics từ logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">gcloud</span> logging metrics create order-errors \
+    <span class="tc-flag">--description</span>  <span class="tc-str">"Count of order processing errors"</span> \
+    <span class="tc-flag">--log-filter</span>   <span class="tc-str">'resource.type="cloud_run_revision" AND jsonPayload.logger="order-service" AND jsonPayload.level="ERROR"'</span>
+
+<span class="tc-cmt">// ── Spring Boot + Cloud Trace (distributed tracing) ──</span>
+<span class="tc-cmt">// pom.xml: com.google.cloud:spring-cloud-gcp-starter-trace</span>
+<span class="tc-cmt">// application.yml:</span>
+<span class="gc-str">spring</span>:
+  <span class="gc-str">cloud</span>:
+    <span class="gc-str">gcp</span>:
+      <span class="gc-str">trace</span>:
+        <span class="gc-str">enabled</span>: <span class="gc-kw">true</span>
+        <span class="gc-str">sample-rate</span>: 0.1    <span class="tc-cmt"># sample 10% requests</span>
+<span class="tc-cmt">// Tự động trace HTTP requests, JDBC calls, Pub/Sub messages</span>
+<span class="tc-cmt">// Xem trace trên Cloud Trace console — distributed request timeline</span>
+
+<span class="tc-cmt">// ── Custom Metrics với Micrometer ──</span>
+<span class="tc-cmt">// pom.xml: micrometer-registry-stackdriver</span>
+<span class="gc-str">management</span>.metrics.export.stackdriver.project-id=order-service-prod-12345
+<span class="gc-str">management</span>.metrics.export.stackdriver.enabled=true
+
+registry.counter(<span class="gc-str">"orders.created"</span>, <span class="gc-str">"status"</span>, status).increment();
+registry.timer(<span class="gc-str">"payment.latency"</span>).record(() -> paymentService.process(payment));</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S19 CHEAT SHEET -->
+<div class="section" id="s19">
+  <div class="sec-head"><span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — GCP toàn tập</h2>
+    <p class="sec-sub">Tra cứu nhanh commands, services và patterns quan trọng nhất</p></div>
+  </div>
+  <div class="cheat-grid">
+    <div class="cheat-card"><h4 class="h4-1">🌐 gcloud Basics</h4>
+      <div class="cheat-row"><span class="ck">Login</span><span class="cv">gcloud auth login</span></div>
+      <div class="cheat-row"><span class="ck">Set project</span><span class="cv">gcloud config set project PROJECT_ID</span></div>
+      <div class="cheat-row"><span class="ck">Enable API</span><span class="cv">gcloud services enable container.googleapis.com</span></div>
+      <div class="cheat-row"><span class="ck">ADC for local</span><span class="cv">gcloud auth application-default login</span></div>
+      <div class="cheat-row"><span class="ck">List configs</span><span class="cv">gcloud config list</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-1">🔐 IAM</h4>
+      <div class="cheat-row"><span class="ck">Tạo SA</span><span class="cv">gcloud iam service-accounts create sa-name</span></div>
+      <div class="cheat-row"><span class="ck">Grant role</span><span class="cv">gcloud projects add-iam-policy-binding PROJECT --member sa --role roles/x</span></div>
+      <div class="cheat-row"><span class="ck">Workload Identity</span><span class="cv">gcloud iam sa add-iam-policy-binding SA --role workloadIdentityUser</span></div>
+      <div class="cheat-row"><span class="ck">List SA</span><span class="cv">gcloud iam service-accounts list</span></div>
+      <div class="cheat-row"><span class="ck">IAM policy</span><span class="cv">gcloud projects get-iam-policy PROJECT_ID</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-2">🖥️ Compute</h4>
+      <div class="cheat-row"><span class="ck">Tạo VM</span><span class="cv">gcloud compute instances create vm-name --machine-type n2-standard-2</span></div>
+      <div class="cheat-row"><span class="ck">SSH vào VM</span><span class="cv">gcloud compute ssh vm-name --zone ZONE</span></div>
+      <div class="cheat-row"><span class="ck">IAP tunnel SSH</span><span class="cv">gcloud compute ssh vm-name --tunnel-through-iap</span></div>
+      <div class="cheat-row"><span class="ck">List instances</span><span class="cv">gcloud compute instances list</span></div>
+      <div class="cheat-row"><span class="ck">Stop VM</span><span class="cv">gcloud compute instances stop vm-name</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-2">☸️ GKE</h4>
+      <div class="cheat-row"><span class="ck">Create Autopilot</span><span class="cv">gcloud container clusters create-auto NAME --region REGION</span></div>
+      <div class="cheat-row"><span class="ck">Get kubeconfig</span><span class="cv">gcloud container clusters get-credentials NAME</span></div>
+      <div class="cheat-row"><span class="ck">List clusters</span><span class="cv">gcloud container clusters list</span></div>
+      <div class="cheat-row"><span class="ck">Upgrade cluster</span><span class="cv">gcloud container clusters upgrade NAME --master</span></div>
+      <div class="cheat-row"><span class="ck">Resize pool</span><span class="cv">gcloud container clusters resize NAME --num-nodes N</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-3">☁️ Cloud Run</h4>
+      <div class="cheat-row"><span class="ck">Deploy</span><span class="cv">gcloud run deploy NAME --image IMAGE --region REGION</span></div>
+      <div class="cheat-row"><span class="ck">List services</span><span class="cv">gcloud run services list --region REGION</span></div>
+      <div class="cheat-row"><span class="ck">Logs</span><span class="cv">gcloud run services logs read NAME --region REGION</span></div>
+      <div class="cheat-row"><span class="ck">Traffic split</span><span class="cv">gcloud run services update-traffic NAME --to-revisions r1=80,r2=20</span></div>
+      <div class="cheat-row"><span class="ck">Delete service</span><span class="cv">gcloud run services delete NAME --region REGION</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-3">🪣 Cloud Storage</h4>
+      <div class="cheat-row"><span class="ck">Create bucket</span><span class="cv">gsutil mb -l REGION gs://BUCKET_NAME</span></div>
+      <div class="cheat-row"><span class="ck">Upload file</span><span class="cv">gsutil cp file.txt gs://bucket/path</span></div>
+      <div class="cheat-row"><span class="ck">Sync folder</span><span class="cv">gsutil rsync -r ./dist gs://bucket</span></div>
+      <div class="cheat-row"><span class="ck">List objects</span><span class="cv">gsutil ls -l gs://bucket/prefix</span></div>
+      <div class="cheat-row"><span class="ck">Signed URL</span><span class="cv">gsutil signurl -d 1h key.json gs://bucket/file</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-4">🗄️ Cloud SQL</h4>
+      <div class="cheat-row"><span class="ck">Create instance</span><span class="cv">gcloud sql instances create NAME --database-version POSTGRES_15</span></div>
+      <div class="cheat-row"><span class="ck">Connect psql</span><span class="cv">gcloud sql connect INSTANCE --user USER</span></div>
+      <div class="cheat-row"><span class="ck">Create DB</span><span class="cv">gcloud sql databases create DB_NAME --instance INSTANCE</span></div>
+      <div class="cheat-row"><span class="ck">List instances</span><span class="cv">gcloud sql instances list</span></div>
+      <div class="cheat-row"><span class="ck">Create backup</span><span class="cv">gcloud sql backups create --instance INSTANCE</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-4">🔑 Secret Manager</h4>
+      <div class="cheat-row"><span class="ck">Tạo secret</span><span class="cv">echo -n "value" | gcloud secrets create NAME --data-file -</span></div>
+      <div class="cheat-row"><span class="ck">Đọc secret</span><span class="cv">gcloud secrets versions access latest --secret NAME</span></div>
+      <div class="cheat-row"><span class="ck">Thêm version</span><span class="cv">echo -n "new_value" | gcloud secrets versions add NAME --data-file -</span></div>
+      <div class="cheat-row"><span class="ck">List secrets</span><span class="cv">gcloud secrets list</span></div>
+      <div class="cheat-row"><span class="ck">Grant access</span><span class="cv">gcloud secrets add-iam-policy-binding NAME --member sa --role roles/secretmanager.secretAccessor</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">AWS / Azure vs GCP — Bảng so sánh dịch vụ tương đương</div>
+    <table class="tbl">
+      <thead><tr><th>AWS</th><th>Azure</th><th>GCP Tương đương</th><th>Mô tả</th></tr></thead>
+      <tbody>
+        <tr><td><code>EC2</code></td><td><code>Virtual Machines</code></td><td><code>Compute Engine</code></td><td>IaaS virtual machines</td></tr>
+        <tr><td><code>EKS</code></td><td><code>AKS</code></td><td><code>GKE</code></td><td>Managed Kubernetes (GKE tốt nhất)</td></tr>
+        <tr><td><code>Lambda</code></td><td><code>Azure Functions</code></td><td><code>Cloud Functions</code></td><td>Serverless functions</td></tr>
+        <tr><td><code>ECS Fargate</code></td><td><code>Container Apps</code></td><td><code>Cloud Run</code></td><td>Serverless containers</td></tr>
+        <tr><td><code>Elastic Beanstalk</code></td><td><code>App Service</code></td><td><code>App Engine</code></td><td>PaaS web apps</td></tr>
+        <tr><td><code>S3</code></td><td><code>Blob Storage</code></td><td><code>Cloud Storage</code></td><td>Object storage</td></tr>
+        <tr><td><code>RDS</code></td><td><code>Azure Database for PostgreSQL</code></td><td><code>Cloud SQL / AlloyDB</code></td><td>Managed relational DB</td></tr>
+        <tr><td><code>Aurora Global</code></td><td><code>N/A</code></td><td><code>Cloud Spanner</code></td><td>Globally distributed SQL</td></tr>
+        <tr><td><code>DynamoDB</code></td><td><code>Cosmos DB</code></td><td><code>Firestore / Bigtable</code></td><td>Managed NoSQL</td></tr>
+        <tr><td><code>ElastiCache</code></td><td><code>Redis Cache</code></td><td><code>Memorystore</code></td><td>Managed Redis</td></tr>
+        <tr><td><code>VPC</code></td><td><code>VNet</code></td><td><code>VPC (Global!)</code></td><td>Private network (GCP VPC là global)</td></tr>
+        <tr><td><code>ALB</code></td><td><code>Application Gateway</code></td><td><code>Cloud Load Balancing</code></td><td>L7 load balancer (GCP là global)</td></tr>
+        <tr><td><code>Route 53</code></td><td><code>Azure DNS</code></td><td><code>Cloud DNS</code></td><td>DNS management</td></tr>
+        <tr><td><code>CloudFront</code></td><td><code>Front Door / CDN</code></td><td><code>Cloud CDN</code></td><td>CDN &amp; edge caching</td></tr>
+        <tr><td><code>WAF + Shield</code></td><td><code>App Gateway WAF</code></td><td><code>Cloud Armor</code></td><td>WAF + DDoS protection</td></tr>
+        <tr><td><code>SQS / SNS</code></td><td><code>Service Bus</code></td><td><code>Pub/Sub</code></td><td>Message queue &amp; pub/sub</td></tr>
+        <tr><td><code>Kinesis</code></td><td><code>Event Hub</code></td><td><code>Pub/Sub + Dataflow</code></td><td>Event streaming</td></tr>
+        <tr><td><code>Redshift</code></td><td><code>Synapse Analytics</code></td><td><code>BigQuery</code></td><td>Data warehouse (BigQuery tốt nhất)</td></tr>
+        <tr><td><code>Secrets Manager</code></td><td><code>Key Vault</code></td><td><code>Secret Manager</code></td><td>Secrets management</td></tr>
+        <tr><td><code>IAM Roles</code></td><td><code>Managed Identity</code></td><td><code>Service Account + WI</code></td><td>Identity &amp; access</td></tr>
+        <tr><td><code>ECR</code></td><td><code>ACR</code></td><td><code>Artifact Registry</code></td><td>Container image registry</td></tr>
+        <tr><td><code>CloudWatch</code></td><td><code>Azure Monitor</code></td><td><code>Cloud Monitoring + Logging</code></td><td>Observability platform</td></tr>
+        <tr><td><code>CloudFormation</code></td><td><code>Bicep / ARM</code></td><td><code>Deployment Manager / Terraform</code></td><td>Infrastructure as Code</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Lộ trình học GCP — từ zero đến production</div>
+    <div class="steps">
+      <div class="step"><div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Tạo tài khoản &amp; Google Cloud Console</h4>
+        <p>Free tier: $300 credits 90 ngày. Tạo Project đầu tiên. Cài gcloud CLI, chạy <code>gcloud init</code>. Hiểu Hierarchy: Organization → Folder → Project → Resources.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>IAM, Service Accounts &amp; gcloud CLI</h4>
+        <p>Tạo Service Account. Assign roles. Bật Application Default Credentials cho local dev. Hiểu Workload Identity để pods không cần key files. Thực hành với gcloud commands.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Cloud Run — deploy container đơn giản nhất</h4>
+        <p>Build Docker image, push lên Artifact Registry. Deploy lên Cloud Run. Tích hợp Secret Manager cho DB password. Connect Cloud SQL qua Auth Proxy. Thử traffic splitting.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>VPC, Cloud SQL &amp; Memorystore</h4>
+        <p>Tạo Custom VPC với private subnets. Cloud SQL PostgreSQL với Private IP. Memorystore Redis. Hiểu Private Google Access — không cần public IP để access Google APIs.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>GKE Autopilot + Workload Identity</h4>
+        <p>Tạo GKE Autopilot cluster. Setup Workload Identity cho pods. Deploy Spring Boot với Helm. Tích hợp Secret Manager. Cấu hình Cloud SQL Auth Proxy sidecar trong pods.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>BigQuery, Pub/Sub &amp; Cloud Build CI/CD</h4>
+        <p>Pub/Sub cho event-driven architecture. BigQuery cho analytics. Cloud Build pipeline tự động. GitHub Actions với Workload Identity (passwordless). Cloud Monitoring alerts gửi Slack.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px"><strong style="color:var(--text)">Tài nguyên tham khảo:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://cloud.google.com/docs" style="color:var(--g1)">GCP Documentation</a> &nbsp;·&nbsp;
+        <a href="https://cloud.google.com/training" style="color:var(--g1)">Google Cloud Training</a> &nbsp;·&nbsp;
+        <a href="https://cloud.google.com/sdk/docs" style="color:var(--g1)">gcloud CLI Reference</a> &nbsp;·&nbsp;
+        <a href="https://cloud.google.com/free" style="color:var(--g1)">GCP Free Tier</a> &nbsp;·&nbsp;
+        <a href="https://cloud.google.com/architecture" style="color:var(--g1)">Architecture Center</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+<div class="footer">
+  <span>🌐 Google Cloud Platform · Cloud Infrastructure · DevOps · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">19 chủ đề · IAM → GKE → BigQuery → Pub/Sub → Cloud Run → Monitor</span>
+</div>
+</div><!-- /main -->
+<script>
+window.addEventListener('scroll',()=>{const e=document.documentElement;document.getElementById('pbar').style.width=(e.scrollTop/(e.scrollHeight-e.clientHeight)*100)+'%'});
+const sections=document.querySelectorAll('.section[id]'),links=document.querySelectorAll('.nav-link');
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+id))}})},{rootMargin:'-28% 0px -60% 0px'});
+sections.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
