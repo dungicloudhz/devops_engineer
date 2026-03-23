@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker — Hướng dẫn toàn tập · Backend & DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --purple:#a07af4;--purple-dim:rgba(160,122,244,.10);
+  --yellow:#ffd060;--yellow-dim:rgba(255,208,96,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  /* Docker colors */
+  --d1:#2496ed;--d1-dim:rgba(36,150,237,.11);--d1-glow:rgba(36,150,237,.26);
+  --d2:#0db7ed;--d2-dim:rgba(13,183,237,.11);--d2-glow:rgba(13,183,237,.26);
+  --d3:#ffd060;--d3-dim:rgba(255,208,96,.11);--d3-glow:rgba(255,208,96,.26);
+  --d4:#a07af4;--d4-dim:rgba(160,122,244,.11);--d4-glow:rgba(160,122,244,.26);
+  --d5:#40d88e;--d5-dim:rgba(64,216,142,.11);--d5-glow:rgba(64,216,142,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--d1),#0a6ca8);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--d1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--d1),var(--d2),var(--d3),var(--d4),var(--d5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--d1-dim);color:var(--d1)}.ngh-2{background:var(--d2-dim);color:var(--d2)}
+.ngh-3{background:var(--d3-dim);color:var(--d3)}.ngh-4{background:var(--d4-dim);color:var(--d4)}
+.ngh-5{background:var(--d5-dim);color:var(--d5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(36,150,237,.07);border-left-color:var(--d1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+
+/* ── MAIN / HERO ── */
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(36,150,237,.11) 0%,transparent 62%),
+    radial-gradient(ellipse 45% 55% at 12% 82%,rgba(13,183,237,.07) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 45% at 50% 50%,rgba(160,122,244,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(36,150,237,.09) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--d1-dim);border:1px solid rgba(36,150,237,.35);color:var(--d1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--d1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--d1)}
+.h-grad{background:linear-gradient(135deg,var(--d1) 0%,var(--d2) 50%,var(--d3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--d1-dim);color:var(--d1)}.chip-2{background:var(--d2-dim);color:var(--d2)}
+.chip-3{background:var(--d3-dim);color:var(--d3)}.chip-4{background:var(--d4-dim);color:var(--d4)}
+.chip-5{background:var(--d5-dim);color:var(--d5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+
+/* ── CAT BANNER ── */
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--d1-dim);border:1px solid rgba(36,150,237,.28)}.cb-1::before{background:linear-gradient(90deg,var(--d1),var(--d2))}
+.cb-2{background:var(--d2-dim);border:1px solid rgba(13,183,237,.28)}.cb-2::before{background:linear-gradient(90deg,var(--d2),var(--d1))}
+.cb-3{background:var(--d3-dim);border:1px solid rgba(255,208,96,.28)}.cb-3::before{background:linear-gradient(90deg,var(--d3),var(--d2))}
+.cb-4{background:var(--d4-dim);border:1px solid rgba(160,122,244,.28)}.cb-4::before{background:linear-gradient(90deg,var(--d4),var(--d1))}
+.cb-5{background:var(--d5-dim);border:1px solid rgba(64,216,142,.28)}.cb-5::before{background:linear-gradient(90deg,var(--d5),var(--d4))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--d1-dim);color:var(--d1)}.cb-2 .cb-badge{background:var(--d2-dim);color:var(--d2)}
+.cb-3 .cb-badge{background:var(--d3-dim);color:var(--d3)}.cb-4 .cb-badge{background:var(--d4-dim);color:var(--d4)}
+.cb-5 .cb-badge{background:var(--d5-dim);color:var(--d5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+/* ── CONTENT / SECTION ── */
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--d1);background:var(--d1-dim);border:1px solid var(--d1-glow)}
+.st-2{color:var(--d2);background:var(--d2-dim);border:1px solid var(--d2-glow)}
+.st-3{color:var(--d3);background:var(--d3-dim);border:1px solid var(--d3-glow)}
+.st-4{color:var(--d4);background:var(--d4-dim);border:1px solid var(--d4-glow)}
+.st-5{color:var(--d5);background:var(--d5-dim);border:1px solid var(--d5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--d1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+
+/* ── GRIDS & CARDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--d1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── CODE BLOCKS ── */
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--d1-dim);color:var(--d1)}.ct-2{background:var(--d2-dim);color:var(--d2)}
+.ct-3{background:var(--d3-dim);color:var(--d3)}.ct-4{background:var(--d4-dim);color:var(--d4)}
+.ct-5{background:var(--d5-dim);color:var(--d5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+/* Dockerfile/Shell syntax */
+.dk-kw{color:#2496ed;font-weight:700}   /* Dockerfile keywords FROM RUN COPY etc */
+.dk-str{color:#c3e88d}                  /* strings / args */
+.dk-cmt{color:#546e7a;font-style:italic}/* comments */
+.dk-flag{color:#ffcb6b}                 /* flags --flag */
+.dk-path{color:#c3e88d}                 /* paths */
+.dk-var{color:#c792ea}                  /* $VAR */
+.dk-num{color:#f78c6c}                  /* numbers */
+.dk-img{color:#0db7ed;font-weight:600}  /* image names */
+.dk-tag{color:#ffd060}                  /* :tag */
+.dk-ok{color:#40d88e}                   /* success output */
+.dk-err{color:#ff6584}                  /* error/warning */
+.dk-sec{color:#ffd060;font-weight:700}  /* section comments */
+.tc-prompt{color:#89ddff}.tc-root{color:#ff6584}
+.tc-cmd{color:#82aaff}.tc-flag{color:#ffcb6b}
+.tc-path{color:#c3e88d}.tc-str{color:#c3e88d}
+.tc-arg{color:#f78c6c}.tc-cmt{color:#546e7a;font-style:italic}
+.tc-out{color:#546e7a}.tc-ok{color:#40d88e}.tc-err{color:#ff6584}
+.tc-pipe{color:#89ddff}.tc-var{color:#c792ea}
+
+/* ── INFO BOXES ── */
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:rgba(64,216,142,.08);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:rgba(255,208,96,.08);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:rgba(36,150,237,.08);border:1px solid rgba(36,150,237,.2);color:#2080c0}
+.i-note{background:rgba(160,122,244,.08);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:rgba(255,101,132,.08);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+
+/* ── RW BOX ── */
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--d1)}.rw-2::before{background:var(--d2)}.rw-3::before{background:var(--d3)}
+.rw-4::before{background:var(--d4)}.rw-5::before{background:var(--d5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--d1)}.rw-2 .rw-label{color:var(--d2)}.rw-3 .rw-label{color:var(--d3)}
+.rw-4 .rw-label{color:var(--d4)}.rw-5 .rw-label{color:var(--d5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── COMPARE ── */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmp-bad{background:rgba(255,101,132,.06);border:1px solid rgba(255,101,132,.2);border-radius:11px;padding:16px}
+.cmp-good{background:rgba(64,216,142,.06);border:1px solid rgba(64,216,142,.2);border-radius:11px;padding:16px}
+.cmp-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cmp-bad .cmp-label{color:var(--pink)}.cmp-good .cmp-label{color:var(--d5)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--d2)}
+
+/* ── STEPS ── */
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--d1);background:var(--d1-dim);border:2px solid var(--d1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── CHEAT SHEET ── */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--d1)}.h4-2{color:var(--d2)}.h4-3{color:var(--d3)}.h4-4{color:var(--d4)}.h4-5{color:var(--d5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;gap:8px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted);flex-shrink:0}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--d2);text-align:right}
+
+/* ── LAYER DIAGRAM ── */
+.layer-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:22px;margin:14px 0;position:relative;overflow:hidden}
+.layer-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--d1),var(--d2),var(--d3))}
+.layer{border-radius:8px;padding:10px 16px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px}
+.layer:last-child{margin-bottom:0}
+.l-rw{background:rgba(36,150,237,.12);border:1px solid rgba(36,150,237,.3);color:var(--d1)}
+.l-ro{background:rgba(13,183,237,.08);border:1px solid rgba(13,183,237,.2);color:var(--d2)}
+.l-base{background:rgba(160,122,244,.08);border:1px solid rgba(160,122,244,.2);color:var(--d4)}
+.layer-badge{font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-left:auto}
+.lb-rw{background:rgba(36,150,237,.2);color:var(--d1)}
+.lb-ro{background:rgba(13,183,237,.1);color:var(--d2)}
+.lb-base{background:rgba(160,122,244,.1);color:var(--d4)}
+
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(36,150,237,.1);color:var(--d2);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid,.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">🐳</div>
+      <div class="logo-text"><h2>Docker</h2><p>Backend &amp; DevOps · Hướng dẫn</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">📚 Series DevOps</div>
+    <a href="terminal-macbook.html" class="nav-link"><span class="ico">💻</span> Terminal macOS</a>
+    <a href="linux-guide.html" class="nav-link"><span class="ico">🐧</span> Linux Server</a>
+    <a href="docker-guide.html" class="nav-link active"><span class="ico">🐳</span> Docker</a>
+    <a href="kubernate-guide.html" class="nav-link"><span class="ico">⚓</span> Kubernetes</a>
+    <a href="gitlab-cicd-guide.html" class="nav-link"><span class="ico">🦊</span> GitLab CI/CD</a>
+    <a href="teraform-guide.html" class="nav-link"><span class="ico">🏗️</span> Terraform</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Nền tảng</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🏗️</span> Docker là gì? Kiến trúc</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🔵 Images &amp; Containers</div>
+    <a href="#s1" class="nav-link"><span class="ico">📦</span> Images — Kéo &amp; Quản lý</a>
+    <a href="#s2" class="nav-link"><span class="ico">🚀</span> Containers — Run &amp; Manage</a>
+    <a href="#s3" class="nav-link"><span class="ico">🔍</span> Inspect &amp; Debug</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🔵 Dockerfile</div>
+    <a href="#s4" class="nav-link"><span class="ico">📄</span> Dockerfile Cơ bản</a>
+    <a href="#s5" class="nav-link"><span class="ico">⚡</span> Multi-stage Build</a>
+    <a href="#s6" class="nav-link"><span class="ico">🎯</span> Best Practices</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Networking &amp; Storage</div>
+    <a href="#s7" class="nav-link"><span class="ico">🌐</span> Docker Networking</a>
+    <a href="#s8" class="nav-link"><span class="ico">💾</span> Volumes &amp; Bind Mounts</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟣 Docker Compose</div>
+    <a href="#s9"  class="nav-link"><span class="ico">🎼</span> Compose Cơ bản</a>
+    <a href="#s10" class="nav-link"><span class="ico">⚙️</span> Compose Nâng cao</a>
+    <a href="#s11" class="nav-link"><span class="ico">☕</span> Ví dụ: Spring Boot Stack</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🟢 Production &amp; DevOps</div>
+    <a href="#s12" class="nav-link"><span class="ico">🗂️</span> Registry &amp; Push/Pull</a>
+    <a href="#s13" class="nav-link"><span class="ico">📊</span> Monitoring &amp; Logging</a>
+    <a href="#s14" class="nav-link"><span class="ico">🔒</span> Security &amp; Hardening</a>
+    <a href="#s15" class="nav-link"><span class="ico">🧹</span> Cleanup &amp; Maintenance</a>
+    <a href="#s16" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> Containers · Images · Dockerfile · Compose · Registry</div>
+  <h1><span class="h-acc">Docker</span><br><span class="h-grad">Hướng Dẫn Toàn Tập</span></h1>
+  <p class="hero-desc">Từ khái niệm container đến Dockerfile production-ready, Docker Compose cho microservices, đến bảo mật và tối ưu image — tất cả kèm ví dụ thực tế dễ hiểu.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">Images &amp; Containers</span>
+    <span class="chip chip-2">Dockerfile</span>
+    <span class="chip chip-3">Multi-stage Build</span>
+    <span class="chip chip-4">Docker Compose</span>
+    <span class="chip chip-5">Registry</span>
+    <span class="chip chip-r">Security</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════ S0 — KIẾN TRÚC ════ -->
+<div class="section" id="s0">
+  <div class="sec-head">
+    <span class="sec-tag st-1">OVERVIEW</span>
+    <div><h2 class="sec-title">Docker là gì? — Kiến trúc &amp; Các khái niệm cốt lõi</h2>
+    <p class="sec-sub">Container vs VM · Image vs Container · Layer System · Docker Daemon</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Container vs VM — Tại sao Container nhanh hơn?</div>
+    <div class="compare">
+      <div class="cmp-bad">
+        <div class="cmp-label">🖥️ Virtual Machine</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2.1;color:var(--muted)">
+          <div style="background:rgba(255,101,132,.1);border-radius:5px;padding:4px 10px;margin-bottom:3px;color:var(--pink)">App A</div>
+          <div style="background:rgba(255,101,132,.1);border-radius:5px;padding:4px 10px;margin-bottom:3px;color:var(--pink)">Guest OS (Ubuntu)</div>
+          <div style="background:rgba(255,101,132,.06);border-radius:5px;padding:4px 10px;margin-bottom:3px;color:var(--muted)">Hypervisor (VMware/KVM)</div>
+          <div style="background:rgba(255,101,132,.06);border-radius:5px;padding:4px 10px;color:var(--muted)">Host OS + Hardware</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px">❌ Mỗi VM cần full OS (~1-2GB RAM)<br>❌ Boot chậm (30s-2 phút)<br>❌ Overhead cao</div>
+      </div>
+      <div class="cmp-good">
+        <div class="cmp-label">🐳 Docker Container</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2.1;color:var(--muted)">
+          <div style="display:flex;gap:5px">
+            <div style="flex:1;background:rgba(36,150,237,.12);border-radius:5px;padding:4px 8px;color:var(--d1);font-size:11px">App A</div>
+            <div style="flex:1;background:rgba(36,150,237,.12);border-radius:5px;padding:4px 8px;color:var(--d1);font-size:11px">App B</div>
+          </div>
+          <div style="margin-top:4px;background:rgba(13,183,237,.1);border-radius:5px;padding:4px 10px;color:var(--d2)">Docker Engine</div>
+          <div style="margin-top:4px;background:rgba(64,216,142,.08);border-radius:5px;padding:4px 10px;color:var(--d5)">Host OS Kernel</div>
+          <div style="margin-top:4px;background:rgba(64,216,142,.05);border-radius:5px;padding:4px 10px;color:var(--muted)">Hardware</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px">✅ Dùng chung Host OS kernel<br>✅ Start trong milli-giây<br>✅ Lightweight (~MB RAM overhead)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Kiến trúc Docker — Client / Daemon / Registry</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--d1),var(--d2),var(--d3))"></div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:8px;margin-top:8px">
+        <div style="background:var(--d1-dim);border:1px solid rgba(36,150,237,.3);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">💻</div>
+          <div style="font-size:11px;font-weight:800;color:var(--d1);text-transform:uppercase;letter-spacing:.5px">Docker Client</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:6px">docker build<br>docker run<br>docker pull</div>
+        </div>
+        <div style="text-align:center;color:var(--muted);font-size:11px">REST API<br>→</div>
+        <div style="background:var(--d2-dim);border:1px solid rgba(13,183,237,.3);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">⚙️</div>
+          <div style="font-size:11px;font-weight:800;color:var(--d2);text-transform:uppercase;letter-spacing:.5px">Docker Daemon</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:6px">dockerd<br>Manages containers<br>&amp; images</div>
+        </div>
+        <div style="text-align:center;color:var(--muted);font-size:11px">pull/push<br>→</div>
+        <div style="background:var(--d3-dim);border:1px solid rgba(255,208,96,.3);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">🗂️</div>
+          <div style="font-size:11px;font-weight:800;color:var(--d3);text-transform:uppercase;letter-spacing:.5px">Registry</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:6px">Docker Hub<br>GHCR / ECR<br>Self-hosted</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Image Layer System — Cách Docker tiết kiệm storage</div>
+    <div class="layer-box">
+      <div style="font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;margin-top:4px">IMAGE LAYERS (Read-only) + CONTAINER LAYER (Read-write)</div>
+      <div class="layer l-rw"><span>📝</span> Container Layer — Writable<span class="layer-badge lb-rw">RW · Runtime</span></div>
+      <div style="text-align:center;color:var(--border2);font-size:11px;margin:3px 0">↑ Copy-on-Write</div>
+      <div class="layer l-ro"><span>☕</span> COPY target/app.jar /app/app.jar<span class="layer-badge lb-ro">Layer 4</span></div>
+      <div class="layer l-ro"><span>🔒</span> RUN groupadd -r app &amp;&amp; useradd -r -g app app<span class="layer-badge lb-ro">Layer 3</span></div>
+      <div class="layer l-ro"><span>📁</span> WORKDIR /app<span class="layer-badge lb-ro">Layer 2</span></div>
+      <div class="layer l-base"><span>☕</span> FROM eclipse-temurin:21-jre<span class="layer-badge lb-base">Base Image</span></div>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Shared layers tiết kiệm disk:</strong> Nếu 10 container cùng dùng <code>eclipse-temurin:21-jre</code>, layer đó chỉ download và lưu một lần. Mỗi container chỉ thêm một thin writable layer riêng.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 1 BANNER ════ -->
+<div class="cat-banner cb-1">
+  <div class="cb-icon">📦</div>
+  <div><div class="cb-badge">IMAGES &amp; CONTAINERS</div>
+  <div class="cb-title">Làm chủ Images và Containers</div>
+  <div class="cb-sub">docker pull · docker run · docker exec · inspect · debug</div></div>
+</div>
+
+<!-- ════ S1 — IMAGES ════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-tag st-1">IMAGES</span>
+    <div><h2 class="sec-title">Images — Kéo, xem và quản lý</h2>
+    <p class="sec-sub">docker pull, image ls, rmi, tag, save/load — làm chủ image management</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Image commands thực tế</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">docker image commands</span><span class="cb-tag ct-1">Images</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Pull images ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pull <span class="dk-img">nginx</span>                        <span class="dk-cmt"># latest tag</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pull <span class="dk-img">nginx</span><span class="dk-tag">:1.25-alpine</span>           <span class="dk-cmt"># specific version</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pull <span class="dk-img">eclipse-temurin</span><span class="dk-tag">:21-jdk-jammy</span> <span class="dk-cmt"># Java 21 JDK</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pull <span class="dk-img">postgres</span><span class="dk-tag">:16-alpine</span>           <span class="dk-cmt"># PostgreSQL 16</span>
+
+<span class="dk-sec"># ── Xem images ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> images                              <span class="dk-cmt"># danh sách images</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image ls <span class="tc-flag">--format</span> <span class="tc-str">"table {{.Repository}}\t{{.Tag}}\t{{.Size}}"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image inspect <span class="dk-img">nginx</span><span class="dk-tag">:latest</span>        <span class="dk-cmt"># metadata đầy đủ JSON</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> history <span class="dk-img">my-app</span><span class="dk-tag">:1.0</span>               <span class="dk-cmt"># xem từng layer + size</span>
+
+<span class="dk-sec"># ── Tag và rename ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag <span class="dk-img">my-app</span><span class="dk-tag">:latest</span> <span class="dk-img">registry.company.com/backend/my-app</span><span class="dk-tag">:v1.2.3</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag <span class="dk-img">my-app</span><span class="dk-tag">:latest</span> <span class="dk-img">my-app</span><span class="dk-tag">:stable</span>
+
+<span class="dk-sec"># ── Xóa images ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> rmi <span class="dk-img">nginx</span><span class="dk-tag">:1.24</span>                    <span class="dk-cmt"># xóa image</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image prune                         <span class="dk-cmt"># xóa dangling images (none)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image prune <span class="tc-flag">-a</span>                      <span class="dk-cmt"># xóa tất cả không dùng</span>
+
+<span class="dk-sec"># ── Save/Load (offline transfer) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> save <span class="dk-img">my-app</span><span class="dk-tag">:1.0</span> <span class="tc-flag">-o</span> my-app-1.0.tar  <span class="dk-cmt"># export sang file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> load <span class="tc-flag">-i</span> my-app-1.0.tar              <span class="dk-cmt"># import từ file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> save <span class="dk-img">my-app</span> <span class="tc-pipe">|</span> gzip <span class="tc-flag">></span> my-app.tar.gz <span class="dk-cmt"># nén luôn</span>
+
+<span class="dk-sec"># ── Scan vulnerabilities ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> scout cves <span class="dk-img">my-app</span><span class="dk-tag">:latest</span>           <span class="dk-cmt"># Docker Scout (built-in)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">trivy</span> image <span class="dk-img">my-app</span><span class="dk-tag">:latest</span>                 <span class="dk-cmt"># Trivy scan</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2 — CONTAINERS ════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-tag st-1">CONTAINERS</span>
+    <div><h2 class="sec-title">Containers — Run, Manage &amp; Control</h2>
+    <p class="sec-sub">docker run với tất cả options quan trọng — port, volume, env, restart</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">docker run — tất cả options cần biết</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">docker run — full options với ví dụ thực tế</span><span class="cb-tag ct-1">Run</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Cú pháp: docker run [OPTIONS] IMAGE [COMMAND] ──</span>
+
+<span class="dk-sec"># Ví dụ 1: Chạy Nginx web server</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run \
+    <span class="tc-flag">--name</span> <span class="tc-arg">nginx-prod</span> \        <span class="dk-cmt"># đặt tên container</span>
+    <span class="tc-flag">-d</span> \                         <span class="dk-cmt"># detached (chạy nền)</span>
+    <span class="tc-flag">-p</span> <span class="dk-num">80:80</span> \                   <span class="dk-cmt"># host:container port</span>
+    <span class="tc-flag">-p</span> <span class="dk-num">443:443</span> \
+    <span class="tc-flag">-v</span> /etc/nginx/nginx.conf<span class="dk-flag">:/etc/nginx/nginx.conf:ro</span> \  <span class="dk-cmt"># mount file config</span>
+    <span class="tc-flag">--restart</span> unless-stopped \  <span class="dk-cmt"># tự restart khi crash</span>
+    <span class="dk-img">nginx</span><span class="dk-tag">:1.25-alpine</span>
+
+<span class="dk-sec"># Ví dụ 2: Chạy PostgreSQL với data volume</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run \
+    <span class="tc-flag">--name</span> <span class="tc-arg">postgres</span> \
+    <span class="tc-flag">-d</span> \
+    <span class="tc-flag">-p</span> <span class="dk-num">5432:5432</span> \
+    <span class="tc-flag">-e</span> <span class="dk-var">POSTGRES_DB</span>=shopdb \          <span class="dk-cmt"># environment variable</span>
+    <span class="tc-flag">-e</span> <span class="dk-var">POSTGRES_USER</span>=admin \
+    <span class="tc-flag">-e</span> <span class="dk-var">POSTGRES_PASSWORD</span>=secret \
+    <span class="tc-flag">-v</span> pgdata<span class="dk-flag">:/var/lib/postgresql/data</span> \  <span class="dk-cmt"># named volume</span>
+    <span class="tc-flag">--network</span> backend-net \      <span class="dk-cmt"># join network</span>
+    <span class="tc-flag">--memory</span> <span class="dk-num">512m</span> \             <span class="dk-cmt"># limit RAM</span>
+    <span class="tc-flag">--cpus</span> <span class="dk-num">1.0</span> \                 <span class="dk-cmt"># limit CPU</span>
+    <span class="dk-img">postgres</span><span class="dk-tag">:16-alpine</span>
+
+<span class="dk-sec"># Ví dụ 3: Chạy Spring Boot app</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run \
+    <span class="tc-flag">--name</span> <span class="tc-arg">order-service</span> \
+    <span class="tc-flag">-d</span> \
+    <span class="tc-flag">-p</span> <span class="dk-num">8080:8080</span> \
+    <span class="tc-flag">-e</span> <span class="dk-var">SPRING_PROFILES_ACTIVE</span>=prod \
+    <span class="tc-flag">-e</span> <span class="dk-var">DB_URL</span>=jdbc:postgresql://postgres:5432/shopdb \
+    <span class="tc-flag">--env-file</span> .env \              <span class="dk-cmt"># load từ file .env</span>
+    <span class="tc-flag">--network</span> backend-net \
+    <span class="tc-flag">--restart</span> on-failure<span class="dk-flag">:3</span> \     <span class="dk-cmt"># restart tối đa 3 lần</span>
+    <span class="tc-flag">--health-cmd</span> <span class="tc-str">"curl -f http://localhost:8080/actuator/health"</span> \
+    <span class="tc-flag">--health-interval</span> <span class="dk-num">30s</span> \
+    <span class="tc-flag">--health-timeout</span> <span class="dk-num">10s</span> \
+    <span class="tc-flag">--health-retries</span> <span class="dk-num">3</span> \
+    <span class="dk-img">registry.company.com/order-service</span><span class="dk-tag">:v2.1.0</span>
+
+<span class="dk-sec"># Ví dụ 4: Interactive shell (debug)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-it --rm</span> <span class="dk-img">ubuntu</span><span class="dk-tag">:22.04</span> bash  <span class="dk-cmt"># -it=interactive, --rm=auto delete</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-it --rm</span> <span class="dk-img">eclipse-temurin</span><span class="dk-tag">:21</span> java -version</pre></div>
+    </div>
+
+    <div class="sub-title">Container lifecycle commands</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Container management — start, stop, rm, logs, cp</span><span class="cb-tag ct-1">Manage</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Xem containers ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> ps                                  <span class="dk-cmt"># đang chạy</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> ps <span class="tc-flag">-a</span>                               <span class="dk-cmt"># tất cả kể cả đã stop</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> ps <span class="tc-flag">--format</span> <span class="tc-str">"table {{.Names}}\t{{.Status}}\t{{.Ports}}"</span>
+
+<span class="dk-sec"># ── Start / Stop / Restart ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stop order-service                 <span class="dk-cmt"># SIGTERM → grace period → SIGKILL</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stop <span class="tc-flag">-t 30</span> order-service           <span class="dk-cmt"># đợi 30s trước SIGKILL</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> start order-service                <span class="dk-cmt"># start lại</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> restart order-service              <span class="dk-cmt"># stop + start</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> kill order-service                 <span class="dk-cmt"># SIGKILL ngay (brutal)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pause order-service               <span class="dk-cmt"># tạm dừng (cgroup freeze)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> unpause order-service             <span class="dk-cmt"># tiếp tục</span>
+
+<span class="dk-sec"># ── Xóa containers ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> rm order-service                   <span class="dk-cmt"># phải stop trước</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> rm <span class="tc-flag">-f</span> order-service               <span class="dk-cmt"># force stop + remove</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> container prune                    <span class="dk-cmt"># xóa tất cả stopped containers</span>
+
+<span class="dk-sec"># ── Logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs order-service                 <span class="dk-cmt"># toàn bộ logs</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-flag">-f</span> order-service             <span class="dk-cmt"># follow real-time</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-flag">--tail 100</span> order-service     <span class="dk-cmt"># 100 dòng cuối</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-flag">--since 30m</span> order-service    <span class="dk-cmt"># 30 phút gần đây</span>
+
+<span class="dk-sec"># ── Copy files ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> cp order-service<span class="dk-flag">:/app/logs/app.log</span> ./  <span class="dk-cmt"># từ container ra host</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> cp ./config.yml order-service<span class="dk-flag">:/app/</span>   <span class="dk-cmt"># từ host vào container</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S3 — INSPECT & DEBUG ════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-tag st-1">DEBUG</span>
+    <div><h2 class="sec-title">Inspect &amp; Debug — Tìm nguyên nhân lỗi</h2>
+    <p class="sec-sub">docker exec, inspect, stats, top — debug container như pro</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Debug container đang chạy</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Debug commands — exec, inspect, stats</span><span class="cb-tag ct-1">Debug</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── docker exec — chạy lệnh trong container đang chạy ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec <span class="tc-flag">-it</span> order-service bash     <span class="dk-cmt"># vào shell bash</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec <span class="tc-flag">-it</span> order-service sh       <span class="dk-cmt"># Alpine dùng sh không có bash</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec order-service env           <span class="dk-cmt"># xem environment variables</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec order-service cat /app/application.yml
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec <span class="tc-flag">-it</span> postgres psql <span class="tc-flag">-U</span> admin shopdb  <span class="dk-cmt"># vào psql</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> exec order-service curl <span class="tc-flag">-s</span> http://localhost:8080/actuator/health
+
+<span class="dk-sec"># ── docker inspect — xem tất cả metadata ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect order-service            <span class="dk-cmt"># full JSON</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect <span class="tc-flag">-f</span> <span class="tc-str">'{{.State.Health.Status}}'</span> order-service  <span class="dk-cmt"># health</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect <span class="tc-flag">-f</span> <span class="tc-str">'{{.NetworkSettings.IPAddress}}'</span> order-service
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect <span class="tc-flag">-f</span> <span class="tc-str">'{{range .Mounts}}{{.Source}} → {{.Destination}}{{"\n"}}{{end}}'</span> order-service
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> inspect order-service <span class="tc-pipe">|</span> jq <span class="tc-str">'.[0].Config.Env'</span>  <span class="dk-cmt"># env vars</span>
+
+<span class="dk-sec"># ── docker stats — real-time resource usage ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stats                            <span class="dk-cmt"># tất cả containers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stats order-service postgres     <span class="dk-cmt"># chỉ containers này</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stats <span class="tc-flag">--no-stream</span>               <span class="dk-cmt"># snapshot 1 lần</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> top order-service               <span class="dk-cmt"># processes trong container</span>
+
+<span class="dk-sec"># ── Debug container đã exit ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> ps <span class="tc-flag">-a --filter</span> <span class="tc-str">"exited=1"</span>      <span class="dk-cmt"># containers exit với code 1</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> logs <span class="tc-arg">--tail 50</span> crashed-container
+<span class="dk-cmt"># Start container đã stop và vào shell ngay:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> start order-service && docker exec <span class="tc-flag">-it</span> order-service sh</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 2 BANNER ════ -->
+<div class="cat-banner cb-2">
+  <div class="cb-icon">📄</div>
+  <div><div class="cb-badge">DOCKERFILE</div>
+  <div class="cb-title">Viết Dockerfile Chuyên nghiệp</div>
+  <div class="cb-sub">Instructions · Multi-stage · Layer optimization · Best practices</div></div>
+</div>
+
+<!-- ════ S4 — DOCKERFILE CƠ BẢN ════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-tag st-2">DOCKERFILE</span>
+    <div><h2 class="sec-title">Dockerfile — Tất cả Instructions quan trọng</h2>
+    <p class="sec-sub">FROM, RUN, COPY, ADD, ENV, ARG, EXPOSE, CMD, ENTRYPOINT — khi nào dùng gì</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Dockerfile đầy đủ cho Java Spring Boot</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Dockerfile — Spring Boot với annotations chi tiết</span><span class="cb-tag ct-2">Dockerfile</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Base image ──</span>
+<span class="dk-kw">FROM</span> <span class="dk-img">eclipse-temurin</span><span class="dk-tag">:21-jre-jammy</span>
+<span class="dk-cmt"># Dùng JRE (không phải JDK) cho production — nhỏ hơn ~200MB</span>
+<span class="dk-cmt"># jammy = Ubuntu 22.04 LTS (stable, security patches)</span>
+
+<span class="dk-sec"># ── Build-time arguments ──</span>
+<span class="dk-kw">ARG</span> <span class="dk-var">APP_VERSION</span>=latest          <span class="dk-cmt"># docker build --build-arg APP_VERSION=1.2.3</span>
+<span class="dk-kw">ARG</span> <span class="dk-var">BUILD_DATE</span>
+
+<span class="dk-sec"># ── Metadata / Labels ──</span>
+<span class="dk-kw">LABEL</span> <span class="dk-var">org.opencontainers.image.title</span>=<span class="dk-str">"Order Service"</span>
+<span class="dk-kw">LABEL</span> <span class="dk-var">org.opencontainers.image.version</span>=<span class="dk-str">"${APP_VERSION}"</span>
+<span class="dk-kw">LABEL</span> <span class="dk-var">org.opencontainers.image.created</span>=<span class="dk-str">"${BUILD_DATE}"</span>
+<span class="dk-kw">LABEL</span> <span class="dk-var">maintainer</span>=<span class="dk-str">"devops@company.com"</span>
+
+<span class="dk-sec"># ── Environment variables ──</span>
+<span class="dk-kw">ENV</span> <span class="dk-var">JAVA_OPTS</span>=<span class="dk-str">"-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"</span>
+<span class="dk-kw">ENV</span> <span class="dk-var">APP_HOME</span>=<span class="dk-str">"/app"</span>
+<span class="dk-cmt"># ENV vs ARG: ENV tồn tại khi runtime, ARG chỉ khi build</span>
+
+<span class="dk-sec"># ── Tạo non-root user (security!) ──</span>
+<span class="dk-kw">RUN</span> groupadd <span class="dk-flag">--system</span> <span class="dk-flag">--gid</span> <span class="dk-num">1001</span> app \
+ && useradd <span class="dk-flag">--system</span> <span class="dk-flag">--uid</span> <span class="dk-num">1001</span> <span class="dk-flag">--gid</span> app <span class="dk-flag">--no-create-home</span> app
+<span class="dk-cmt"># Combine RUN commands → ít layers hơn!</span>
+
+<span class="dk-sec"># ── Working directory ──</span>
+<span class="dk-kw">WORKDIR</span> <span class="dk-path">${APP_HOME}</span>
+<span class="dk-cmt"># WORKDIR tạo thư mục nếu chưa tồn tại</span>
+<span class="dk-cmt"># Tất cả COPY, RUN, CMD sau đều relative đến đây</span>
+
+<span class="dk-sec"># ── Copy files ──</span>
+<span class="dk-kw">COPY</span> <span class="dk-path">--chown=app:app</span> target/app.jar <span class="dk-path">./app.jar</span>
+<span class="dk-cmt"># COPY vs ADD:</span>
+<span class="dk-cmt"># COPY: đơn giản, chỉ copy local files (preferred)</span>
+<span class="dk-cmt"># ADD: có thể untar archives, download URLs (tránh dùng)</span>
+
+<span class="dk-sec"># ── Switch to non-root user ──</span>
+<span class="dk-kw">USER</span> app
+
+<span class="dk-sec"># ── Expose port ──</span>
+<span class="dk-kw">EXPOSE</span> <span class="dk-num">8080</span>
+<span class="dk-cmt"># EXPOSE chỉ là documentation — không thực sự mở port</span>
+<span class="dk-cmt"># Phải dùng -p khi docker run để map ra host</span>
+
+<span class="dk-sec"># ── Health check ──</span>
+<span class="dk-kw">HEALTHCHECK</span> <span class="dk-flag">--interval=30s</span> <span class="dk-flag">--timeout=10s</span> <span class="dk-flag">--start-period=60s</span> <span class="dk-flag">--retries=3</span> \
+  <span class="dk-kw">CMD</span> curl <span class="dk-flag">-f</span> http://localhost:8080/actuator/health || exit 1
+
+<span class="dk-sec"># ── Entry point vs CMD ──</span>
+<span class="dk-kw">ENTRYPOINT</span> [<span class="dk-str">"java"</span>]
+<span class="dk-kw">CMD</span> [<span class="dk-str">"-jar"</span>, <span class="dk-str">"app.jar"</span>]
+<span class="dk-cmt"># ENTRYPOINT: không thể override (trừ --entrypoint)</span>
+<span class="dk-cmt"># CMD: default args cho ENTRYPOINT, có thể override</span>
+<span class="dk-cmt"># docker run my-app -jar app.jar --spring.profiles.active=dev</span>
+
+<span class="dk-cmt"># Kết hợp cả JAVA_OPTS:</span>
+<span class="dk-cmt"># ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar $@", "--"]</span>
+<span class="dk-cmt"># CMD []</span></pre></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">CMD vs ENTRYPOINT — Phân biệt rõ ràng</div>
+    <table class="tbl">
+      <thead><tr><th>Instruction</th><th>Override bởi docker run</th><th>Mục đích</th><th>Ví dụ</th></tr></thead>
+      <tbody>
+        <tr><td><code>CMD ["arg"]</code></td><td>✅ Dễ dàng</td><td>Default command/args</td><td><code>CMD ["--spring.profiles.active=prod"]</code></td></tr>
+        <tr><td><code>ENTRYPOINT ["cmd"]</code></td><td>⚠️ Chỉ qua --entrypoint</td><td>Fixed executable</td><td><code>ENTRYPOINT ["java", "-jar", "app.jar"]</code></td></tr>
+        <tr><td>Kết hợp cả hai</td><td>CMD được override</td><td>Flexible</td><td>ENTRYPOINT = java, CMD = default args</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ S5 — MULTI-STAGE ════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-tag st-2">MULTI-STAGE</span>
+    <div><h2 class="sec-title">Multi-stage Build — Image nhỏ, Build nhanh</h2>
+    <p class="sec-sub">Tách build environment khỏi runtime — giảm image size từ 1GB xuống 200MB</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Multi-stage cho Spring Boot — 3 stages</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Dockerfile.multi-stage — dependency cache + extract layers</span><span class="cb-tag ct-2">Multi-stage</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ══════ Stage 1: Dependency cache ══════</span>
+<span class="dk-kw">FROM</span> <span class="dk-img">eclipse-temurin</span><span class="dk-tag">:21-jdk-jammy</span> <span class="dk-kw">AS</span> deps
+<span class="dk-kw">WORKDIR</span> <span class="dk-path">/build</span>
+
+<span class="dk-cmt"># Copy chỉ pom.xml trước → download deps → cache layer này</span>
+<span class="dk-kw">COPY</span> .mvn/ .mvn/
+<span class="dk-kw">COPY</span> mvnw pom.xml ./
+<span class="dk-kw">RUN</span> ./mvnw dependency:go-offline <span class="dk-flag">--no-transfer-progress</span>
+<span class="dk-cmt"># Layer này chỉ rebuild khi pom.xml thay đổi!</span>
+
+<span class="dk-sec"># ══════ Stage 2: Build ══════</span>
+<span class="dk-kw">FROM</span> deps <span class="dk-kw">AS</span> builder
+<span class="dk-kw">COPY</span> src/ src/
+<span class="dk-kw">RUN</span> ./mvnw package <span class="dk-flag">-DskipTests</span> <span class="dk-flag">--no-transfer-progress</span>
+
+<span class="dk-cmt"># Spring Boot layer extraction — tối ưu Docker cache</span>
+<span class="dk-kw">RUN</span> java <span class="dk-flag">-Djarmode=layertools</span> <span class="dk-flag">-jar</span> target/*.jar extract
+
+<span class="dk-sec"># ══════ Stage 3: Runtime ══════</span>
+<span class="dk-kw">FROM</span> <span class="dk-img">eclipse-temurin</span><span class="dk-tag">:21-jre-jammy</span> <span class="dk-kw">AS</span> runtime
+<span class="dk-cmt"># Chỉ JRE — không có Maven, JDK tools → image nhỏ hơn ~400MB</span>
+
+<span class="dk-kw">RUN</span> groupadd <span class="dk-flag">-r</span> app && useradd <span class="dk-flag">-r</span> <span class="dk-flag">-g</span> app app
+<span class="dk-kw">WORKDIR</span> <span class="dk-path">/app</span>
+
+<span class="dk-cmt"># Copy Spring Boot layers theo thứ tự (ít thay đổi nhất → nhiều nhất)</span>
+<span class="dk-kw">COPY</span> <span class="dk-flag">--from=builder</span> <span class="dk-flag">--chown=app:app</span> /build/dependencies/ ./
+<span class="dk-kw">COPY</span> <span class="dk-flag">--from=builder</span> <span class="dk-flag">--chown=app:app</span> /build/spring-boot-loader/ ./
+<span class="dk-kw">COPY</span> <span class="dk-flag">--from=builder</span> <span class="dk-flag">--chown=app:app</span> /build/snapshot-dependencies/ ./
+<span class="dk-kw">COPY</span> <span class="dk-flag">--from=builder</span> <span class="dk-flag">--chown=app:app</span> /build/application/ ./
+<span class="dk-cmt"># Layer application thay đổi mỗi build → ở cuối</span>
+
+<span class="dk-kw">USER</span> app
+<span class="dk-kw">EXPOSE</span> <span class="dk-num">8080</span>
+<span class="dk-kw">HEALTHCHECK</span> <span class="dk-flag">--interval=30s</span> <span class="dk-flag">--timeout=10s</span> <span class="dk-flag">--start-period=60s</span> \
+  <span class="dk-kw">CMD</span> curl <span class="dk-flag">-f</span> http://localhost:8080/actuator/health || exit 1
+
+<span class="dk-kw">ENV</span> <span class="dk-var">JAVA_OPTS</span>=<span class="dk-str">"-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"</span>
+<span class="dk-kw">ENTRYPOINT</span> [<span class="dk-str">"sh"</span>, <span class="dk-str">"-c"</span>, <span class="dk-str">"java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"</span>]</pre></div>
+    </div>
+
+    <div class="rw-box rw-1">
+      <div class="rw-label">📊 So sánh kích thước</div>
+      <div class="rw-title">Single-stage vs Multi-stage Image Size</div>
+      <div class="rw-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;margin-bottom:8px">❌ Single-stage</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);line-height:1.9">
+              <div>JDK 21 base: <span style="color:var(--pink)">~400MB</span></div>
+              <div>Maven: <span style="color:var(--pink)">~50MB</span></div>
+              <div>Source code: <span style="color:var(--muted)">~5MB</span></div>
+              <div style="color:var(--pink);font-weight:700;border-top:1px solid var(--border);padding-top:4px;margin-top:4px">Total: ~455MB</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--d5);text-transform:uppercase;margin-bottom:8px">✅ Multi-stage</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);line-height:1.9">
+              <div>JRE 21 base: <span style="color:var(--d5)">~220MB</span></div>
+              <div>App layers: <span style="color:var(--d5)">~30MB</span></div>
+              <div>No JDK/Maven: <span style="color:var(--d5)">0MB</span></div>
+              <div style="color:var(--d5);font-weight:700;border-top:1px solid var(--border);padding-top:4px;margin-top:4px">Total: ~250MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S6 — BEST PRACTICES ════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-tag st-2">BEST PRACTICES</span>
+    <div><h2 class="sec-title">Dockerfile Best Practices — Production-ready</h2>
+    <p class="sec-sub">.dockerignore, layer ordering, security, non-root user</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">.dockerignore — Không copy rác vào image</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.dockerignore — loại trừ files không cần thiết</span><span class="cb-tag ct-2">.dockerignore</span></div>
+      <div class="cb-body"><pre><span class="dk-cmt"># Git</span>
+.git/
+.gitignore
+
+<span class="dk-cmt"># Build artifacts (Maven/Gradle)</span>
+target/
+build/
+*.class
+*.jar
+!target/app.jar   <span class="dk-cmt"># exception: CẦN file này!</span>
+
+<span class="dk-cmt"># IDE files</span>
+.idea/
+*.iml
+.vscode/
+*.swp
+
+<span class="dk-cmt"># Docker files (không cần trong image)</span>
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+<span class="dk-cmt"># Logs và temp</span>
+*.log
+logs/
+tmp/
+
+<span class="dk-cmt"># Secrets (KHÔNG BAO GIỜ để vào image!)</span>
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets/
+
+<span class="dk-cmt"># Node modules (nếu có frontend)</span>
+node_modules/</pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">So sánh Bad vs Good Dockerfile patterns</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Bad vs Good practices</span><span class="cb-tag ct-2">Best Practices</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ❌ BAD — apt không clean up, nhiều RUN layers</span>
+<span class="dk-kw">RUN</span> apt update
+<span class="dk-kw">RUN</span> apt install <span class="dk-flag">-y</span> curl
+<span class="dk-kw">RUN</span> apt install <span class="dk-flag">-y</span> jq
+<span class="dk-cmt"># → 3 layers riêng biệt, cache apt còn lại</span>
+
+<span class="dk-sec"># ✅ GOOD — một layer, sạch cache</span>
+<span class="dk-kw">RUN</span> apt-get update \
+ && apt-get install <span class="dk-flag">-y</span> <span class="dk-flag">--no-install-recommends</span> curl jq \
+ && apt-get clean \
+ && rm <span class="dk-flag">-rf</span> /var/lib/apt/lists/*
+<span class="dk-cmt"># → 1 layer duy nhất, không có apt cache</span>
+
+<span class="dk-sec"># ❌ BAD — copy tất cả source trước (cache miss mỗi lần)</span>
+<span class="dk-kw">COPY</span> . .
+<span class="dk-kw">RUN</span> ./mvnw package
+
+<span class="dk-sec"># ✅ GOOD — copy dependencies trước, source code sau</span>
+<span class="dk-kw">COPY</span> pom.xml mvnw ./
+<span class="dk-kw">COPY</span> .mvn/ .mvn/
+<span class="dk-kw">RUN</span> ./mvnw dependency:go-offline   <span class="dk-cmt"># cache khi pom.xml không đổi</span>
+<span class="dk-kw">COPY</span> src/ src/
+<span class="dk-kw">RUN</span> ./mvnw package <span class="dk-flag">-DskipTests</span>
+
+<span class="dk-sec"># ❌ BAD — chạy root</span>
+<span class="dk-kw">USER</span> root
+<span class="dk-kw">CMD</span> [<span class="dk-str">"java"</span>, <span class="dk-str">"-jar"</span>, <span class="dk-str">"app.jar"</span>]
+
+<span class="dk-sec"># ✅ GOOD — non-root user</span>
+<span class="dk-kw">RUN</span> useradd <span class="dk-flag">-r</span> <span class="dk-flag">-u</span> <span class="dk-num">1001</span> appuser
+<span class="dk-kw">USER</span> <span class="dk-num">1001</span>
+<span class="dk-kw">CMD</span> [<span class="dk-str">"java"</span>, <span class="dk-str">"-jar"</span>, <span class="dk-str">"app.jar"</span>]
+
+<span class="dk-sec"># ❌ BAD — latest tag không ổn định</span>
+<span class="dk-kw">FROM</span> <span class="dk-img">openjdk</span><span class="dk-tag">:latest</span>
+
+<span class="dk-sec"># ✅ GOOD — pin version cụ thể</span>
+<span class="dk-kw">FROM</span> <span class="dk-img">eclipse-temurin</span><span class="dk-tag">:21.0.4_7-jre-jammy</span>
+<span class="dk-cmt"># hoặc dùng digest: FROM eclipse-temurin@sha256:abc123...</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 3 BANNER ════ -->
+<div class="cat-banner cb-3">
+  <div class="cb-icon">🌐</div>
+  <div><div class="cb-badge">NETWORKING &amp; STORAGE</div>
+  <div class="cb-title">Docker Networks &amp; Volumes</div>
+  <div class="cb-sub">Bridge · Host · Overlay networks · Named volumes · Bind mounts</div></div>
+</div>
+
+<!-- ════ S7 — NETWORKING ════ -->
+<div class="section" id="s7">
+  <div class="sec-head">
+    <span class="sec-tag st-3">NETWORKING</span>
+    <div><h2 class="sec-title">Docker Networking — Containers giao tiếp nhau</h2>
+    <p class="sec-sub">Bridge, Host, None networks — cách containers nói chuyện với nhau và với host</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các loại Network và khi nào dùng</div>
+    <table class="tbl">
+      <thead><tr><th>Network Driver</th><th>Mô tả</th><th>Dùng cho</th><th>Isolation</th></tr></thead>
+      <tbody>
+        <tr><td><code>bridge</code> (default)</td><td>Private network trên host, containers giao tiếp qua IP</td><td>Multi-container apps trên 1 host</td><td>✅ Tốt</td></tr>
+        <tr><td><code>host</code></td><td>Container dùng network interface của host</td><td>Performance critical, không cần isolation</td><td>❌ Không</td></tr>
+        <tr><td><code>none</code></td><td>Không có network</td><td>Batch jobs, security-critical</td><td>✅ Hoàn toàn</td></tr>
+        <tr><td><code>overlay</code></td><td>Multi-host networking (Docker Swarm/K8s)</td><td>Distributed apps</td><td>✅ Tốt</td></tr>
+        <tr><td><code>macvlan</code></td><td>Container có MAC address riêng</td><td>Network appliances</td><td>✅</td></tr>
+      </tbody>
+    </table>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Docker networking — tạo, kết nối, DNS</span><span class="cb-tag ct-3">Network</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Tạo custom network ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network create backend-net
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network create <span class="tc-flag">--driver bridge --subnet 172.20.0.0/16</span> backend-net
+
+<span class="dk-sec"># ── Xem networks ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network ls
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network inspect backend-net
+
+<span class="dk-sec"># ── Kết nối containers vào network ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-d --name</span> postgres <span class="tc-flag">--network</span> backend-net postgres:16
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-d --name</span> order-service <span class="tc-flag">--network</span> backend-net my-app
+
+<span class="dk-cmt"># ✅ Containers cùng network có thể gọi nhau bằng TÊN container!</span>
+<span class="dk-cmt"># order-service → jdbc:postgresql://postgres:5432/shopdb ✅</span>
+<span class="dk-cmt"># KHÔNG cần IP thật — Docker DNS tự resolve tên container sang IP</span>
+
+<span class="dk-sec"># ── Connect/disconnect container đang chạy ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network connect backend-net existing-container
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network disconnect backend-net existing-container
+
+<span class="dk-sec"># ── Host network (Linux only) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">--network host</span> nginx
+<span class="dk-cmt"># Container dùng port 80 của host trực tiếp, không cần -p 80:80</span>
+<span class="dk-cmt"># ⚠️ Không hoạt động trên macOS/Windows (Docker Desktop dùng VM)</span>
+
+<span class="dk-sec"># ── Port mapping ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-p 8080:8080</span> my-app      <span class="dk-cmt"># host:container</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-p 127.0.0.1:8080:8080</span> my-app  <span class="dk-cmt"># chỉ localhost (an toàn hơn)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-P</span> my-app              <span class="dk-cmt"># auto-map tất cả EXPOSE ports</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S8 — VOLUMES ════ -->
+<div class="section" id="s8">
+  <div class="sec-head">
+    <span class="sec-tag st-3">VOLUMES</span>
+    <div><h2 class="sec-title">Volumes &amp; Bind Mounts — Persistent Data</h2>
+    <p class="sec-sub">Named volumes, bind mounts, tmpfs — chọn đúng loại cho đúng use case</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">3 loại storage và khi nào dùng</div>
+    <div class="compare">
+      <div style="background:rgba(36,150,237,.07);border:1px solid rgba(36,150,237,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--d1);margin-bottom:10px">📦 Named Volume</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.75">Docker quản lý, lưu tại <code>/var/lib/docker/volumes/</code><br><br>
+          ✅ Dữ liệu tồn tại khi container bị xóa<br>
+          ✅ Dễ backup và restore<br>
+          ✅ Tốt cho databases<br>
+          ✅ Portable giữa containers</div>
+      </div>
+      <div style="background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.25);border-radius:11px;padding:16px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--d3);margin-bottom:10px">📁 Bind Mount</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.75">Mount trực tiếp từ host filesystem<br><br>
+          ✅ Thay đổi file ngay lập tức<br>
+          ✅ Tốt cho development (hot reload)<br>
+          ✅ Share config files<br>
+          ❌ Phụ thuộc path trên host</div>
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Volumes &amp; Bind Mounts — full examples</span><span class="cb-tag ct-3">Storage</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Named Volumes ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> volume create pgdata
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> volume ls
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> volume inspect pgdata
+
+<span class="dk-cmt"># Mount named volume khi run container</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-v</span> pgdata<span class="dk-flag">:/var/lib/postgresql/data</span> postgres:16
+<span class="dk-cmt"># pgdata = tên volume, /var/lib/postgresql/data = path trong container</span>
+
+<span class="dk-sec"># ── Bind Mount ──</span>
+<span class="dk-cmt"># Mount thư mục source code cho development</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-v</span> /home/dev/my-app/src<span class="dk-flag">:/app/src</span> my-app
+<span class="dk-cmt"># Syntax mới hơn --mount (rõ ràng hơn):</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run \
+    <span class="tc-flag">--mount</span> type=bind,source=$(pwd)/src,target=/app/src \
+    <span class="tc-flag">--mount</span> type=bind,source=$(pwd)/config.yml,target=/app/config.yml,readonly \
+    my-app
+
+<span class="dk-sec"># ── Read-only mount (security) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">-v</span> /etc/ssl/certs<span class="dk-flag">:/etc/ssl/certs:ro</span> my-app
+
+<span class="dk-sec"># ── Backup & Restore volumes ──</span>
+<span class="dk-cmt"># Backup:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">--rm</span> \
+    <span class="tc-flag">-v</span> pgdata<span class="dk-flag">:/data</span> \
+    <span class="tc-flag">-v</span> $(pwd)<span class="dk-flag">:/backup</span> \
+    <span class="dk-img">alpine</span> tar czf /backup/pgdata-backup.tar.gz <span class="dk-flag">-C</span> /data .
+
+<span class="dk-cmt"># Restore:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">--rm</span> \
+    <span class="tc-flag">-v</span> pgdata<span class="dk-flag">:/data</span> \
+    <span class="tc-flag">-v</span> $(pwd)<span class="dk-flag">:/backup</span> \
+    <span class="dk-img">alpine</span> tar xzf /backup/pgdata-backup.tar.gz <span class="dk-flag">-C</span> /data
+
+<span class="dk-sec"># ── Xóa volumes ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> volume rm pgdata              <span class="dk-cmt"># xóa cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> volume prune                  <span class="dk-cmt"># xóa volumes không dùng</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 4 BANNER ════ -->
+<div class="cat-banner cb-4">
+  <div class="cb-icon">🎼</div>
+  <div><div class="cb-badge">DOCKER COMPOSE</div>
+  <div class="cb-title">Docker Compose — Multi-container Apps</div>
+  <div class="cb-sub">compose.yml · Services · Networks · Volumes · Health checks · Profiles</div></div>
+</div>
+
+<!-- ════ S9 — COMPOSE CƠ BẢN ════ -->
+<div class="section" id="s9">
+  <div class="sec-head">
+    <span class="sec-tag st-4">COMPOSE</span>
+    <div><h2 class="sec-title">Docker Compose — Cấu trúc và Commands</h2>
+    <p class="sec-sub">compose.yml từ cơ bản đến nâng cao — tất cả options quan trọng</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">compose.yml đầy đủ annotations</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">compose.yml — full structure annotated</span><span class="cb-tag ct-4">Compose</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># compose.yml (Docker Compose v3.8+)</span>
+
+<span class="y-key">services:</span>
+
+  <span class="y-sec">postgres:</span>
+    <span class="y-key">image:</span>           <span class="dk-img">postgres</span><span class="dk-tag">:16-alpine</span>
+    <span class="y-key">container_name:</span> <span class="tc-arg">postgres</span>
+    <span class="y-key">restart:</span>         <span class="tc-str">unless-stopped</span>
+    <span class="y-key">environment:</span>
+      <span class="y-key">POSTGRES_DB:</span>       <span class="tc-str">shopdb</span>
+      <span class="y-key">POSTGRES_USER:</span>     <span class="tc-str">admin</span>
+      <span class="y-key">POSTGRES_PASSWORD:</span> <span class="tc-str">${DB_PASSWORD}</span>    <span class="dk-cmt"># từ .env file</span>
+    <span class="y-key">ports:</span>
+      - <span class="tc-str">"127.0.0.1:5432:5432"</span>               <span class="dk-cmt"># chỉ localhost</span>
+    <span class="y-key">volumes:</span>
+      - <span class="tc-str">pgdata:/var/lib/postgresql/data</span>
+      - <span class="tc-str">./init.sql:/docker-entrypoint-initdb.d/init.sql:ro</span>
+    <span class="y-key">healthcheck:</span>
+      <span class="y-key">test:</span>     [<span class="tc-str">"CMD-SHELL"</span>, <span class="tc-str">"pg_isready -U admin -d shopdb"</span>]
+      <span class="y-key">interval:</span> <span class="tc-str">10s</span>
+      <span class="y-key">timeout:</span>  <span class="tc-str">5s</span>
+      <span class="y-key">retries:</span>  <span class="dk-num">5</span>
+    <span class="y-key">networks:</span>
+      - <span class="tc-str">backend</span>
+    <span class="y-key">deploy:</span>
+      <span class="y-key">resources:</span>
+        <span class="y-key">limits:</span>
+          <span class="y-key">memory:</span> <span class="tc-str">512m</span>
+          <span class="y-key">cpus:</span>   <span class="tc-str">"1.0"</span>
+
+  <span class="y-sec">redis:</span>
+    <span class="y-key">image:</span>   <span class="dk-img">redis</span><span class="dk-tag">:7-alpine</span>
+    <span class="y-key">command:</span> <span class="tc-str">redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes</span>
+    <span class="y-key">volumes:</span>
+      - <span class="tc-str">redisdata:/data</span>
+    <span class="y-key">networks:</span>
+      - <span class="tc-str">backend</span>
+    <span class="y-key">healthcheck:</span>
+      <span class="y-key">test:</span> [<span class="tc-str">"CMD"</span>, <span class="tc-str">"redis-cli"</span>, <span class="tc-str">"-a"</span>, <span class="tc-str">"${REDIS_PASSWORD}"</span>, <span class="tc-str">"ping"</span>]
+      <span class="y-key">interval:</span> <span class="tc-str">10s</span>
+
+  <span class="y-sec">order-service:</span>
+    <span class="y-key">build:</span>
+      <span class="y-key">context:</span>    <span class="tc-str">.</span>
+      <span class="y-key">dockerfile:</span> <span class="tc-str">Dockerfile</span>
+      <span class="y-key">target:</span>     <span class="tc-str">runtime</span>              <span class="dk-cmt"># multi-stage target</span>
+      <span class="y-key">args:</span>
+        <span class="y-key">APP_VERSION:</span> <span class="tc-str">${APP_VERSION:-dev}</span>
+    <span class="y-key">image:</span>           <span class="dk-img">registry.company.com/order-service</span><span class="dk-tag">:${APP_VERSION:-dev}</span>
+    <span class="y-key">container_name:</span> <span class="tc-arg">order-service</span>
+    <span class="y-key">restart:</span>         <span class="tc-str">on-failure:3</span>
+    <span class="y-key">depends_on:</span>
+      <span class="y-key">postgres:</span>
+        <span class="y-key">condition:</span> <span class="tc-str">service_healthy</span>  <span class="dk-cmt"># chờ postgres healthy!</span>
+      <span class="y-key">redis:</span>
+        <span class="y-key">condition:</span> <span class="tc-str">service_healthy</span>
+    <span class="y-key">environment:</span>
+      <span class="y-key">SPRING_PROFILES_ACTIVE:</span>    <span class="tc-str">prod</span>
+      <span class="y-key">SPRING_DATASOURCE_URL:</span>     <span class="tc-str">jdbc:postgresql://postgres:5432/shopdb</span>
+      <span class="y-key">SPRING_DATASOURCE_USERNAME:</span><span class="tc-str">admin</span>
+      <span class="y-key">SPRING_DATASOURCE_PASSWORD:</span><span class="tc-str">${DB_PASSWORD}</span>
+      <span class="y-key">SPRING_REDIS_HOST:</span>         <span class="tc-str">redis</span>
+      <span class="y-key">SPRING_REDIS_PASSWORD:</span>     <span class="tc-str">${REDIS_PASSWORD}</span>
+    <span class="y-key">ports:</span>
+      - <span class="tc-str">"8080:8080"</span>
+    <span class="y-key">volumes:</span>
+      - <span class="tc-str">./logs:/app/logs</span>
+    <span class="y-key">healthcheck:</span>
+      <span class="y-key">test:</span>          [<span class="tc-str">"CMD-SHELL"</span>, <span class="tc-str">"curl -f http://localhost:8080/actuator/health || exit 1"</span>]
+      <span class="y-key">interval:</span>      <span class="tc-str">30s</span>
+      <span class="y-key">timeout:</span>       <span class="tc-str">10s</span>
+      <span class="y-key">start_period:</span>  <span class="tc-str">60s</span>
+      <span class="y-key">retries:</span>       <span class="dk-num">3</span>
+    <span class="y-key">networks:</span>
+      - <span class="tc-str">backend</span>
+      - <span class="tc-str">frontend</span>
+    <span class="y-key">logging:</span>
+      <span class="y-key">driver:</span>  <span class="tc-str">json-file</span>
+      <span class="y-key">options:</span>
+        <span class="y-key">max-size:</span> <span class="tc-str">"100m"</span>
+        <span class="y-key">max-file:</span> <span class="tc-str">"5"</span>
+
+<span class="y-key">volumes:</span>
+  <span class="y-key">pgdata:</span>    <span class="dk-cmt"># named volume, Docker quản lý</span>
+  <span class="y-key">redisdata:</span>
+
+<span class="y-key">networks:</span>
+  <span class="y-key">backend:</span>
+    <span class="y-key">driver:</span>   <span class="tc-str">bridge</span>
+    <span class="y-key">internal:</span> <span class="y-bool">true</span>   <span class="dk-cmt"># không có external access</span>
+  <span class="y-key">frontend:</span>
+    <span class="y-key">driver:</span>  <span class="tc-str">bridge</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Docker Compose Commands</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">docker compose — tất cả commands cần biết</span><span class="cb-tag ct-4">Commands</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Start / Stop ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d</span>                 <span class="dk-cmt"># start tất cả services (detached)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d --build</span>         <span class="dk-cmt"># rebuild images trước khi start</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d</span> postgres redis  <span class="dk-cmt"># chỉ start services cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose down                   <span class="dk-cmt"># stop và xóa containers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose down <span class="tc-flag">-v</span>               <span class="dk-cmt"># down + xóa volumes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose down <span class="tc-flag">--rmi all</span>        <span class="dk-cmt"># down + xóa images</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose restart order-service
+
+<span class="dk-sec"># ── Xem status ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose ps                     <span class="dk-cmt"># status containers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose top                    <span class="dk-cmt"># processes</span>
+
+<span class="dk-sec"># ── Logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose logs <span class="tc-flag">-f</span>               <span class="dk-cmt"># follow tất cả</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose logs <span class="tc-flag">-f</span> order-service <span class="dk-cmt"># service cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose logs <span class="tc-flag">--tail 50 -f</span>
+
+<span class="dk-sec"># ── Exec ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose exec postgres psql <span class="tc-flag">-U</span> admin shopdb
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose exec order-service bash
+
+<span class="dk-sec"># ── Scale (multiple instances) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d --scale</span> order-service=<span class="dk-num">3</span>  <span class="dk-cmt"># 3 instances</span>
+
+<span class="dk-sec"># ── Build ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose build                  <span class="dk-cmt"># build tất cả images</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose build <span class="tc-flag">--no-cache</span>      <span class="dk-cmt"># build từ đầu</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose pull                   <span class="dk-cmt"># pull images mới nhất</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S10 — COMPOSE NÂNG CAO ════ -->
+<div class="section" id="s10">
+  <div class="sec-head">
+    <span class="sec-tag st-4">ADVANCED</span>
+    <div><h2 class="sec-title">Compose Nâng cao — Profiles, Override, .env</h2>
+    <p class="sec-sub">Profiles cho môi trường khác nhau, override files, env management</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Profiles — Dev vs Production services</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">profiles + compose.override.yml + .env</span><span class="cb-tag ct-4">Advanced</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── compose.yml với profiles ──</span>
+<span class="y-key">services:</span>
+  <span class="y-sec">app:</span>
+    <span class="y-key">build:</span> <span class="tc-str">.</span>
+    <span class="y-key">depends_on:</span> [<span class="tc-str">postgres</span>]
+
+  <span class="y-sec">postgres:</span>
+    <span class="y-key">image:</span> <span class="dk-img">postgres</span><span class="dk-tag">:16</span>  <span class="dk-cmt"># luôn start</span>
+
+  <span class="y-sec">pgadmin:</span>                              <span class="dk-cmt"># chỉ start khi profile tools</span>
+    <span class="y-key">image:</span>    <span class="dk-img">dpage/pgadmin4</span>
+    <span class="y-key">profiles:</span> [<span class="tc-str">tools</span>]
+    <span class="y-key">ports:</span>    [<span class="tc-str">"5050:80"</span>]
+
+  <span class="y-sec">redis-commander:</span>
+    <span class="y-key">image:</span>    <span class="dk-img">rediscommander/redis-commander</span>
+    <span class="y-key">profiles:</span> [<span class="tc-str">tools</span>]
+
+  <span class="y-sec">prometheus:</span>                           <span class="dk-cmt"># chỉ khi profile monitoring</span>
+    <span class="y-key">image:</span>    <span class="dk-img">prom/prometheus</span>
+    <span class="y-key">profiles:</span> [<span class="tc-str">monitoring</span>]
+
+<span class="dk-cmt"># Dùng:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose up <span class="tc-flag">-d</span>                             <span class="dk-cmt"># chỉ app + postgres</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose <span class="tc-flag">--profile tools</span> up <span class="tc-flag">-d</span>          <span class="dk-cmt"># + pgadmin + redis-commander</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose <span class="tc-flag">--profile monitoring</span> up <span class="tc-flag">-d</span>    <span class="dk-cmt"># + prometheus</span>
+
+<span class="dk-sec"># ── compose.override.yml — tự động merge với compose.yml ──</span>
+<span class="dk-cmt"># compose.yml = production config</span>
+<span class="dk-cmt"># compose.override.yml = development overrides</span>
+
+<span class="y-key">services:</span>
+  <span class="y-sec">order-service:</span>
+    <span class="y-key">build:</span>
+      <span class="y-key">target:</span> <span class="tc-str">builder</span>                  <span class="dk-cmt"># dùng builder stage với JDK</span>
+    <span class="y-key">volumes:</span>
+      - <span class="tc-str">./src:/app/src</span>               <span class="dk-cmt"># mount source code</span>
+    <span class="y-key">environment:</span>
+      <span class="y-key">SPRING_PROFILES_ACTIVE:</span> <span class="tc-str">dev</span>
+      <span class="y-key">SPRING_DEVTOOLS_RESTART_ENABLED:</span> <span class="tc-str">true</span>
+
+<span class="dk-cmt"># Explicit override files:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose <span class="tc-flag">-f compose.yml -f compose.prod.yml</span> up <span class="tc-flag">-d</span>
+
+<span class="dk-sec"># ── .env file ──</span>
+<span class="dk-cmt"># .env (không commit lên git!)</span>
+<span class="dk-var">APP_VERSION</span>=<span class="dk-str">1.2.3</span>
+<span class="dk-var">DB_PASSWORD</span>=<span class="dk-str">super_secret_password</span>
+<span class="dk-var">REDIS_PASSWORD</span>=<span class="dk-str">redis_pass</span>
+<span class="dk-var">COMPOSE_PROJECT_NAME</span>=<span class="dk-str">myapp</span>    <span class="dk-cmt"># prefix cho container names</span>
+
+<span class="dk-cmt"># Dùng env file khác:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> compose <span class="tc-flag">--env-file</span> .env.production up <span class="tc-flag">-d</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S11 — VÍ DỤ SPRING BOOT ════ -->
+<div class="section" id="s11">
+  <div class="sec-head">
+    <span class="sec-tag st-4">EXAMPLE</span>
+    <div><h2 class="sec-title">Ví dụ Thực tế: Spring Boot + PostgreSQL + Redis + Kafka</h2>
+    <p class="sec-sub">Microservice stack hoàn chỉnh cho local development</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Full stack cho backend development</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">compose.yml — Spring Boot microservice local stack</span><span class="cb-tag ct-4">Full Stack</span></div>
+      <div class="cb-body"><pre><span class="y-key">services:</span>
+
+  <span class="dk-sec"># ═══ DATABASE ═══</span>
+  <span class="y-sec">postgres:</span>
+    <span class="y-key">image:</span> <span class="dk-img">postgres</span><span class="dk-tag">:16-alpine</span>
+    <span class="y-key">environment:</span>
+      <span class="y-key">POSTGRES_DB:</span>       shopdb
+      <span class="y-key">POSTGRES_USER:</span>     admin
+      <span class="y-key">POSTGRES_PASSWORD:</span> <span class="tc-var">${DB_PASS:-secret}</span>
+    <span class="y-key">ports:</span>  [<span class="tc-str">"5432:5432"</span>]
+    <span class="y-key">volumes:</span>
+      - <span class="tc-str">pgdata:/var/lib/postgresql/data</span>
+      - <span class="tc-str">./scripts/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro</span>
+    <span class="y-key">healthcheck:</span>
+      <span class="y-key">test:</span>     [<span class="tc-str">"CMD-SHELL"</span>, <span class="tc-str">"pg_isready -U admin"</span>]
+      <span class="y-key">interval:</span> <span class="tc-str">5s</span>
+      <span class="y-key">retries:</span>  <span class="dk-num">10</span>
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+  <span class="dk-sec"># ═══ CACHE ═══</span>
+  <span class="y-sec">redis:</span>
+    <span class="y-key">image:</span>   <span class="dk-img">redis</span><span class="dk-tag">:7-alpine</span>
+    <span class="y-key">command:</span> <span class="tc-str">redis-server --save 60 1 --loglevel warning</span>
+    <span class="y-key">ports:</span>   [<span class="tc-str">"6379:6379"</span>]
+    <span class="y-key">volumes:</span> [<span class="tc-str">redisdata:/data</span>]
+    <span class="y-key">healthcheck:</span>
+      <span class="y-key">test:</span> [<span class="tc-str">"CMD"</span>, <span class="tc-str">"redis-cli"</span>, <span class="tc-str">"ping"</span>]
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+  <span class="dk-sec"># ═══ MESSAGE BROKER ═══</span>
+  <span class="y-sec">kafka:</span>
+    <span class="y-key">image:</span>           <span class="dk-img">confluentinc/cp-kafka</span><span class="dk-tag">:7.6.0</span>
+    <span class="y-key">depends_on:</span>      [<span class="tc-str">zookeeper</span>]
+    <span class="y-key">ports:</span>           [<span class="tc-str">"9092:9092"</span>]
+    <span class="y-key">environment:</span>
+      <span class="y-key">KAFKA_BROKER_ID:</span>                        <span class="dk-num">1</span>
+      <span class="y-key">KAFKA_ZOOKEEPER_CONNECT:</span>                <span class="tc-str">zookeeper:2181</span>
+      <span class="y-key">KAFKA_ADVERTISED_LISTENERS:</span>             <span class="tc-str">PLAINTEXT://localhost:9092</span>
+      <span class="y-key">KAFKA_AUTO_CREATE_TOPICS_ENABLE:</span>        <span class="tc-str">true</span>
+      <span class="y-key">KAFKA_DELETE_TOPIC_ENABLE:</span>              <span class="tc-str">true</span>
+      <span class="y-key">KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:</span> <span class="dk-num">1</span>
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+  <span class="y-sec">zookeeper:</span>
+    <span class="y-key">image:</span>       <span class="dk-img">confluentinc/cp-zookeeper</span><span class="dk-tag">:7.6.0</span>
+    <span class="y-key">environment:</span>
+      <span class="y-key">ZOOKEEPER_CLIENT_PORT:</span> <span class="dk-num">2181</span>
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+  <span class="dk-sec"># ═══ APPLICATION ═══</span>
+  <span class="y-sec">order-service:</span>
+    <span class="y-key">build:</span>      <span class="tc-str">./order-service</span>
+    <span class="y-key">ports:</span>      [<span class="tc-str">"8080:8080"</span>]
+    <span class="y-key">depends_on:</span>
+      <span class="y-key">postgres:</span> {<span class="y-key">condition:</span> <span class="tc-str">service_healthy</span>}
+      <span class="y-key">redis:</span>    {<span class="y-key">condition:</span> <span class="tc-str">service_healthy</span>}
+    <span class="y-key">environment:</span>
+      <span class="y-key">SPRING_PROFILES_ACTIVE:</span>                     <span class="tc-str">local</span>
+      <span class="y-key">SPRING_DATASOURCE_URL:</span>                      <span class="tc-str">jdbc:postgresql://postgres:5432/shopdb</span>
+      <span class="y-key">SPRING_DATASOURCE_USERNAME:</span>                 <span class="tc-str">admin</span>
+      <span class="y-key">SPRING_DATASOURCE_PASSWORD:</span>                 <span class="tc-var">${DB_PASS:-secret}</span>
+      <span class="y-key">SPRING_DATA_REDIS_HOST:</span>                     <span class="tc-str">redis</span>
+      <span class="y-key">SPRING_KAFKA_BOOTSTRAP_SERVERS:</span>             <span class="tc-str">kafka:9092</span>
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+  <span class="dk-sec"># ═══ OBSERVABILITY (profile: monitoring) ═══</span>
+  <span class="y-sec">prometheus:</span>
+    <span class="y-key">image:</span>    <span class="dk-img">prom/prometheus</span><span class="dk-tag">:v2.50.0</span>
+    <span class="y-key">profiles:</span> [<span class="tc-str">monitoring</span>]
+    <span class="y-key">volumes:</span>  [<span class="tc-str">./prometheus.yml:/etc/prometheus/prometheus.yml:ro</span>]
+    <span class="y-key">ports:</span>    [<span class="tc-str">"9090:9090"</span>]
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+  <span class="y-sec">grafana:</span>
+    <span class="y-key">image:</span>    <span class="dk-img">grafana/grafana</span><span class="dk-tag">:10.3.0</span>
+    <span class="y-key">profiles:</span> [<span class="tc-str">monitoring</span>]
+    <span class="y-key">ports:</span>    [<span class="tc-str">"3000:3000"</span>]
+    <span class="y-key">volumes:</span>  [<span class="tc-str">grafanadata:/var/lib/grafana</span>]
+    <span class="y-key">networks:</span> [<span class="tc-str">backend</span>]
+
+<span class="y-key">volumes:</span>
+  <span class="y-key">pgdata:</span>
+  <span class="y-key">redisdata:</span>
+  <span class="y-key">grafanadata:</span>
+
+<span class="y-key">networks:</span>
+  <span class="y-key">backend:</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CAT 5 BANNER ════ -->
+<div class="cat-banner cb-5">
+  <div class="cb-icon">🏭</div>
+  <div><div class="cb-badge">PRODUCTION &amp; DEVOPS</div>
+  <div class="cb-title">Registry · Monitoring · Security · Cleanup</div>
+  <div class="cb-sub">Push/Pull · Logging · Hardening · docker system prune</div></div>
+</div>
+
+<!-- ════ S12 — REGISTRY ════ -->
+<div class="section" id="s12">
+  <div class="sec-head">
+    <span class="sec-tag st-5">REGISTRY</span>
+    <div><h2 class="sec-title">Registry — Push, Pull và Self-hosted</h2>
+    <p class="sec-sub">Docker Hub, GHCR, ECR, Harbor — quản lý images production</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Push/Pull workflow và multi-registry</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Registry — login, push, pull, self-hosted Harbor</span><span class="cb-tag ct-5">Registry</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Docker Hub ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> login                          <span class="dk-cmt"># login Docker Hub</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag my-app<span class="dk-tag">:1.0</span> username/my-app<span class="dk-tag">:1.0</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> push username/my-app<span class="dk-tag">:1.0</span>
+
+<span class="dk-sec"># ── GitHub Container Registry (GHCR) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">echo</span> <span class="tc-var">$GITHUB_TOKEN</span> <span class="tc-pipe">|</span> docker login ghcr.io <span class="tc-flag">-u</span> <span class="tc-var">$GITHUB_USER</span> <span class="tc-flag">--password-stdin</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag my-app ghcr.io/company/my-app<span class="dk-tag">:1.0</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> push ghcr.io/company/my-app<span class="dk-tag">:1.0</span>
+
+<span class="dk-sec"># ── AWS ECR ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">aws</span> ecr get-login-password <span class="tc-flag">--region</span> ap-southeast-1 <span class="tc-pipe">|</span> \
+    docker login <span class="tc-flag">--username</span> AWS <span class="tc-flag">--password-stdin</span> <span class="tc-arg">123456789.dkr.ecr.ap-southeast-1.amazonaws.com</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> push <span class="tc-arg">123456789.dkr.ecr.ap-southeast-1.amazonaws.com</span>/my-app<span class="dk-tag">:1.0</span>
+
+<span class="dk-sec"># ── Self-hosted Registry (Harbor) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> login registry.company.com <span class="tc-flag">-u</span> <span class="tc-var">$REGISTRY_USER</span> <span class="tc-flag">-p</span> <span class="tc-var">$REGISTRY_PASS</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> tag my-app registry.company.com/backend/order-service<span class="dk-tag">:v1.2.3</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> push registry.company.com/backend/order-service<span class="dk-tag">:v1.2.3</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> pull registry.company.com/backend/order-service<span class="dk-tag">:v1.2.3</span>
+
+<span class="dk-sec"># ── Store credentials securely ──</span>
+<span class="dk-cmt"># ~/.docker/config.json (tránh lưu password plain text!)</span>
+<span class="dk-cmt"># Dùng docker credential helpers:</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">brew</span> install docker-credential-helper   <span class="dk-cmt"># macOS Keychain</span>
+<span class="dk-cmt"># config.json: {"credsStore": "osxkeychain"}</span>
+
+<span class="dk-sec"># ── Multi-arch build (Apple Silicon + Linux) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> buildx create <span class="tc-flag">--use --name</span> multi-arch
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> buildx build \
+    <span class="tc-flag">--platform</span> linux/amd64,linux/arm64 \
+    <span class="tc-flag">-t</span> registry.company.com/my-app<span class="dk-tag">:1.0</span> \
+    <span class="tc-flag">--push</span> .</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S13 — MONITORING & LOGGING ════ -->
+<div class="section" id="s13">
+  <div class="sec-head">
+    <span class="sec-tag st-5">MONITORING</span>
+    <div><h2 class="sec-title">Monitoring &amp; Logging — Quan sát containers</h2>
+    <p class="sec-sub">docker stats, logging drivers, Prometheus + Grafana stack</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Logging drivers và cấu hình</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Logging drivers + /etc/docker/daemon.json</span><span class="cb-tag ct-5">Logging</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── /etc/docker/daemon.json — global config ──</span>
+{
+  <span class="dk-str">"log-driver"</span>: <span class="dk-str">"json-file"</span>,      <span class="dk-cmt">// default driver</span>
+  <span class="dk-str">"log-opts"</span>: {
+    <span class="dk-str">"max-size"</span>: <span class="dk-str">"100m"</span>,            <span class="dk-cmt">// rotate sau 100MB</span>
+    <span class="dk-str">"max-file"</span>: <span class="dk-str">"5"</span>,               <span class="dk-cmt">// giữ 5 files</span>
+    <span class="dk-str">"compress"</span>: <span class="dk-str">"true"</span>             <span class="dk-cmt">// nén logs cũ</span>
+  },
+  <span class="dk-str">"default-ulimits"</span>: {
+    <span class="dk-str">"nofile"</span>: {
+      <span class="dk-str">"Name"</span>: <span class="dk-str">"nofile"</span>,
+      <span class="dk-str">"Hard"</span>: <span class="dk-num">65536</span>,
+      <span class="dk-str">"Soft"</span>: <span class="dk-num">65536</span>
+    }
+  },
+  <span class="dk-str">"storage-driver"</span>: <span class="dk-str">"overlay2"</span>
+}
+
+<span class="dk-sec"># ── Logging per service trong compose.yml ──</span>
+<span class="y-key">services:</span>
+  <span class="y-sec">order-service:</span>
+    <span class="y-key">logging:</span>
+      <span class="y-key">driver:</span>  <span class="tc-str">json-file</span>           <span class="dk-cmt"># json-file, syslog, fluentd, awslogs...</span>
+      <span class="y-key">options:</span>
+        <span class="y-key">max-size:</span> <span class="tc-str">"100m"</span>
+        <span class="y-key">max-file:</span> <span class="tc-str">"5"</span>
+        <span class="y-key">tag:</span>      <span class="tc-str">"{{.Name}}/{{.ID}}"</span>  <span class="dk-cmt"># tag trong log</span>
+
+    <span class="dk-cmt"># Gửi logs đến Loki (Grafana)</span>
+    <span class="y-key">logging:</span>
+      <span class="y-key">driver:</span>  <span class="tc-str">loki</span>
+      <span class="y-key">options:</span>
+        <span class="y-key">loki-url:</span>            <span class="tc-str">"http://loki:3100/loki/api/v1/push"</span>
+        <span class="y-key">loki-external-labels:</span><span class="tc-str">job=order-service,env=production</span>
+
+<span class="dk-sec"># ── Real-time monitoring ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> stats <span class="tc-flag">--format</span> <span class="tc-str">"table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> events <span class="tc-flag">--filter</span> <span class="tc-str">'type=container'</span>  <span class="dk-cmt"># stream Docker events</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> events <span class="tc-flag">--filter event=die</span>           <span class="dk-cmt"># chỉ container crashes</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S14 — SECURITY ════ -->
+<div class="section" id="s14">
+  <div class="sec-head">
+    <span class="sec-tag st-5">SECURITY</span>
+    <div><h2 class="sec-title">Security &amp; Hardening — Docker Production-safe</h2>
+    <p class="sec-sub">Non-root, read-only filesystem, capabilities, secrets management</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Security best practices</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Docker security — non-root, capabilities, secrets</span><span class="cb-tag ct-5">Security</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── compose.yml security settings ──</span>
+<span class="y-key">services:</span>
+  <span class="y-sec">order-service:</span>
+    <span class="y-key">user:</span> <span class="dk-str">"1001:1001"</span>              <span class="dk-cmt"># chạy non-root</span>
+    <span class="y-key">read_only:</span> <span class="y-bool">true</span>               <span class="dk-cmt"># filesystem read-only</span>
+    <span class="y-key">tmpfs:</span>
+      - <span class="tc-str">/tmp</span>                       <span class="dk-cmt"># tmp vẫn writable</span>
+      - <span class="tc-str">/app/tmp</span>
+    <span class="y-key">security_opt:</span>
+      - <span class="tc-str">no-new-privileges:true</span>     <span class="dk-cmt"># không cho escalate privileges</span>
+    <span class="y-key">cap_drop:</span>
+      - <span class="tc-str">ALL</span>                        <span class="dk-cmt"># bỏ tất cả Linux capabilities</span>
+    <span class="y-key">cap_add:</span>
+      - <span class="tc-str">NET_BIND_SERVICE</span>           <span class="dk-cmt"># chỉ thêm cái cần (bind port <1024)</span>
+    <span class="y-key">secrets:</span>
+      - <span class="tc-str">db_password</span>
+
+<span class="y-sec">secrets:</span>
+  <span class="y-key">db_password:</span>
+    <span class="y-key">file:</span> <span class="tc-str">./secrets/db_password.txt</span>  <span class="dk-cmt"># file chứa password</span>
+    <span class="dk-cmt"># → mount tại /run/secrets/db_password trong container</span>
+    <span class="dk-cmt"># Đọc: db.password=@/run/secrets/db_password (Spring Boot)</span>
+
+<span class="dk-sec"># ── Scan vulnerabilities ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">trivy</span> image <span class="tc-flag">--severity HIGH,CRITICAL</span> my-app<span class="dk-tag">:latest</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">trivy</span> fs .                          <span class="dk-cmt"># scan filesystem</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">trivy</span> config .                      <span class="dk-cmt"># scan IaC configs</span>
+
+<span class="dk-sec"># ── Kiểm tra secrets trong image ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> history my-app<span class="dk-tag">:latest</span>      <span class="dk-cmt"># xem lịch sử layers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">--rm</span> trufflesecurity/trufflehog docker <span class="tc-flag">--image</span> my-app<span class="dk-tag">:latest</span>
+
+<span class="dk-sec"># ── Không để secrets trong ENV (history visible!) ──</span>
+<span class="dk-cmt"># ❌ BAD — visible trong docker inspect, docker history</span>
+<span class="dk-kw">ENV</span> DB_PASSWORD=supersecret
+
+<span class="dk-cmt"># ✅ GOOD — dùng runtime secret hoặc env file</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> run <span class="tc-flag">--env-file</span> .env.production my-app
+<span class="dk-cmt"># hoặc dùng Docker Secrets / Vault / AWS Secrets Manager</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S15 — CLEANUP ════ -->
+<div class="section" id="s15">
+  <div class="sec-head">
+    <span class="sec-tag st-5">CLEANUP</span>
+    <div><h2 class="sec-title">Cleanup &amp; Maintenance — Giữ hệ thống gọn sạch</h2>
+    <p class="sec-sub">docker system prune, disk usage, dangling images — tiết kiệm disk</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cleanup commands — an toàn và toàn diện</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cleanup — prune, system df, safe cleanup script</span><span class="cb-tag ct-5">Cleanup</span></div>
+      <div class="cb-body"><pre><span class="dk-sec"># ── Kiểm tra disk usage ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system df                    <span class="dk-cmt"># tổng quan</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system df <span class="tc-flag">-v</span>               <span class="dk-cmt"># chi tiết từng image/volume</span>
+<span class="tc-out">TYPE            TOTAL  ACTIVE    SIZE      RECLAIMABLE
+Images          15     6         4.2GB     2.8GB (66%)
+Containers      8      3         245MB     120MB
+Volumes         5      3         1.2GB     400MB
+Build Cache     120    0         850MB     850MB</span>
+
+<span class="dk-sec"># ── Từng bước cleanup (an toàn) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> container prune              <span class="dk-cmt"># xóa stopped containers</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image prune                  <span class="dk-cmt"># xóa dangling images (none:none)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> volume prune                 <span class="dk-cmt"># xóa anonymous volumes</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> network prune                <span class="dk-cmt"># xóa unused networks</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> builder prune                <span class="dk-cmt"># xóa build cache</span>
+
+<span class="dk-sec"># ── Nuclear option (cleanup tất cả) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system prune                 <span class="dk-cmt"># stopped containers + dangling</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system prune <span class="tc-flag">-a</span>             <span class="dk-cmt"># + unused images (kể cả đang dùng)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> system prune <span class="tc-flag">-a --volumes</span>   <span class="dk-cmt"># ⚠️ XÓA CẢ VOLUMES! Mất data!</span>
+
+<span class="dk-sec"># ── Cleanup có filter ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> image prune <span class="tc-flag">-a --filter</span> <span class="tc-str">"until=24h"</span>   <span class="dk-cmt"># images cũ hơn 24h</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">docker</span> container prune <span class="tc-flag">--filter</span> <span class="tc-str">"status=exited"</span>
+
+<span class="dk-sec"># ── Cron job cleanup định kỳ ──</span>
+<span class="dk-cmt"># /etc/cron.weekly/docker-cleanup</span>
+<span class="dk-cmt">#!/bin/bash</span>
+<span class="tc-cmd">docker</span> system prune <span class="tc-flag">-f</span>
+<span class="tc-cmd">docker</span> image prune <span class="tc-flag">-a -f --filter</span> <span class="tc-str">"until=168h"</span>  <span class="dk-cmt"># >7 ngày</span>
+<span class="tc-cmd">docker</span> builder prune <span class="tc-flag">-f --keep-storage 5g</span>        <span class="dk-cmt"># giữ 5GB build cache</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S16 — CHEAT SHEET ════ -->
+<div class="section" id="s16">
+  <div class="sec-head">
+    <span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — Docker toàn tập</h2>
+    <p class="sec-sub">Tra cứu nhanh mọi commands và best practices</p></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4 class="h4-1">📦 Images</h4>
+      <div class="cheat-row"><span class="ck">Pull image</span><span class="cv">docker pull nginx:alpine</span></div>
+      <div class="cheat-row"><span class="ck">Xem images</span><span class="cv">docker images</span></div>
+      <div class="cheat-row"><span class="ck">Xem layers</span><span class="cv">docker history image</span></div>
+      <div class="cheat-row"><span class="ck">Build image</span><span class="cv">docker build -t name:tag .</span></div>
+      <div class="cheat-row"><span class="ck">Xóa dangling</span><span class="cv">docker image prune -a</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-1">🚀 Containers</h4>
+      <div class="cheat-row"><span class="ck">Chạy detached</span><span class="cv">docker run -d -p 8080:8080 app</span></div>
+      <div class="cheat-row"><span class="ck">Interactive shell</span><span class="cv">docker run -it --rm ubuntu bash</span></div>
+      <div class="cheat-row"><span class="ck">Vào container</span><span class="cv">docker exec -it name bash</span></div>
+      <div class="cheat-row"><span class="ck">Follow logs</span><span class="cv">docker logs -f name</span></div>
+      <div class="cheat-row"><span class="ck">Xóa stopped</span><span class="cv">docker container prune</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-2">📄 Dockerfile</h4>
+      <div class="cheat-row"><span class="ck">Base image</span><span class="cv">FROM eclipse-temurin:21-jre</span></div>
+      <div class="cheat-row"><span class="ck">Copy files</span><span class="cv">COPY --chown=app:app src dst</span></div>
+      <div class="cheat-row"><span class="ck">Run command</span><span class="cv">RUN cmd1 && cmd2</span></div>
+      <div class="cheat-row"><span class="ck">Set env</span><span class="cv">ENV KEY=value</span></div>
+      <div class="cheat-row"><span class="ck">Entrypoint</span><span class="cv">ENTRYPOINT ["java", "-jar"]</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">🌐 Network</h4>
+      <div class="cheat-row"><span class="ck">Tạo network</span><span class="cv">docker network create backend</span></div>
+      <div class="cheat-row"><span class="ck">Gọi nhau qua tên</span><span class="cv">jdbc://postgres:5432/db</span></div>
+      <div class="cheat-row"><span class="ck">Xem networks</span><span class="cv">docker network ls</span></div>
+      <div class="cheat-row"><span class="ck">Inspect network</span><span class="cv">docker network inspect name</span></div>
+      <div class="cheat-row"><span class="ck">Port mapping</span><span class="cv">-p 127.0.0.1:8080:8080</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-3">💾 Volumes</h4>
+      <div class="cheat-row"><span class="ck">Named volume</span><span class="cv">-v pgdata:/var/lib/pg/data</span></div>
+      <div class="cheat-row"><span class="ck">Bind mount</span><span class="cv">-v $(pwd)/src:/app/src</span></div>
+      <div class="cheat-row"><span class="ck">Read-only</span><span class="cv">-v config:/app/config:ro</span></div>
+      <div class="cheat-row"><span class="ck">Tạo volume</span><span class="cv">docker volume create pgdata</span></div>
+      <div class="cheat-row"><span class="ck">Xóa volumes</span><span class="cv">docker volume prune</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-4">🎼 Compose</h4>
+      <div class="cheat-row"><span class="ck">Start all</span><span class="cv">docker compose up -d</span></div>
+      <div class="cheat-row"><span class="ck">Rebuild + start</span><span class="cv">docker compose up -d --build</span></div>
+      <div class="cheat-row"><span class="ck">Stop + remove</span><span class="cv">docker compose down -v</span></div>
+      <div class="cheat-row"><span class="ck">Scale service</span><span class="cv">--scale app=3</span></div>
+      <div class="cheat-row"><span class="ck">With profile</span><span class="cv">--profile tools up -d</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-5">🔒 Security</h4>
+      <div class="cheat-row"><span class="ck">Non-root user</span><span class="cv">USER 1001</span></div>
+      <div class="cheat-row"><span class="ck">Read-only fs</span><span class="cv">read_only: true</span></div>
+      <div class="cheat-row"><span class="ck">Drop all caps</span><span class="cv">cap_drop: [ALL]</span></div>
+      <div class="cheat-row"><span class="ck">No new privs</span><span class="cv">no-new-privileges:true</span></div>
+      <div class="cheat-row"><span class="ck">Scan image</span><span class="cv">trivy image my-app:latest</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-5">🧹 Cleanup</h4>
+      <div class="cheat-row"><span class="ck">Disk usage</span><span class="cv">docker system df -v</span></div>
+      <div class="cheat-row"><span class="ck">Safe prune</span><span class="cv">docker system prune</span></div>
+      <div class="cheat-row"><span class="ck">Xóa build cache</span><span class="cv">docker builder prune</span></div>
+      <div class="cheat-row"><span class="ck">Xóa cũ >7d</span><span class="cv">image prune -a --filter until=168h</span></div>
+      <div class="cheat-row"><span class="ck">⚠️ Xóa volumes</span><span class="cv">system prune -a --volumes</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Docker Best Practices — Checklist Production</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Dùng official base images và pin version</h4><p>Tránh <code>:latest</code> trên production. Dùng <code>eclipse-temurin:21.0.4-jre-jammy</code> thay vì <code>java:latest</code>. Subscribe security advisories của base image.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Multi-stage build — tách builder khỏi runtime</h4><p>Stage builder dùng JDK, Maven, npm. Stage runtime chỉ có JRE/Node. Image cuối không có build tools, source code hay test dependencies.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Non-root user và minimal permissions</h4><p>Tạo user system <code>--uid 1001</code> trong Dockerfile. <code>USER 1001</code> trước CMD/ENTRYPOINT. <code>cap_drop: [ALL]</code> và chỉ thêm capabilities thực sự cần.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Optimize layer caching — copy dependencies trước</h4><p>Copy <code>pom.xml</code> → <code>mvnw dependency:go-offline</code> → copy <code>src/</code> → <code>mvnw package</code>. Khi chỉ source thay đổi, dependency layer được cache lại.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>HEALTHCHECK trong Dockerfile và compose.yml</h4><p>Dùng <code>HEALTHCHECK</code> để Docker biết app thực sự ready. Compose dùng <code>depends_on condition: service_healthy</code> để đảm bảo thứ tự khởi động đúng.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>Log rotation và resource limits</h4><p>Cấu hình <code>max-size: 100m, max-file: 5</code> cho logging. Set <code>memory: 512m, cpus: 1.0</code> trong compose. Không để container dùng vô hạn tài nguyên của host.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px">
+      <strong style="color:var(--text)">Tài nguyên tham khảo:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://docs.docker.com/reference/dockerfile/" style="color:var(--d1)">Dockerfile Reference</a> &nbsp;·&nbsp;
+        <a href="https://docs.docker.com/compose/compose-file/" style="color:var(--d1)">Compose File Reference</a> &nbsp;·&nbsp;
+        <a href="https://docs.docker.com/build/building/best-practices/" style="color:var(--d1)">Dockerfile Best Practices</a> &nbsp;·&nbsp;
+        <a href="https://github.com/aquasecurity/trivy" style="color:var(--d1)">Trivy Scanner</a> &nbsp;·&nbsp;
+        <a href="https://hub.docker.com/_/eclipse-temurin" style="color:var(--d1)">Eclipse Temurin</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <span>🐳 Docker · Backend &amp; DevOps · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">16 chủ đề · Images · Dockerfile · Compose · Security · Best Practices</span>
+</div>
+</div><!-- /main -->
+
+<script>
+window.addEventListener('scroll', () => {
+  const el = document.documentElement;
+  document.getElementById('pbar').style.width =
+    (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
+});
+const sections = document.querySelectorAll('.section[id]');
+const links = document.querySelectorAll('.nav-link');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-28% 0px -60% 0px' });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes (K8s) — Hướng dẫn toàn tập · Backend & DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  /* K8s colors */
+  --k1:#326ce5;--k1-dim:rgba(50,108,229,.12);--k1-glow:rgba(50,108,229,.28);
+  --k2:#00bcd4;--k2-dim:rgba(0,188,212,.11);--k2-glow:rgba(0,188,212,.26);
+  --k3:#ffd060;--k3-dim:rgba(255,208,96,.11);--k3-glow:rgba(255,208,96,.26);
+  --k4:#a07af4;--k4-dim:rgba(160,122,244,.11);--k4-glow:rgba(160,122,244,.26);
+  --k5:#40d88e;--k5-dim:rgba(64,216,142,.11);--k5-glow:rgba(64,216,142,.26);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.sidebar{position:fixed;left:0;top:0;width:264px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--k1),#1a3ea0);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--k1-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--k1),var(--k2),var(--k3),var(--k4),var(--k5));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-1{background:var(--k1-dim);color:var(--k1)}.ngh-2{background:var(--k2-dim);color:var(--k2)}
+.ngh-3{background:var(--k3-dim);color:var(--k3)}.ngh-4{background:var(--k4-dim);color:var(--k4)}
+.ngh-5{background:var(--k5-dim);color:var(--k5)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(50,108,229,.07);border-left-color:var(--k1)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.main{margin-left:264px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 72% 28%,rgba(50,108,229,.12) 0%,transparent 62%),
+    radial-gradient(ellipse 45% 55% at 12% 82%,rgba(0,188,212,.07) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 45% at 50% 50%,rgba(160,122,244,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:500px;height:500px;background:radial-gradient(circle,rgba(50,108,229,.09) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--k1-dim);border:1px solid rgba(50,108,229,.35);color:var(--k1);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--k1);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.h-acc{color:var(--k1)}
+.h-grad{background:linear-gradient(135deg,var(--k1) 0%,var(--k2) 50%,var(--k3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:570px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-1{background:var(--k1-dim);color:var(--k1)}.chip-2{background:var(--k2-dim);color:var(--k2)}
+.chip-3{background:var(--k3-dim);color:var(--k3)}.chip-4{background:var(--k4-dim);color:var(--k4)}
+.chip-5{background:var(--k5-dim);color:var(--k5)}.chip-r{background:var(--pink-dim);color:var(--pink)}
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-1{background:var(--k1-dim);border:1px solid rgba(50,108,229,.28)}.cb-1::before{background:linear-gradient(90deg,var(--k1),var(--k2))}
+.cb-2{background:var(--k2-dim);border:1px solid rgba(0,188,212,.28)}.cb-2::before{background:linear-gradient(90deg,var(--k2),var(--k1))}
+.cb-3{background:var(--k3-dim);border:1px solid rgba(255,208,96,.28)}.cb-3::before{background:linear-gradient(90deg,var(--k3),var(--k2))}
+.cb-4{background:var(--k4-dim);border:1px solid rgba(160,122,244,.28)}.cb-4::before{background:linear-gradient(90deg,var(--k4),var(--k1))}
+.cb-5{background:var(--k5-dim);border:1px solid rgba(64,216,142,.28)}.cb-5::before{background:linear-gradient(90deg,var(--k5),var(--k4))}
+.cb-icon{font-size:36px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-1 .cb-badge{background:var(--k1-dim);color:var(--k1)}.cb-2 .cb-badge{background:var(--k2-dim);color:var(--k2)}
+.cb-3 .cb-badge{background:var(--k3-dim);color:var(--k3)}.cb-4 .cb-badge{background:var(--k4-dim);color:var(--k4)}
+.cb-5 .cb-badge{background:var(--k5-dim);color:var(--k5)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.content{padding:56px 64px;max-width:1010px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-1{color:var(--k1);background:var(--k1-dim);border:1px solid var(--k1-glow)}
+.st-2{color:var(--k2);background:var(--k2-dim);border:1px solid var(--k2-glow)}
+.st-3{color:var(--k3);background:var(--k3-dim);border:1px solid var(--k3-glow)}
+.st-4{color:var(--k4);background:var(--k4-dim);border:1px solid var(--k4-glow)}
+.st-5{color:var(--k5);background:var(--k5-dim);border:1px solid var(--k5-glow)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--k1);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:4px}.sub strong{color:var(--text)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--k1);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px}
+.ct-1{background:var(--k1-dim);color:var(--k1)}.ct-2{background:var(--k2-dim);color:var(--k2)}
+.ct-3{background:var(--k3-dim);color:var(--k3)}.ct-4{background:var(--k4-dim);color:var(--k4)}
+.ct-5{background:var(--k5-dim);color:var(--k5)}.ct-r{background:var(--pink-dim);color:var(--pink)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;white-space:pre;color:#8899bb}
+/* YAML/K8s syntax */
+.y-key{color:#89ddff}.y-str{color:#c3e88d}.y-num{color:#f78c6c}.y-bool{color:#ff6584}
+.y-cmt{color:#546e7a;font-style:italic}.y-kw{color:#c792ea}.y-sec{color:#ffd060;font-weight:700}
+.y-api{color:#326ce5;font-weight:700}.y-kind{color:#00bcd4;font-weight:700}
+.y-var{color:#c792ea}.y-label{color:#40d88e}.y-ann{color:#ffcb6b}
+/* Shell */
+.tc-prompt{color:#89ddff}.tc-cmd{color:#82aaff}.tc-flag{color:#ffcb6b}
+.tc-path{color:#c3e88d}.tc-arg{color:#f78c6c}.tc-cmt{color:#546e7a;font-style:italic}
+.tc-out{color:#546e7a}.tc-ok{color:#40d88e}.tc-err{color:#ff6584}.tc-pipe{color:#89ddff}
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:rgba(64,216,142,.08);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:rgba(255,208,96,.08);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.2);color:#2060c0}
+.i-note{background:rgba(160,122,244,.08);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:rgba(255,101,132,.08);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-1::before{background:var(--k1)}.rw-2::before{background:var(--k2)}.rw-3::before{background:var(--k3)}
+.rw-4::before{background:var(--k4)}.rw-5::before{background:var(--k5)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-1 .rw-label{color:var(--k1)}.rw-2 .rw-label{color:var(--k2)}.rw-3 .rw-label{color:var(--k3)}
+.rw-4 .rw-label{color:var(--k4)}.rw-5 .rw-label{color:var(--k5)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmp-bad{background:rgba(255,101,132,.06);border:1px solid rgba(255,101,132,.2);border-radius:11px;padding:16px}
+.cmp-good{background:rgba(64,216,142,.06);border:1px solid rgba(64,216,142,.2);border-radius:11px;padding:16px}
+.cmp-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cmp-bad .cmp-label{color:var(--pink)}.cmp-good .cmp-label{color:var(--k5)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--k2)}
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--k1);background:var(--k1-dim);border:2px solid var(--k1-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-1{color:var(--k1)}.h4-2{color:var(--k2)}.h4-3{color:var(--k3)}.h4-4{color:var(--k4)}.h4-5{color:var(--k5)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;gap:8px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted);flex-shrink:0}.cv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--k2);text-align:right}
+/* K8s architecture diagram */
+.arch-node{border-radius:10px;padding:12px 16px;text-align:center;font-family:'JetBrains Mono',monospace}
+.an-cp{background:rgba(50,108,229,.12);border:2px solid rgba(50,108,229,.4);color:var(--k1)}
+.an-wk{background:rgba(0,188,212,.10);border:1px solid rgba(0,188,212,.3);color:var(--k2)}
+.an-pod{background:rgba(64,216,142,.08);border:1px solid rgba(64,216,142,.25);color:var(--k5)}
+.an-svc{background:rgba(255,208,96,.08);border:1px solid rgba(255,208,96,.25);color:var(--k3)}
+.an-sec{background:rgba(160,122,244,.08);border:1px solid rgba(160,122,244,.25);color:var(--k4)}
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(50,108,229,.1);color:var(--k2);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid,.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">☸️</div>
+      <div class="logo-text"><h2>Kubernetes</h2><p>Backend &amp; DevOps · Hướng dẫn</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">📚 Series DevOps</div>
+    <a href="terminal-macbook.html" class="nav-link"><span class="ico">💻</span> Terminal macOS</a>
+    <a href="linux-guide.html" class="nav-link"><span class="ico">🐧</span> Linux Server</a>
+    <a href="docker-guide.html" class="nav-link"><span class="ico">🐳</span> Docker</a>
+    <a href="kubernate-guide.html" class="nav-link active"><span class="ico">⚓</span> Kubernetes</a>
+    <a href="gitlab-cicd-guide.html" class="nav-link"><span class="ico">🦊</span> GitLab CI/CD</a>
+    <a href="teraform-guide.html" class="nav-link"><span class="ico">🏗️</span> Terraform</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Nền tảng</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🏗️</span> Kiến trúc K8s</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-1">🔵 Core Objects</div>
+    <a href="#s1" class="nav-link"><span class="ico">🫛</span> Pod — Đơn vị nhỏ nhất</a>
+    <a href="#s2" class="nav-link"><span class="ico">🔄</span> Deployment &amp; ReplicaSet</a>
+    <a href="#s3" class="nav-link"><span class="ico">🌐</span> Service &amp; Networking</a>
+    <a href="#s4" class="nav-link"><span class="ico">🗂️</span> Namespace</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-2">🔵 Config &amp; Storage</div>
+    <a href="#s5" class="nav-link"><span class="ico">⚙️</span> ConfigMap &amp; Secret</a>
+    <a href="#s6" class="nav-link"><span class="ico">💾</span> Volumes &amp; PVC</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-3">🟡 Workload Types</div>
+    <a href="#s7" class="nav-link"><span class="ico">📊</span> StatefulSet</a>
+    <a href="#s8" class="nav-link"><span class="ico">🖥️</span> DaemonSet &amp; Job</a>
+    <a href="#s9" class="nav-link"><span class="ico">🚪</span> Ingress &amp; IngressClass</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-4">🟣 Scaling &amp; Reliability</div>
+    <a href="#s10" class="nav-link"><span class="ico">📈</span> HPA &amp; VPA</a>
+    <a href="#s11" class="nav-link"><span class="ico">🏷️</span> Resource Requests &amp; Limits</a>
+    <a href="#s12" class="nav-link"><span class="ico">🔬</span> Probes — Health Checks</a>
+    <a href="#s13" class="nav-link"><span class="ico">🛡️</span> Pod Disruption Budget</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-5">🟢 Advanced &amp; Production</div>
+    <a href="#s14" class="nav-link"><span class="ico">🔐</span> RBAC &amp; ServiceAccount</a>
+    <a href="#s15" class="nav-link"><span class="ico">⛑️</span> Helm — Package Manager</a>
+    <a href="#s16" class="nav-link"><span class="ico">🔧</span> kubectl — Mọi lệnh cần biết</a>
+    <a href="#s17" class="nav-link"><span class="ico">📦</span> Deploy Spring Boot lên K8s</a>
+    <a href="#s18" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<div class="main">
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> Kubernetes · kubectl · Helm · EKS/GKE/AKS · Production</div>
+  <h1><span class="h-acc">Kubernetes</span><br><span class="h-grad">K8s Toàn Tập</span></h1>
+  <p class="hero-desc">Hướng dẫn Kubernetes từ cơ bản đến nâng cao — Pod, Deployment, Service, Ingress, HPA, RBAC, Helm, đến deploy Spring Boot production-ready với đầy đủ ví dụ YAML thực tế.</p>
+  <div class="hero-chips">
+    <span class="chip chip-1">Pod &amp; Deployment</span>
+    <span class="chip chip-2">Service &amp; Ingress</span>
+    <span class="chip chip-3">ConfigMap &amp; Secret</span>
+    <span class="chip chip-4">RBAC &amp; Security</span>
+    <span class="chip chip-5">HPA &amp; Scaling</span>
+    <span class="chip chip-r">Helm Charts</span>
+  </div>
+</div>
+<div class="content">
+<!-- S0 ARCHITECTURE -->
+<div class="section" id="s0">
+  <div class="sec-head"><span class="sec-tag st-1">OVERVIEW</span>
+    <div><h2 class="sec-title">Kiến trúc Kubernetes — Big Picture</h2>
+    <p class="sec-sub">Control Plane · Worker Nodes · Pods · Tại sao cần K8s?</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tại sao dùng Kubernetes?</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">🔄</div><div class="card-title" style="color:var(--k1)">Self-healing</div><div class="card-desc">Pod crash tự động restart. Node die tự reschedule sang node khác. Không cần thức đêm trực server.</div></div>
+      <div class="card"><div class="card-icon">📈</div><div class="card-title" style="color:var(--k2)">Auto Scaling</div><div class="card-desc">HPA tự scale pods khi CPU/RAM cao. Cluster Autoscaler tự thêm node khi cần. Scale về 0 khi idle.</div></div>
+      <div class="card"><div class="card-icon">🚀</div><div class="card-title" style="color:var(--k3)">Zero-downtime Deploy</div><div class="card-desc">Rolling update thay thế pods dần dần. Rollback nhanh chóng khi có lỗi. Blue-green, canary deployments.</div></div>
+      <div class="card"><div class="card-icon">⚙️</div><div class="card-title" style="color:var(--k5)">Declarative Config</div><div class="card-desc">Khai báo trạng thái mong muốn bằng YAML. K8s tự làm mọi thứ để đạt trạng thái đó.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Kiến trúc K8s Cluster</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;margin:14px 0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--k1),var(--k2),var(--k3),var(--k5))"></div>
+      <div style="margin-top:8px">
+        <!-- Control Plane -->
+        <div style="background:rgba(50,108,229,.08);border:2px solid rgba(50,108,229,.35);border-radius:12px;padding:16px;margin-bottom:14px">
+          <div style="font-size:10px;font-weight:800;color:var(--k1);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🧠 CONTROL PLANE (Master Node)</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div class="arch-node an-cp" style="font-size:11px"><div style="font-size:16px;margin-bottom:4px">🔌</div>API Server<div style="font-size:10px;opacity:.7;margin-top:2px">Entry point</div></div>
+            <div class="arch-node an-cp" style="font-size:11px"><div style="font-size:16px;margin-bottom:4px">⏰</div>Scheduler<div style="font-size:10px;opacity:.7;margin-top:2px">Gán pods → nodes</div></div>
+            <div class="arch-node an-cp" style="font-size:11px"><div style="font-size:16px;margin-bottom:4px">🔧</div>Controller Mgr<div style="font-size:10px;opacity:.7;margin-top:2px">Reconcile loops</div></div>
+            <div class="arch-node an-cp" style="font-size:11px"><div style="font-size:16px;margin-bottom:4px">🗄️</div>etcd<div style="font-size:10px;opacity:.7;margin-top:2px">Cluster state DB</div></div>
+          </div>
+        </div>
+        <!-- Worker Nodes -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:rgba(0,188,212,.07);border:1px solid rgba(0,188,212,.25);border-radius:12px;padding:14px">
+            <div style="font-size:10px;font-weight:800;color:var(--k2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🖥️ WORKER NODE 1</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+              <div class="arch-node an-pod" style="font-size:10px;padding:6px 10px">Pod: order-svc</div>
+              <div class="arch-node an-pod" style="font-size:10px;padding:6px 10px">Pod: order-svc</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <div class="arch-node an-wk" style="font-size:10px;padding:5px 8px;flex:1">kubelet</div>
+              <div class="arch-node an-wk" style="font-size:10px;padding:5px 8px;flex:1">kube-proxy</div>
+              <div class="arch-node an-wk" style="font-size:10px;padding:5px 8px;flex:1">containerd</div>
+            </div>
+          </div>
+          <div style="background:rgba(0,188,212,.07);border:1px solid rgba(0,188,212,.25);border-radius:12px;padding:14px">
+            <div style="font-size:10px;font-weight:800;color:var(--k2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🖥️ WORKER NODE 2</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+              <div class="arch-node an-pod" style="font-size:10px;padding:6px 10px">Pod: payment</div>
+              <div class="arch-node an-pod" style="font-size:10px;padding:6px 10px">Pod: postgres</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <div class="arch-node an-wk" style="font-size:10px;padding:5px 8px;flex:1">kubelet</div>
+              <div class="arch-node an-wk" style="font-size:10px;padding:5px 8px;flex:1">kube-proxy</div>
+              <div class="arch-node an-wk" style="font-size:10px;padding:5px 8px;flex:1">containerd</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Component</th><th>Vai trò</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td><code>API Server</code></td><td>Cổng vào duy nhất của cluster — REST API cho kubectl và controllers</td><td>Stateless, có thể replicate</td></tr>
+        <tr><td><code>Scheduler</code></td><td>Quyết định Pod chạy trên Node nào dựa trên resources, affinity</td><td>Pluggable algorithm</td></tr>
+        <tr><td><code>Controller Manager</code></td><td>Chạy các control loops: ReplicaSet, Deployment, Node controllers</td><td>Reconciliation loops</td></tr>
+        <tr><td><code>etcd</code></td><td>Distributed key-value store lưu toàn bộ cluster state</td><td>BACKUP etcd thường xuyên!</td></tr>
+        <tr><td><code>kubelet</code></td><td>Agent trên mỗi node, nhận PodSpec và đảm bảo containers chạy</td><td>Trên mỗi worker node</td></tr>
+        <tr><td><code>kube-proxy</code></td><td>Duy trì network rules, load balancing cho Services</td><td>iptables hoặc IPVS mode</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-1">
+  <div class="cb-icon">🫛</div>
+  <div><div class="cb-badge">CORE OBJECTS</div>
+  <div class="cb-title">Pod, Deployment, Service, Namespace</div>
+  <div class="cb-sub">Các đối tượng cơ bản nhất trong Kubernetes</div></div>
+</div>
+
+<!-- S1 POD -->
+<div class="section" id="s1">
+  <div class="sec-head"><span class="sec-tag st-1">POD</span>
+    <div><h2 class="sec-title">Pod — Đơn vị nhỏ nhất trong K8s</h2>
+    <p class="sec-sub">Một hoặc nhiều containers cùng network namespace, storage, lifecycle</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Pod YAML đầy đủ với giải thích</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">pod.yaml — annotated</span><span class="cb-tag ct-1">Pod</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Pod</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-pod</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+  <span class="y-key">labels</span>:                           <span class="y-cmt"># selector matching dùng labels</span>
+    <span class="y-label">app</span>:     <span class="y-str">order-service</span>
+    <span class="y-label">version</span>: <span class="y-str">v2.1.0</span>
+    <span class="y-label">tier</span>:    <span class="y-str">backend</span>
+  <span class="y-key">annotations</span>:
+    <span class="y-ann">prometheus.io/scrape</span>: <span class="y-str">"true"</span>
+    <span class="y-ann">prometheus.io/port</span>:   <span class="y-str">"8080"</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">containers</span>:
+  - <span class="y-key">name</span>:  <span class="y-str">order-service</span>
+    <span class="y-key">image</span>: <span class="y-str">registry.company.com/order-service:v2.1.0</span>
+    <span class="y-key">ports</span>:
+    - <span class="y-key">containerPort</span>: <span class="y-num">8080</span>
+      <span class="y-key">name</span>:          <span class="y-str">http</span>
+    <span class="y-key">env</span>:
+    - <span class="y-key">name</span>:  <span class="y-str">SPRING_PROFILES_ACTIVE</span>
+      <span class="y-key">value</span>: <span class="y-str">prod</span>
+    - <span class="y-key">name</span>:  <span class="y-str">DB_PASSWORD</span>
+      <span class="y-key">valueFrom</span>:
+        <span class="y-key">secretKeyRef</span>:               <span class="y-cmt"># lấy từ Secret</span>
+          <span class="y-key">name</span>: <span class="y-str">order-service-secrets</span>
+          <span class="y-key">key</span>:  <span class="y-str">db-password</span>
+    <span class="y-key">resources</span>:
+      <span class="y-key">requests</span>:                       <span class="y-cmt"># tài nguyên tối thiểu (scheduler dùng)</span>
+        <span class="y-key">memory</span>: <span class="y-str">"256Mi"</span>
+        <span class="y-key">cpu</span>:    <span class="y-str">"250m"</span>              <span class="y-cmt"># 250 millicores = 0.25 CPU</span>
+      <span class="y-key">limits</span>:                         <span class="y-cmt"># tài nguyên tối đa (container bị kill nếu vượt)</span>
+        <span class="y-key">memory</span>: <span class="y-str">"512Mi"</span>
+        <span class="y-key">cpu</span>:    <span class="y-str">"1000m"</span>
+    <span class="y-key">livenessProbe</span>:
+      <span class="y-key">httpGet</span>:
+        <span class="y-key">path</span>: <span class="y-str">/actuator/health/liveness</span>
+        <span class="y-key">port</span>: <span class="y-num">8080</span>
+      <span class="y-key">initialDelaySeconds</span>: <span class="y-num">60</span>
+      <span class="y-key">periodSeconds</span>:       <span class="y-num">10</span>
+    <span class="y-key">readinessProbe</span>:
+      <span class="y-key">httpGet</span>:
+        <span class="y-key">path</span>: <span class="y-str">/actuator/health/readiness</span>
+        <span class="y-key">port</span>: <span class="y-num">8080</span>
+      <span class="y-key">initialDelaySeconds</span>: <span class="y-num">30</span>
+      <span class="y-key">periodSeconds</span>:       <span class="y-num">5</span>
+    <span class="y-key">volumeMounts</span>:
+    - <span class="y-key">name</span>:      <span class="y-str">config-volume</span>
+      <span class="y-key">mountPath</span>: <span class="y-str">/app/config</span>
+      <span class="y-key">readOnly</span>:  <span class="y-bool">true</span>
+  <span class="y-key">volumes</span>:
+  - <span class="y-key">name</span>: <span class="y-str">config-volume</span>
+    <span class="y-key">configMap</span>:
+      <span class="y-key">name</span>: <span class="y-str">order-service-config</span>
+  <span class="y-key">imagePullSecrets</span>:
+  - <span class="y-key">name</span>: <span class="y-str">registry-credentials</span>  <span class="y-cmt"># pull từ private registry</span>
+  <span class="y-key">restartPolicy</span>: <span class="y-str">Always</span>            <span class="y-cmt"># Always | OnFailure | Never</span>
+  <span class="y-key">terminationGracePeriodSeconds</span>: <span class="y-num">30</span></pre></div>
+    </div>
+    <div class="info i-warn">
+      <span class="info-ico">⚠️</span>
+      <div><strong style="color:var(--text)">Không tạo Pod trực tiếp trong production!</strong> Pod là ephemeral — nếu node chết, Pod không tự rebuild. Luôn dùng Deployment (hoặc StatefulSet, DaemonSet) để quản lý Pods. Pod tạo trực tiếp chỉ dùng để test/debug.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S2 DEPLOYMENT -->
+<div class="section" id="s2">
+  <div class="sec-head"><span class="sec-tag st-1">DEPLOYMENT</span>
+    <div><h2 class="sec-title">Deployment &amp; ReplicaSet — Stateless Workloads</h2>
+    <p class="sec-sub">Quản lý rolling update, rollback, scaling cho stateless apps</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Deployment YAML production-ready</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">deployment.yaml — order-service với rolling update</span><span class="cb-tag ct-1">Deployment</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">apps/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Deployment</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+  <span class="y-key">labels</span>:
+    <span class="y-label">app</span>: <span class="y-str">order-service</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">replicas</span>: <span class="y-num">3</span>                         <span class="y-cmt"># chạy 3 pods song song</span>
+  <span class="y-key">selector</span>:
+    <span class="y-key">matchLabels</span>:
+      <span class="y-label">app</span>: <span class="y-str">order-service</span>
+  <span class="y-key">strategy</span>:
+    <span class="y-key">type</span>: <span class="y-str">RollingUpdate</span>               <span class="y-cmt"># Recreate hoặc RollingUpdate</span>
+    <span class="y-key">rollingUpdate</span>:
+      <span class="y-key">maxSurge</span>:       <span class="y-num">1</span>               <span class="y-cmt"># tối đa thêm 1 pod trong khi update</span>
+      <span class="y-key">maxUnavailable</span>: <span class="y-num">0</span>               <span class="y-cmt"># không cho pod nào unavailable (zero-downtime!)</span>
+  <span class="y-key">minReadySeconds</span>: <span class="y-num">10</span>                 <span class="y-cmt"># chờ 10s sau khi pod ready rồi mới tiếp</span>
+  <span class="y-key">progressDeadlineSeconds</span>: <span class="y-num">600</span>       <span class="y-cmt"># timeout rollout sau 10 phút</span>
+  <span class="y-key">template</span>:                            <span class="y-cmt"># PodTemplate — giống Pod spec</span>
+    <span class="y-key">metadata</span>:
+      <span class="y-key">labels</span>:
+        <span class="y-label">app</span>:     <span class="y-str">order-service</span>
+        <span class="y-label">version</span>: <span class="y-str">v2.1.0</span>
+    <span class="y-key">spec</span>:
+      <span class="y-key">affinity</span>:
+        <span class="y-key">podAntiAffinity</span>:               <span class="y-cmt"># pods không chạy cùng node</span>
+          <span class="y-key">preferredDuringSchedulingIgnoredDuringExecution</span>:
+          - <span class="y-key">weight</span>: <span class="y-num">100</span>
+            <span class="y-key">podAffinityTerm</span>:
+              <span class="y-key">labelSelector</span>:
+                <span class="y-key">matchLabels</span>:
+                  <span class="y-label">app</span>: <span class="y-str">order-service</span>
+              <span class="y-key">topologyKey</span>: <span class="y-str">kubernetes.io/hostname</span>
+      <span class="y-key">topologySpreadConstraints</span>:       <span class="y-cmt"># phân tán đều qua availability zones</span>
+      - <span class="y-key">maxSkew</span>:           <span class="y-num">1</span>
+        <span class="y-key">topologyKey</span>:       <span class="y-str">topology.kubernetes.io/zone</span>
+        <span class="y-key">whenUnsatisfiable</span>: <span class="y-str">DoNotSchedule</span>
+        <span class="y-key">labelSelector</span>:
+          <span class="y-key">matchLabels</span>:
+            <span class="y-label">app</span>: <span class="y-str">order-service</span>
+      <span class="y-key">containers</span>:
+      - <span class="y-key">name</span>:  <span class="y-str">order-service</span>
+        <span class="y-key">image</span>: <span class="y-str">registry.company.com/order-service:v2.1.0</span>
+        <span class="y-key">ports</span>:
+        - <span class="y-key">containerPort</span>: <span class="y-num">8080</span>
+        <span class="y-key">envFrom</span>:                         <span class="y-cmt"># load tất cả keys từ ConfigMap</span>
+        - <span class="y-key">configMapRef</span>:
+            <span class="y-key">name</span>: <span class="y-str">order-service-config</span>
+        - <span class="y-key">secretRef</span>:
+            <span class="y-key">name</span>: <span class="y-str">order-service-secrets</span>
+        <span class="y-key">resources</span>:
+          <span class="y-key">requests</span>: {<span class="y-key">memory</span>: <span class="y-str">"256Mi"</span>, <span class="y-key">cpu</span>: <span class="y-str">"250m"</span>}
+          <span class="y-key">limits</span>:   {<span class="y-key">memory</span>: <span class="y-str">"512Mi"</span>, <span class="y-key">cpu</span>: <span class="y-str">"1000m"</span>}
+        <span class="y-key">livenessProbe</span>:
+          <span class="y-key">httpGet</span>: {<span class="y-key">path</span>: <span class="y-str">/actuator/health/liveness</span>, <span class="y-key">port</span>: <span class="y-num">8080</span>}
+          <span class="y-key">initialDelaySeconds</span>: <span class="y-num">60</span>
+          <span class="y-key">periodSeconds</span>: <span class="y-num">10</span>
+          <span class="y-key">failureThreshold</span>: <span class="y-num">3</span>
+        <span class="y-key">readinessProbe</span>:
+          <span class="y-key">httpGet</span>: {<span class="y-key">path</span>: <span class="y-str">/actuator/health/readiness</span>, <span class="y-key">port</span>: <span class="y-num">8080</span>}
+          <span class="y-key">initialDelaySeconds</span>: <span class="y-num">30</span>
+          <span class="y-key">periodSeconds</span>: <span class="y-num">5</span>
+          <span class="y-key">failureThreshold</span>: <span class="y-num">3</span>
+        <span class="y-key">lifecycle</span>:
+          <span class="y-key">preStop</span>:                       <span class="y-cmt"># graceful shutdown</span>
+            <span class="y-key">exec</span>:
+              <span class="y-key">command</span>: [<span class="y-str">"/bin/sh"</span>, <span class="y-str">"-c"</span>, <span class="y-str">"sleep 5"</span>]
+      <span class="y-key">terminationGracePeriodSeconds</span>: <span class="y-num">60</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Rollout commands</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">kubectl rollout — update, status, rollback</span><span class="cb-tag ct-1">Rollout</span></div>
+      <div class="cb-body"><pre><span class="tc-cmt"># Update image (trigger rolling update)</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> set image deployment/order-service <span class="tc-arg">order-service=registry.company.com/order-service:v2.2.0</span> <span class="tc-flag">-n</span> production
+
+<span class="tc-cmt"># Xem trạng thái rollout</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> rollout status deployment/order-service <span class="tc-flag">-n</span> production
+<span class="tc-out">Waiting for deployment "order-service" rollout to finish: 1 of 3 updated...
+deployment "order-service" successfully rolled out</span>
+
+<span class="tc-cmt"># Xem lịch sử rollout</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> rollout history deployment/order-service <span class="tc-flag">-n</span> production
+
+<span class="tc-cmt"># Rollback về version trước</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> rollout undo deployment/order-service <span class="tc-flag">-n</span> production
+
+<span class="tc-cmt"># Rollback về revision cụ thể</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> rollout undo deployment/order-service <span class="tc-flag">--to-revision=2</span> <span class="tc-flag">-n</span> production
+
+<span class="tc-cmt"># Scale thủ công</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> scale deployment/order-service <span class="tc-flag">--replicas=5</span> <span class="tc-flag">-n</span> production
+
+<span class="tc-cmt"># Pause/Resume rolling update</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> rollout pause deployment/order-service <span class="tc-flag">-n</span> production
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> rollout resume deployment/order-service <span class="tc-flag">-n</span> production</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S3 SERVICE -->
+<div class="section" id="s3">
+  <div class="sec-head"><span class="sec-tag st-1">SERVICE</span>
+    <div><h2 class="sec-title">Service — Network Access to Pods</h2>
+    <p class="sec-sub">ClusterIP, NodePort, LoadBalancer, ExternalName — 4 loại Service</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Service types và khi nào dùng</div>
+    <table class="tbl">
+      <thead><tr><th>Type</th><th>Access scope</th><th>Dùng cho</th><th>Ví dụ</th></tr></thead>
+      <tbody>
+        <tr><td><code>ClusterIP</code></td><td>Trong cluster</td><td>Internal service-to-service</td><td>order-service → payment-service</td></tr>
+        <tr><td><code>NodePort</code></td><td>Host:NodePort (30000-32767)</td><td>Dev/test, không dùng production</td><td>curl node-ip:30080</td></tr>
+        <tr><td><code>LoadBalancer</code></td><td>External IP từ cloud</td><td>Public-facing service trên cloud</td><td>AWS ELB, GCP LB</td></tr>
+        <tr><td><code>ExternalName</code></td><td>DNS CNAME alias</td><td>Trỏ đến external service</td><td>db.company.com</td></tr>
+      </tbody>
+    </table>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">service.yaml — ClusterIP và LoadBalancer</span><span class="cb-tag ct-1">Service</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── ClusterIP (internal access) ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Service</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">type</span>:     <span class="y-str">ClusterIP</span>              <span class="y-cmt"># default</span>
+  <span class="y-key">selector</span>:
+    <span class="y-label">app</span>: <span class="y-str">order-service</span>            <span class="y-cmt"># match pods với label này</span>
+  <span class="y-key">ports</span>:
+  - <span class="y-key">name</span>:       <span class="y-str">http</span>
+    <span class="y-key">port</span>:       <span class="y-num">80</span>                  <span class="y-cmt"># port của Service</span>
+    <span class="y-key">targetPort</span>: <span class="y-num">8080</span>              <span class="y-cmt"># port trong container</span>
+    <span class="y-key">protocol</span>:   <span class="y-str">TCP</span>
+<span class="y-cmt"># DNS: order-service.production.svc.cluster.local</span>
+<span class="y-cmt"># hoặc ngắn: order-service (trong cùng namespace)</span>
+
+---
+<span class="y-cmt"># ── LoadBalancer (external access via cloud LB) ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Service</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">api-gateway-lb</span>
+  <span class="y-key">annotations</span>:
+    <span class="y-ann">service.beta.kubernetes.io/aws-load-balancer-type</span>: <span class="y-str">"nlb"</span>
+    <span class="y-ann">service.beta.kubernetes.io/aws-load-balancer-internal</span>: <span class="y-str">"false"</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">type</span>: <span class="y-str">LoadBalancer</span>
+  <span class="y-key">selector</span>:
+    <span class="y-label">app</span>: <span class="y-str">api-gateway</span>
+  <span class="y-key">ports</span>:
+  - <span class="y-key">port</span>: <span class="y-num">443</span>
+    <span class="y-key">targetPort</span>: <span class="y-num">8443</span>
+
+---
+<span class="y-cmt"># ── Headless Service (cho StatefulSet, DNS per pod) ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Service</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">postgres</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">clusterIP</span>: <span class="y-str">None</span>                   <span class="y-cmt"># Headless — không có virtual IP</span>
+  <span class="y-key">selector</span>:
+    <span class="y-label">app</span>: <span class="y-str">postgres</span>
+  <span class="y-key">ports</span>:
+  - <span class="y-key">port</span>: <span class="y-num">5432</span>
+<span class="y-cmt"># DNS: postgres-0.postgres.default.svc.cluster.local (StatefulSet)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S4 NAMESPACE -->
+<div class="section" id="s4">
+  <div class="sec-head"><span class="sec-tag st-1">NAMESPACE</span>
+    <div><h2 class="sec-title">Namespace — Phân vùng Cluster</h2>
+    <p class="sec-sub">Tách môi trường dev/staging/prod, phân quyền theo team</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Namespace setup cho multi-team, multi-env</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">namespace.yaml + ResourceQuota + LimitRange</span><span class="cb-tag ct-1">Namespace</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Namespace</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">production</span>
+  <span class="y-key">labels</span>:
+    <span class="y-label">env</span>:  <span class="y-str">production</span>
+    <span class="y-label">team</span>: <span class="y-str">backend</span>
+---
+<span class="y-cmt"># ResourceQuota — giới hạn tổng resources của namespace</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">ResourceQuota</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">production-quota</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">hard</span>:
+    <span class="y-key">pods</span>:             <span class="y-str">"50"</span>
+    <span class="y-key">requests.cpu</span>:    <span class="y-str">"20"</span>
+    <span class="y-key">requests.memory</span>: <span class="y-str">20Gi</span>
+    <span class="y-key">limits.cpu</span>:      <span class="y-str">"40"</span>
+    <span class="y-key">limits.memory</span>:   <span class="y-str">40Gi</span>
+    <span class="y-key">services</span>:         <span class="y-str">"20"</span>
+    <span class="y-key">persistentvolumeclaims</span>: <span class="y-str">"10"</span>
+---
+<span class="y-cmt"># LimitRange — set defaults khi pod không khai báo resources</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">LimitRange</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">default-limits</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">limits</span>:
+  - <span class="y-key">type</span>: <span class="y-str">Container</span>
+    <span class="y-key">default</span>:                      <span class="y-cmt"># default limits</span>
+      <span class="y-key">cpu</span>:    <span class="y-str">500m</span>
+      <span class="y-key">memory</span>: <span class="y-str">256Mi</span>
+    <span class="y-key">defaultRequest</span>:               <span class="y-cmt"># default requests</span>
+      <span class="y-key">cpu</span>:    <span class="y-str">100m</span>
+      <span class="y-key">memory</span>: <span class="y-str">128Mi</span>
+    <span class="y-key">max</span>:                          <span class="y-cmt"># maximum cho một container</span>
+      <span class="y-key">cpu</span>:    <span class="y-str">4</span>
+      <span class="y-key">memory</span>: <span class="y-str">4Gi</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-2">
+  <div class="cb-icon">⚙️</div>
+  <div><div class="cb-badge">CONFIG &amp; STORAGE</div>
+  <div class="cb-title">ConfigMap, Secret &amp; Persistent Volumes</div>
+  <div class="cb-sub">Quản lý cấu hình và dữ liệu bền vững</div></div>
+</div>
+
+<!-- S5 CONFIGMAP & SECRET -->
+<div class="section" id="s5">
+  <div class="sec-head"><span class="sec-tag st-2">CONFIG</span>
+    <div><h2 class="sec-title">ConfigMap &amp; Secret — Quản lý cấu hình</h2>
+    <p class="sec-sub">Tách config khỏi code, quản lý secrets an toàn</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">ConfigMap — 3 cách mount</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">configmap.yaml + 3 cách dùng</span><span class="cb-tag ct-2">ConfigMap</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Tạo ConfigMap ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">ConfigMap</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-config</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">data</span>:
+  <span class="y-cmt"># Key-value pairs</span>
+  <span class="y-key">APP_ENV</span>:                <span class="y-str">production</span>
+  <span class="y-key">LOG_LEVEL</span>:              <span class="y-str">INFO</span>
+  <span class="y-key">KAFKA_BOOTSTRAP_SERVERS</span>:<span class="y-str">kafka:9092</span>
+  <span class="y-cmt"># File content</span>
+  <span class="y-key">application.yml</span>: |
+    <span class="y-key">spring</span>:
+      <span class="y-key">datasource</span>:
+        <span class="y-key">url</span>: <span class="y-str">jdbc:postgresql://postgres:5432/shopdb</span>
+      <span class="y-key">kafka</span>:
+        <span class="y-key">bootstrap-servers</span>: <span class="y-str">kafka:9092</span>
+    <span class="y-key">management</span>:
+      <span class="y-key">endpoints</span>:
+        <span class="y-key">web</span>:
+          <span class="y-key">exposure</span>:
+            <span class="y-key">include</span>: <span class="y-str">"health,info,metrics,prometheus"</span>
+
+<span class="y-cmt"># ── Cách 1: envFrom (load tất cả keys thành env vars) ──</span>
+<span class="y-key">envFrom</span>:
+- <span class="y-key">configMapRef</span>:
+    <span class="y-key">name</span>: <span class="y-str">order-service-config</span>
+
+<span class="y-cmt"># ── Cách 2: env.valueFrom (lấy từng key) ──</span>
+<span class="y-key">env</span>:
+- <span class="y-key">name</span>:  <span class="y-str">LOG_LEVEL</span>
+  <span class="y-key">valueFrom</span>:
+    <span class="y-key">configMapKeyRef</span>:
+      <span class="y-key">name</span>: <span class="y-str">order-service-config</span>
+      <span class="y-key">key</span>:  <span class="y-str">LOG_LEVEL</span>
+
+<span class="y-cmt"># ── Cách 3: volumeMount (mount as files) ──</span>
+<span class="y-key">volumeMounts</span>:
+- <span class="y-key">name</span>:      <span class="y-str">config-vol</span>
+  <span class="y-key">mountPath</span>: <span class="y-str">/app/config</span>
+  <span class="y-key">readOnly</span>:  <span class="y-bool">true</span>
+<span class="y-key">volumes</span>:
+- <span class="y-key">name</span>: <span class="y-str">config-vol</span>
+  <span class="y-key">configMap</span>:
+    <span class="y-key">name</span>: <span class="y-str">order-service-config</span>
+    <span class="y-key">items</span>:                          <span class="y-cmt"># chỉ mount một số keys</span>
+    - <span class="y-key">key</span>:  <span class="y-str">application.yml</span>
+      <span class="y-key">path</span>: <span class="y-str">application.yml</span>         <span class="y-cmt"># → /app/config/application.yml</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Secret — Mã hóa và mount an toàn</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">secret.yaml — tạo và mount secrets</span><span class="cb-tag ct-2">Secret</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Tạo Secret (values phải base64 encode) ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Secret</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-secrets</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">type</span>: <span class="y-str">Opaque</span>
+<span class="y-key">data</span>:
+  <span class="y-cmt"># echo -n "secret_password" | base64</span>
+  <span class="y-key">db-password</span>:    <span class="y-str">c2VjcmV0X3Bhc3N3b3Jk</span>
+  <span class="y-key">redis-password</span>: <span class="y-str">cmVkaXNfc2VjcmV0</span>
+<span class="y-key">stringData</span>:                         <span class="y-cmt"># hoặc dùng stringData (K8s tự encode)</span>
+  <span class="y-key">jwt-secret</span>: <span class="y-str">my-super-secret-jwt-key</span>
+
+<span class="y-cmt"># ── Tạo Secret từ kubectl (cách an toàn hơn) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> create secret generic order-service-secrets \
+    <span class="tc-flag">--from-literal</span>=db-password=secret \
+    <span class="tc-flag">--from-literal</span>=redis-password=redis_pass \
+    <span class="tc-flag">--from-file</span>=tls.crt=./certs/tls.crt \
+    <span class="tc-flag">-n</span> production
+
+<span class="y-cmt"># ── TLS Secret ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> create secret tls my-tls-secret \
+    <span class="tc-flag">--cert</span>=tls.crt <span class="tc-flag">--key</span>=tls.key <span class="tc-flag">-n</span> production
+
+<span class="y-cmt"># ── ImagePullSecret (private registry) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> create secret docker-registry registry-credentials \
+    <span class="tc-flag">--docker-server</span>=registry.company.com \
+    <span class="tc-flag">--docker-username</span>=robot-ci \
+    <span class="tc-flag">--docker-password</span>=<span class="tc-var">$TOKEN</span> \
+    <span class="tc-flag">-n</span> production</pre></div>
+    </div>
+    <div class="info i-warn">
+      <span class="info-ico">⚠️</span>
+      <div><strong style="color:var(--text)">Secret không thực sự "secret" theo mặc định!</strong> K8s Secret chỉ base64 encode, không encrypt. Cần bật <strong>Encryption at Rest</strong> cho etcd, hoặc dùng <strong>Sealed Secrets</strong>, <strong>HashiCorp Vault</strong>, <strong>AWS Secrets Manager</strong> cho production thực sự.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 VOLUMES PVC -->
+<div class="section" id="s6">
+  <div class="sec-head"><span class="sec-tag st-2">STORAGE</span>
+    <div><h2 class="sec-title">Volumes, PV &amp; PVC — Persistent Storage</h2>
+    <p class="sec-sub">PersistentVolume, PersistentVolumeClaim, StorageClass</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">StorageClass → PVC → Pod</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">storageclass.yaml + pvc.yaml + pod mount</span><span class="cb-tag ct-2">Storage</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── StorageClass (cloud provider cấp storage) ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">storage.k8s.io/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">StorageClass</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">fast-ssd</span>
+<span class="y-key">provisioner</span>: <span class="y-str">ebs.csi.aws.com</span>        <span class="y-cmt"># AWS EBS</span>
+<span class="y-key">parameters</span>:
+  <span class="y-key">type</span>:      <span class="y-str">gp3</span>
+  <span class="y-key">encrypted</span>: <span class="y-str">"true"</span>
+<span class="y-key">reclaimPolicy</span>:    <span class="y-str">Retain</span>             <span class="y-cmt"># Retain | Delete | Recycle</span>
+<span class="y-key">volumeBindingMode</span>: <span class="y-str">WaitForFirstConsumer</span>
+<span class="y-key">allowVolumeExpansion</span>: <span class="y-bool">true</span>
+
+---
+<span class="y-cmt"># ── PersistentVolumeClaim — yêu cầu storage ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">PersistentVolumeClaim</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">postgres-data</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">accessModes</span>:
+  - <span class="y-str">ReadWriteOnce</span>                    <span class="y-cmt"># RWO | ROX | RWX | RWOP</span>
+  <span class="y-key">storageClassName</span>: <span class="y-str">fast-ssd</span>
+  <span class="y-key">resources</span>:
+    <span class="y-key">requests</span>:
+      <span class="y-key">storage</span>: <span class="y-str">50Gi</span>
+
+---
+<span class="y-cmt"># ── Mount PVC vào Pod ──</span>
+<span class="y-key">containers</span>:
+- <span class="y-key">name</span>: <span class="y-str">postgres</span>
+  <span class="y-key">volumeMounts</span>:
+  - <span class="y-key">name</span>:      <span class="y-str">data</span>
+    <span class="y-key">mountPath</span>: <span class="y-str">/var/lib/postgresql/data</span>
+<span class="y-key">volumes</span>:
+- <span class="y-key">name</span>: <span class="y-str">data</span>
+  <span class="y-key">persistentVolumeClaim</span>:
+    <span class="y-key">claimName</span>: <span class="y-str">postgres-data</span>
+
+<span class="y-cmt"># ── Access Modes ──</span>
+<span class="y-cmt"># ReadWriteOnce (RWO)  — 1 node đọc/ghi (block storage như EBS)</span>
+<span class="y-cmt"># ReadOnlyMany  (ROX)  — nhiều nodes đọc</span>
+<span class="y-cmt"># ReadWriteMany (RWX)  — nhiều nodes đọc/ghi (NFS, EFS, CephFS)</span>
+<span class="y-cmt"># ReadWriteOncePod (RWOP) — chỉ 1 pod đọc/ghi (K8s 1.22+)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-3">
+  <div class="cb-icon">🎯</div>
+  <div><div class="cb-badge">WORKLOAD TYPES</div>
+  <div class="cb-title">StatefulSet · DaemonSet · Job · Ingress</div>
+  <div class="cb-sub">Các loại workload cho từng use case khác nhau</div></div>
+</div>
+
+<!-- S7 STATEFULSET -->
+<div class="section" id="s7">
+  <div class="sec-head"><span class="sec-tag st-3">STATEFULSET</span>
+    <div><h2 class="sec-title">StatefulSet — Stateful Apps (Databases)</h2>
+    <p class="sec-sub">Stable network identity, ordered deployment, persistent storage per pod</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">PostgreSQL với StatefulSet</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">statefulset.yaml — PostgreSQL production setup</span><span class="cb-tag ct-3">StatefulSet</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">apps/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">StatefulSet</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">postgres</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">serviceName</span>: <span class="y-str">postgres</span>            <span class="y-cmt"># headless service tên</span>
+  <span class="y-key">replicas</span>:    <span class="y-num">3</span>                    <span class="y-cmt"># primary + 2 replicas</span>
+  <span class="y-key">selector</span>:
+    <span class="y-key">matchLabels</span>:
+      <span class="y-label">app</span>: <span class="y-str">postgres</span>
+  <span class="y-key">updateStrategy</span>:
+    <span class="y-key">type</span>: <span class="y-str">RollingUpdate</span>
+    <span class="y-key">rollingUpdate</span>:
+      <span class="y-key">partition</span>: <span class="y-num">0</span>                 <span class="y-cmt"># chỉ update pods có ordinal >= 0</span>
+  <span class="y-key">podManagementPolicy</span>: <span class="y-str">OrderedReady</span>  <span class="y-cmt"># Parallel hoặc OrderedReady</span>
+  <span class="y-key">template</span>:
+    <span class="y-key">metadata</span>:
+      <span class="y-key">labels</span>:
+        <span class="y-label">app</span>: <span class="y-str">postgres</span>
+    <span class="y-key">spec</span>:
+      <span class="y-key">initContainers</span>:               <span class="y-cmt"># chạy trước main container</span>
+      - <span class="y-key">name</span>:    <span class="y-str">init-permission</span>
+        <span class="y-key">image</span>:   <span class="y-str">busybox:1.36</span>
+        <span class="y-key">command</span>: [<span class="y-str">"sh"</span>, <span class="y-str">"-c"</span>, <span class="y-str">"chown -R 999:999 /var/lib/postgresql/data"</span>]
+        <span class="y-key">volumeMounts</span>:
+        - <span class="y-key">name</span>: <span class="y-str">data</span>
+          <span class="y-key">mountPath</span>: <span class="y-str">/var/lib/postgresql/data</span>
+      <span class="y-key">containers</span>:
+      - <span class="y-key">name</span>:  <span class="y-str">postgres</span>
+        <span class="y-key">image</span>: <span class="y-str">postgres:16-alpine</span>
+        <span class="y-key">env</span>:
+        - <span class="y-key">name</span>:  <span class="y-str">POSTGRES_DB</span>
+          <span class="y-key">value</span>: <span class="y-str">shopdb</span>
+        - <span class="y-key">name</span>:  <span class="y-str">POSTGRES_USER</span>
+          <span class="y-key">value</span>: <span class="y-str">admin</span>
+        - <span class="y-key">name</span>: <span class="y-str">POSTGRES_PASSWORD</span>
+          <span class="y-key">valueFrom</span>:
+            <span class="y-key">secretKeyRef</span>:
+              <span class="y-key">name</span>: <span class="y-str">postgres-secrets</span>
+              <span class="y-key">key</span>:  <span class="y-str">password</span>
+        <span class="y-cmt"># Biết pod number thông qua downward API</span>
+        - <span class="y-key">name</span>: <span class="y-str">POD_NAME</span>
+          <span class="y-key">valueFrom</span>:
+            <span class="y-key">fieldRef</span>:
+              <span class="y-key">fieldPath</span>: <span class="y-str">metadata.name</span>
+        <span class="y-key">ports</span>:
+        - <span class="y-key">containerPort</span>: <span class="y-num">5432</span>
+        <span class="y-key">volumeMounts</span>:
+        - <span class="y-key">name</span>:      <span class="y-str">data</span>
+          <span class="y-key">mountPath</span>: <span class="y-str">/var/lib/postgresql/data</span>
+        <span class="y-key">resources</span>:
+          <span class="y-key">requests</span>: {<span class="y-key">memory</span>: <span class="y-str">1Gi</span>, <span class="y-key">cpu</span>: <span class="y-str">500m</span>}
+          <span class="y-key">limits</span>:   {<span class="y-key">memory</span>: <span class="y-str">2Gi</span>, <span class="y-key">cpu</span>: <span class="y-str">2000m</span>}
+  <span class="y-key">volumeClaimTemplates</span>:           <span class="y-cmt"># mỗi pod tạo PVC riêng!</span>
+  - <span class="y-key">metadata</span>:
+      <span class="y-key">name</span>: <span class="y-str">data</span>
+    <span class="y-key">spec</span>:
+      <span class="y-key">accessModes</span>:      [<span class="y-str">ReadWriteOnce</span>]
+      <span class="y-key">storageClassName</span>: <span class="y-str">fast-ssd</span>
+      <span class="y-key">resources</span>:
+        <span class="y-key">requests</span>:
+          <span class="y-key">storage</span>: <span class="y-str">50Gi</span>
+<span class="y-cmt"># Pods được tạo: postgres-0, postgres-1, postgres-2</span>
+<span class="y-cmt"># DNS:         postgres-0.postgres.production.svc.cluster.local</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S8 DAEMONSET JOB -->
+<div class="section" id="s8">
+  <div class="sec-head"><span class="sec-tag st-3">DAEMONSET &amp; JOB</span>
+    <div><h2 class="sec-title">DaemonSet, Job &amp; CronJob</h2>
+    <p class="sec-sub">DaemonSet chạy trên mọi node · Job chạy một lần · CronJob lên lịch</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">DaemonSet — log agent và monitoring</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">daemonset.yaml + cronjob.yaml</span><span class="cb-tag ct-3">Workloads</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── DaemonSet — chạy 1 pod trên EVERY node ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">apps/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">DaemonSet</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">fluentd</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">selector</span>:
+    <span class="y-key">matchLabels</span>:
+      <span class="y-label">app</span>: <span class="y-str">fluentd</span>
+  <span class="y-key">template</span>:
+    <span class="y-key">metadata</span>:
+      <span class="y-key">labels</span>:
+        <span class="y-label">app</span>: <span class="y-str">fluentd</span>
+    <span class="y-key">spec</span>:
+      <span class="y-key">tolerations</span>:                   <span class="y-cmt"># chạy cả trên control plane nodes</span>
+      - <span class="y-key">key</span>:      <span class="y-str">node-role.kubernetes.io/control-plane</span>
+        <span class="y-key">effect</span>:   <span class="y-str">NoSchedule</span>
+      <span class="y-key">containers</span>:
+      - <span class="y-key">name</span>:  <span class="y-str">fluentd</span>
+        <span class="y-key">image</span>: <span class="y-str">fluent/fluentd-kubernetes-daemonset:v1</span>
+        <span class="y-key">volumeMounts</span>:
+        - <span class="y-key">name</span>:      <span class="y-str">varlog</span>
+          <span class="y-key">mountPath</span>: <span class="y-str">/var/log</span>
+      <span class="y-key">volumes</span>:
+      - <span class="y-key">name</span>: <span class="y-str">varlog</span>
+        <span class="y-key">hostPath</span>:
+          <span class="y-key">path</span>: <span class="y-str">/var/log</span>
+
+---
+<span class="y-cmt"># ── CronJob — backup database hàng ngày ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">batch/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">CronJob</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">postgres-backup</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">schedule</span>:          <span class="y-str">"0 2 * * *"</span>       <span class="y-cmt"># 2AM hàng ngày</span>
+  <span class="y-key">timeZone</span>:          <span class="y-str">"Asia/Ho_Chi_Minh"</span>
+  <span class="y-key">successfulJobsHistoryLimit</span>: <span class="y-num">3</span>
+  <span class="y-key">failedJobsHistoryLimit</span>:     <span class="y-num">3</span>
+  <span class="y-key">concurrencyPolicy</span>:  <span class="y-str">Forbid</span>            <span class="y-cmt"># Forbid | Allow | Replace</span>
+  <span class="y-key">jobTemplate</span>:
+    <span class="y-key">spec</span>:
+      <span class="y-key">backoffLimit</span>:    <span class="y-num">3</span>               <span class="y-cmt"># retry 3 lần nếu fail</span>
+      <span class="y-key">activeDeadlineSeconds</span>: <span class="y-num">3600</span>   <span class="y-cmt"># timeout 1 giờ</span>
+      <span class="y-key">template</span>:
+        <span class="y-key">spec</span>:
+          <span class="y-key">restartPolicy</span>: <span class="y-str">OnFailure</span>  <span class="y-cmt"># Job phải là OnFailure hoặc Never</span>
+          <span class="y-key">containers</span>:
+          - <span class="y-key">name</span>:    <span class="y-str">backup</span>
+            <span class="y-key">image</span>:   <span class="y-str">postgres:16-alpine</span>
+            <span class="y-key">command</span>: [<span class="y-str">"sh"</span>, <span class="y-str">"-c"</span>]
+            <span class="y-key">args</span>:
+            - |
+              pg_dump -h postgres -U admin shopdb | gzip | \
+              aws s3 cp - s3://company-backups/postgres/$(date +%Y%m%d).sql.gz</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S9 INGRESS -->
+<div class="section" id="s9">
+  <div class="sec-head"><span class="sec-tag st-3">INGRESS</span>
+    <div><h2 class="sec-title">Ingress &amp; IngressClass — HTTP Routing</h2>
+    <p class="sec-sub">Route traffic từ ngoài vào đúng service, TLS termination, path routing</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Ingress với TLS và multiple services</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">ingress.yaml — NGINX Ingress với TLS + routing</span><span class="cb-tag ct-3">Ingress</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">networking.k8s.io/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Ingress</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">api-ingress</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+  <span class="y-key">annotations</span>:
+    <span class="y-ann">kubernetes.io/ingress.class</span>:               <span class="y-str">nginx</span>
+    <span class="y-ann">nginx.ingress.kubernetes.io/ssl-redirect</span>:  <span class="y-str">"true"</span>
+    <span class="y-ann">nginx.ingress.kubernetes.io/proxy-body-size</span>:<span class="y-str">50m</span>
+    <span class="y-ann">nginx.ingress.kubernetes.io/rate-limit</span>:    <span class="y-str">"100"</span>
+    <span class="y-ann">cert-manager.io/cluster-issuer</span>:           <span class="y-str">letsencrypt-prod</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">ingressClassName</span>: <span class="y-str">nginx</span>
+  <span class="y-key">tls</span>:
+  - <span class="y-key">hosts</span>:
+    - <span class="y-str">api.company.com</span>
+    <span class="y-key">secretName</span>: <span class="y-str">api-tls-secret</span>          <span class="y-cmt"># cert-manager tự tạo</span>
+  <span class="y-key">rules</span>:
+  - <span class="y-key">host</span>: <span class="y-str">api.company.com</span>
+    <span class="y-key">http</span>:
+      <span class="y-key">paths</span>:
+      - <span class="y-key">path</span>:     <span class="y-str">/api/orders</span>
+        <span class="y-key">pathType</span>: <span class="y-str">Prefix</span>
+        <span class="y-key">backend</span>:
+          <span class="y-key">service</span>:
+            <span class="y-key">name</span>: <span class="y-str">order-service</span>
+            <span class="y-key">port</span>: {<span class="y-key">number</span>: <span class="y-num">80</span>}
+      - <span class="y-key">path</span>:     <span class="y-str">/api/payments</span>
+        <span class="y-key">pathType</span>: <span class="y-str">Prefix</span>
+        <span class="y-key">backend</span>:
+          <span class="y-key">service</span>:
+            <span class="y-key">name</span>: <span class="y-str">payment-service</span>
+            <span class="y-key">port</span>: {<span class="y-key">number</span>: <span class="y-num">80</span>}
+      - <span class="y-key">path</span>:     <span class="y-str">/</span>
+        <span class="y-key">pathType</span>: <span class="y-str">Prefix</span>
+        <span class="y-key">backend</span>:
+          <span class="y-key">service</span>:
+            <span class="y-key">name</span>: <span class="y-str">api-gateway</span>
+            <span class="y-key">port</span>: {<span class="y-key">number</span>: <span class="y-num">80</span>}
+
+<span class="y-cmt"># Flow: Internet → LoadBalancer → NGINX Ingress Controller → Service → Pods</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-4">
+  <div class="cb-icon">📈</div>
+  <div><div class="cb-badge">SCALING &amp; RELIABILITY</div>
+  <div class="cb-title">HPA · Resources · Probes · PDB</div>
+  <div class="cb-sub">Tự động scale, đảm bảo reliability, zero-downtime</div></div>
+</div>
+
+<!-- S10 HPA VPA -->
+<div class="section" id="s10">
+  <div class="sec-head"><span class="sec-tag st-4">AUTOSCALING</span>
+    <div><h2 class="sec-title">HPA &amp; VPA — Tự động Scale</h2>
+    <p class="sec-sub">Horizontal Pod Autoscaler scale replicas · Vertical scale resources</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">HPA với CPU, Memory và custom metrics</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">hpa.yaml — CPU + Memory + custom metrics</span><span class="cb-tag ct-4">HPA</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">autoscaling/v2</span>
+<span class="y-api">kind</span>: <span class="y-kind">HorizontalPodAutoscaler</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-hpa</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">scaleTargetRef</span>:
+    <span class="y-key">apiVersion</span>: <span class="y-str">apps/v1</span>
+    <span class="y-key">kind</span>:       <span class="y-str">Deployment</span>
+    <span class="y-key">name</span>:       <span class="y-str">order-service</span>
+  <span class="y-key">minReplicas</span>: <span class="y-num">3</span>
+  <span class="y-key">maxReplicas</span>: <span class="y-num">20</span>
+  <span class="y-key">metrics</span>:
+  - <span class="y-key">type</span>: <span class="y-str">Resource</span>
+    <span class="y-key">resource</span>:
+      <span class="y-key">name</span>: <span class="y-str">cpu</span>
+      <span class="y-key">target</span>:
+        <span class="y-key">type</span>:               <span class="y-str">Utilization</span>
+        <span class="y-key">averageUtilization</span>: <span class="y-num">70</span>         <span class="y-cmt"># scale khi CPU > 70%</span>
+  - <span class="y-key">type</span>: <span class="y-str">Resource</span>
+    <span class="y-key">resource</span>:
+      <span class="y-key">name</span>: <span class="y-str">memory</span>
+      <span class="y-key">target</span>:
+        <span class="y-key">type</span>:          <span class="y-str">AverageValue</span>
+        <span class="y-key">averageValue</span>:  <span class="y-str">400Mi</span>
+  - <span class="y-key">type</span>: <span class="y-str">Pods</span>                          <span class="y-cmt"># custom Prometheus metric</span>
+    <span class="y-key">pods</span>:
+      <span class="y-key">metric</span>:
+        <span class="y-key">name</span>: <span class="y-str">http_requests_per_second</span>
+      <span class="y-key">target</span>:
+        <span class="y-key">type</span>:         <span class="y-str">AverageValue</span>
+        <span class="y-key">averageValue</span>: <span class="y-str">1000</span>
+  <span class="y-key">behavior</span>:
+    <span class="y-key">scaleUp</span>:
+      <span class="y-key">stabilizationWindowSeconds</span>: <span class="y-num">60</span>    <span class="y-cmt"># chờ 60s trước khi scale up</span>
+      <span class="y-key">policies</span>:
+      - <span class="y-key">type</span>:          <span class="y-str">Pods</span>
+        <span class="y-key">value</span>:         <span class="y-num">4</span>
+        <span class="y-key">periodSeconds</span>: <span class="y-num">60</span>              <span class="y-cmt"># thêm tối đa 4 pods mỗi phút</span>
+    <span class="y-key">scaleDown</span>:
+      <span class="y-key">stabilizationWindowSeconds</span>: <span class="y-num">300</span>   <span class="y-cmt"># chờ 5 phút trước khi scale down</span>
+      <span class="y-key">policies</span>:
+      - <span class="y-key">type</span>:          <span class="y-str">Percent</span>
+        <span class="y-key">value</span>:         <span class="y-num">10</span>
+        <span class="y-key">periodSeconds</span>: <span class="y-num">60</span>              <span class="y-cmt"># giảm tối đa 10% mỗi phút</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S11 RESOURCES -->
+<div class="section" id="s11">
+  <div class="sec-head"><span class="sec-tag st-4">RESOURCES</span>
+    <div><h2 class="sec-title">Resource Requests &amp; Limits — Tối ưu tài nguyên</h2>
+    <p class="sec-sub">QoS Classes, CPU throttling, OOM killer — hiểu sâu về resource management</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">QoS Classes và ảnh hưởng khi node thiếu tài nguyên</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Resource QoS — Guaranteed, Burstable, BestEffort</span><span class="cb-tag ct-4">Resources</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Guaranteed QoS (requests == limits) ──</span>
+<span class="y-cmt"># → Ưu tiên cao nhất, không bị evict trừ khi hết tài nguyên tuyệt đối</span>
+<span class="y-key">resources</span>:
+  <span class="y-key">requests</span>: {<span class="y-key">memory</span>: <span class="y-str">"512Mi"</span>, <span class="y-key">cpu</span>: <span class="y-str">"500m"</span>}
+  <span class="y-key">limits</span>:   {<span class="y-key">memory</span>: <span class="y-str">"512Mi"</span>, <span class="y-key">cpu</span>: <span class="y-str">"500m"</span>}
+
+<span class="y-cmt"># ── Burstable QoS (requests < limits hoặc chỉ có 1) ──</span>
+<span class="y-cmt"># → Bị evict sau BestEffort, có thể burst lên limits khi cần</span>
+<span class="y-key">resources</span>:
+  <span class="y-key">requests</span>: {<span class="y-key">memory</span>: <span class="y-str">"256Mi"</span>, <span class="y-key">cpu</span>: <span class="y-str">"250m"</span>}
+  <span class="y-key">limits</span>:   {<span class="y-key">memory</span>: <span class="y-str">"1Gi"</span>,   <span class="y-key">cpu</span>: <span class="y-str">"2000m"</span>}
+
+<span class="y-cmt"># ── BestEffort QoS (không có requests/limits) ──</span>
+<span class="y-cmt"># → Bị evict đầu tiên. KHÔNG dùng cho production!</span>
+
+<span class="y-cmt"># ── CPU units: 1 = 1 vCPU/core ──</span>
+<span class="y-cmt"># 1000m = 1 CPU  |  500m = 0.5 CPU  |  100m = 0.1 CPU</span>
+
+<span class="y-cmt"># ── Memory units ──</span>
+<span class="y-cmt"># 1Gi = 1 GiB (binary) = 1073741824 bytes</span>
+<span class="y-cmt"># 1G  = 1 GB  (decimal) = 1000000000 bytes</span>
+<span class="y-cmt"># 512Mi = 512 MiB</span>
+
+<span class="y-cmt"># ── Thực tế cho Spring Boot ──</span>
+<span class="y-key">resources</span>:
+  <span class="y-key">requests</span>:
+    <span class="y-key">memory</span>: <span class="y-str">"512Mi"</span>     <span class="y-cmt"># JVM heap ~256-512MB</span>
+    <span class="y-key">cpu</span>:    <span class="y-str">"250m"</span>      <span class="y-cmt"># idle JVM dùng ~100-200m</span>
+  <span class="y-key">limits</span>:
+    <span class="y-key">memory</span>: <span class="y-str">"1Gi"</span>       <span class="y-cmt"># allow burst cho GC</span>
+    <span class="y-key">cpu</span>:    <span class="y-str">"1000m"</span>     <span class="y-cmt"># peak load</span>
+
+<span class="y-cmt"># ── JVM flags quan trọng khi chạy trong container ──</span>
+<span class="y-key">env</span>:
+- <span class="y-key">name</span>: <span class="y-str">JAVA_OPTS</span>
+  <span class="y-key">value</span>: <span class="y-str">"-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"</span>
+<span class="y-cmt"># UseContainerSupport: JVM đọc limits từ cgroups thay vì host RAM</span>
+<span class="y-cmt"># MaxRAMPercentage=75: dùng 75% của memory limit</span>
+<span class="y-cmt"># ExitOnOutOfMemoryError: exit để K8s restart, không treo zombie</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S12 PROBES -->
+<div class="section" id="s12">
+  <div class="sec-head"><span class="sec-tag st-4">PROBES</span>
+    <div><h2 class="sec-title">Probes — Health Checks</h2>
+    <p class="sec-sub">liveness, readiness, startup probes — tránh mọi downtime</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">3 loại probe và khi nào dùng</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">probes — liveness, readiness, startup</span><span class="cb-tag ct-4">Probes</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># livenessProbe:  App có alive không? → restart container nếu fail</span>
+<span class="y-cmt"># readinessProbe: App có sẵn sàng nhận traffic không? → remove từ LB nếu fail</span>
+<span class="y-cmt"># startupProbe:   App đã khởi động xong chưa? → disable liveness trong startup</span>
+
+<span class="y-key">containers</span>:
+- <span class="y-key">name</span>: <span class="y-str">order-service</span>
+
+  <span class="y-cmt"># startupProbe — cho app khởi động chậm (Spring Boot ~60s)</span>
+  <span class="y-key">startupProbe</span>:
+    <span class="y-key">httpGet</span>:
+      <span class="y-key">path</span>: <span class="y-str">/actuator/health</span>
+      <span class="y-key">port</span>: <span class="y-num">8080</span>
+    <span class="y-key">failureThreshold</span>:    <span class="y-num">30</span>         <span class="y-cmt"># 30 * 10s = 5 phút max startup time</span>
+    <span class="y-key">periodSeconds</span>:       <span class="y-num">10</span>
+
+  <span class="y-cmt"># livenessProbe — app có còn healthy không?</span>
+  <span class="y-key">livenessProbe</span>:
+    <span class="y-key">httpGet</span>:
+      <span class="y-key">path</span>: <span class="y-str">/actuator/health/liveness</span>
+      <span class="y-key">port</span>: <span class="y-num">8080</span>
+    <span class="y-key">initialDelaySeconds</span>: <span class="y-num">0</span>           <span class="y-cmt"># 0 vì startupProbe đã handle startup</span>
+    <span class="y-key">periodSeconds</span>:       <span class="y-num">10</span>
+    <span class="y-key">timeoutSeconds</span>:      <span class="y-num">5</span>
+    <span class="y-key">failureThreshold</span>:    <span class="y-num">3</span>           <span class="y-cmt"># fail 3 lần → restart</span>
+    <span class="y-key">successThreshold</span>:    <span class="y-num">1</span>
+
+  <span class="y-cmt"># readinessProbe — app có ready nhận traffic không?</span>
+  <span class="y-key">readinessProbe</span>:
+    <span class="y-key">httpGet</span>:
+      <span class="y-key">path</span>: <span class="y-str">/actuator/health/readiness</span>
+      <span class="y-key">port</span>: <span class="y-num">8080</span>
+    <span class="y-key">periodSeconds</span>:    <span class="y-num">5</span>
+    <span class="y-key">failureThreshold</span>: <span class="y-num">3</span>             <span class="y-cmt"># fail 3 lần → remove từ Service endpoints</span>
+    <span class="y-key">successThreshold</span>: <span class="y-num">1</span>
+
+<span class="y-cmt"># ── Spring Boot 3.x Actuator config ──</span>
+<span class="y-cmt"># application.yml:</span>
+<span class="y-cmt"># management.health.livenessState.enabled: true</span>
+<span class="y-cmt"># management.health.readinessState.enabled: true</span>
+<span class="y-cmt"># Readiness fail khi: DB unavailable, Kafka unavailable → không nhận request</span>
+<span class="y-cmt"># Liveness fail khi: deadlock, memory leak → restart</span>
+
+<span class="y-cmt"># ── Probe types ──</span>
+<span class="y-cmt"># httpGet:  HTTP GET, success nếu 200-399</span>
+<span class="y-cmt"># exec:     chạy command, success nếu exit 0</span>
+<span class="y-cmt"># tcpSocket:TCP connect, success nếu connect được</span>
+<span class="y-cmt"># grpc:     gRPC health check protocol</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S13 PDB -->
+<div class="section" id="s13">
+  <div class="sec-head"><span class="sec-tag st-4">PDB</span>
+    <div><h2 class="sec-title">Pod Disruption Budget — Đảm bảo Availability</h2>
+    <p class="sec-sub">Ngăn K8s drain quá nhiều pods cùng lúc trong maintenance</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">PDB đảm bảo minimum availability</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">poddisruptionbudget.yaml</span><span class="cb-tag ct-4">PDB</span></div>
+      <div class="cb-body"><pre><span class="y-api">apiVersion</span>: <span class="y-str">policy/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">PodDisruptionBudget</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-pdb</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">minAvailable</span>: <span class="y-num">2</span>                    <span class="y-cmt"># luôn có ít nhất 2 pods available</span>
+  <span class="y-cmt"># hoặc: maxUnavailable: 1          # tối đa 1 pod unavailable</span>
+  <span class="y-cmt"># hoặc: minAvailable: "80%"         # tối thiểu 80% pods</span>
+  <span class="y-key">selector</span>:
+    <span class="y-key">matchLabels</span>:
+      <span class="y-label">app</span>: <span class="y-str">order-service</span>
+
+<span class="y-cmt"># Khi kubectl drain node hoặc cluster upgrade:</span>
+<span class="y-cmt"># → K8s sẽ không drain node nếu PDB bị vi phạm</span>
+<span class="y-cmt"># → Đảm bảo always có ít nhất 2 replicas serving traffic</span>
+
+<span class="tc-cmt"># Xem PDB status</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get pdb <span class="tc-flag">-n</span> production
+<span class="tc-out">NAME                 MIN AVAILABLE  MAX UNAVAILABLE  ALLOWED DISRUPTIONS  AGE
+order-service-pdb    2              N/A              1                    5d</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+<div class="cat-banner cb-5">
+  <div class="cb-icon">🔐</div>
+  <div><div class="cb-badge">ADVANCED &amp; PRODUCTION</div>
+  <div class="cb-title">RBAC · Helm · kubectl · Deploy Spring Boot</div>
+  <div class="cb-sub">Bảo mật, package manager, lệnh kubectl thiết yếu, ví dụ thực tế</div></div>
+</div>
+
+<!-- S14 RBAC -->
+<div class="section" id="s14">
+  <div class="sec-head"><span class="sec-tag st-5">RBAC</span>
+    <div><h2 class="sec-title">RBAC &amp; ServiceAccount — Bảo mật K8s</h2>
+    <p class="sec-sub">Role, ClusterRole, RoleBinding, ServiceAccount — phân quyền chi tiết</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">RBAC cho CI/CD và microservices</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">rbac.yaml — ServiceAccount + Role + RoleBinding</span><span class="cb-tag ct-5">RBAC</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── ServiceAccount cho App ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">ServiceAccount</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-sa</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+  <span class="y-key">annotations</span>:
+    <span class="y-ann">eks.amazonaws.com/role-arn</span>: <span class="y-str">arn:aws:iam::123456:role/order-service-role</span>
+<span class="y-key">automountServiceAccountToken</span>: <span class="y-bool">false</span>  <span class="y-cmt"># tắt auto-mount nếu không cần K8s API</span>
+
+---
+<span class="y-cmt"># ── Role — quyền trong namespace ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">rbac.authorization.k8s.io/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Role</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-role</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">rules</span>:
+- <span class="y-key">apiGroups</span>: [<span class="y-str">""</span>]                    <span class="y-cmt"># "" = core API group</span>
+  <span class="y-key">resources</span>: [<span class="y-str">configmaps</span>, <span class="y-str">secrets</span>]
+  <span class="y-key">verbs</span>:     [<span class="y-str">get</span>, <span class="y-str">list</span>, <span class="y-str">watch</span>]
+- <span class="y-key">apiGroups</span>: [<span class="y-str">""</span>]
+  <span class="y-key">resources</span>: [<span class="y-str">pods</span>]
+  <span class="y-key">verbs</span>:     [<span class="y-str">get</span>, <span class="y-str">list</span>]
+
+---
+<span class="y-cmt"># ── RoleBinding — gán Role cho ServiceAccount ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">rbac.authorization.k8s.io/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">RoleBinding</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-rolebinding</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">subjects</span>:
+- <span class="y-key">kind</span>:      <span class="y-str">ServiceAccount</span>
+  <span class="y-key">name</span>:      <span class="y-str">order-service-sa</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">roleRef</span>:
+  <span class="y-key">kind</span>:     <span class="y-str">Role</span>
+  <span class="y-key">name</span>:     <span class="y-str">order-service-role</span>
+  <span class="y-key">apiGroup</span>: <span class="y-str">rbac.authorization.k8s.io</span>
+
+---
+<span class="y-cmt"># ── ClusterRole cho CI/CD (toàn cluster) ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">rbac.authorization.k8s.io/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">ClusterRole</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">ci-deploy-role</span>
+<span class="y-key">rules</span>:
+- <span class="y-key">apiGroups</span>: [<span class="y-str">apps</span>]
+  <span class="y-key">resources</span>: [<span class="y-str">deployments</span>, <span class="y-str">statefulsets</span>]
+  <span class="y-key">verbs</span>:     [<span class="y-str">get</span>, <span class="y-str">list</span>, <span class="y-str">create</span>, <span class="y-str">update</span>, <span class="y-str">patch</span>]
+- <span class="y-key">apiGroups</span>: [<span class="y-str">""</span>]
+  <span class="y-key">resources</span>: [<span class="y-str">services</span>, <span class="y-str">configmaps</span>, <span class="y-str">secrets</span>]
+  <span class="y-key">verbs</span>:     [<span class="y-str">get</span>, <span class="y-str">list</span>, <span class="y-str">create</span>, <span class="y-str">update</span>, <span class="y-str">patch</span>]</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S15 HELM -->
+<div class="section" id="s15">
+  <div class="sec-head"><span class="sec-tag st-5">HELM</span>
+    <div><h2 class="sec-title">Helm — Kubernetes Package Manager</h2>
+    <p class="sec-sub">Chart, values.yaml, templates — deploy và quản lý K8s apps như npm</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tạo và dùng Helm Chart</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Helm chart structure + values.yaml + commands</span><span class="cb-tag ct-5">Helm</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Tạo chart mới ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> create order-service
+<span class="y-cmt"># order-service/</span>
+<span class="y-cmt"># ├── Chart.yaml       # metadata</span>
+<span class="y-cmt"># ├── values.yaml      # default values</span>
+<span class="y-cmt"># ├── templates/       # K8s YAML templates</span>
+<span class="y-cmt"># │   ├── deployment.yaml</span>
+<span class="y-cmt"># │   ├── service.yaml</span>
+<span class="y-cmt"># │   ├── hpa.yaml</span>
+<span class="y-cmt"># │   └── _helpers.tpl # helper functions</span>
+<span class="y-cmt"># └── charts/          # dependencies</span>
+
+<span class="y-cmt"># ── values.yaml ──</span>
+<span class="y-key">image</span>:
+  <span class="y-key">repository</span>: <span class="y-str">registry.company.com/order-service</span>
+  <span class="y-key">tag</span>:        <span class="y-str">latest</span>
+  <span class="y-key">pullPolicy</span>: <span class="y-str">IfNotPresent</span>
+
+<span class="y-key">replicaCount</span>: <span class="y-num">3</span>
+
+<span class="y-key">service</span>:
+  <span class="y-key">type</span>: <span class="y-str">ClusterIP</span>
+  <span class="y-key">port</span>: <span class="y-num">80</span>
+
+<span class="y-key">resources</span>:
+  <span class="y-key">requests</span>: {<span class="y-key">cpu</span>: <span class="y-str">250m</span>, <span class="y-key">memory</span>: <span class="y-str">256Mi</span>}
+  <span class="y-key">limits</span>:   {<span class="y-key">cpu</span>: <span class="y-str">1000m</span>, <span class="y-key">memory</span>: <span class="y-str">512Mi</span>}
+
+<span class="y-key">autoscaling</span>:
+  <span class="y-key">enabled</span>:     <span class="y-bool">true</span>
+  <span class="y-key">minReplicas</span>: <span class="y-num">3</span>
+  <span class="y-key">maxReplicas</span>: <span class="y-num">20</span>
+  <span class="y-key">targetCPUUtilizationPercentage</span>: <span class="y-num">70</span>
+
+<span class="y-key">ingress</span>:
+  <span class="y-key">enabled</span>:     <span class="y-bool">true</span>
+  <span class="y-key">className</span>:   <span class="y-str">nginx</span>
+  <span class="y-key">host</span>:        <span class="y-str">api.company.com</span>
+
+<span class="y-cmt"># ── templates/deployment.yaml ──</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">apps/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Deployment</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">{{ include "order-service.fullname" . }}</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">replicas</span>: <span class="y-str">{{ .Values.replicaCount }}</span>
+  <span class="y-key">template</span>:
+    <span class="y-key">spec</span>:
+      <span class="y-key">containers</span>:
+      - <span class="y-key">image</span>: <span class="y-str">"{{ .Values.image.repository }}:{{ .Values.image.tag }}"</span>
+
+<span class="y-cmt"># ── Helm commands ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> install order-service ./order-service <span class="tc-flag">-n</span> production <span class="tc-flag">--create-namespace</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> upgrade order-service ./order-service <span class="tc-flag">-n</span> production \
+    <span class="tc-flag">--set</span> image.tag=v2.1.0 <span class="tc-flag">--set</span> replicaCount=5
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> upgrade <span class="tc-flag">--install</span> order-service ./order-service \  <span class="tc-cmt"># idempotent!</span>
+    <span class="tc-flag">-n</span> production \
+    <span class="tc-flag">-f</span> values-prod.yaml \
+    <span class="tc-flag">--set</span> image.tag=<span class="tc-var">$CI_COMMIT_SHORT_SHA</span> \
+    <span class="tc-flag">--wait</span> --timeout 5m <span class="tc-flag">--atomic</span>            <span class="tc-cmt"># rollback nếu fail</span>
+
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> rollback order-service 2 <span class="tc-flag">-n</span> production  <span class="tc-cmt"># về revision 2</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> history order-service <span class="tc-flag">-n</span> production
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> list <span class="tc-flag">-n</span> production
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> uninstall order-service <span class="tc-flag">-n</span> production
+
+<span class="tc-cmt"># Template debug</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> template order-service ./order-service <span class="tc-flag">-f</span> values-prod.yaml
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> lint ./order-service
+<span class="tc-prompt">$</span> <span class="tc-cmd">helm</span> upgrade order-service ./order-service <span class="tc-flag">--dry-run</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S16 KUBECTL -->
+<div class="section" id="s16">
+  <div class="sec-head"><span class="sec-tag st-5">KUBECTL</span>
+    <div><h2 class="sec-title">kubectl — Mọi lệnh cần biết</h2>
+    <p class="sec-sub">get, describe, logs, exec, port-forward, debug — kubectl như pro</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">kubectl commands thiết yếu hàng ngày</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">kubectl — comprehensive command reference</span><span class="cb-tag ct-5">kubectl</span></div>
+      <div class="cb-body"><pre><span class="y-cmt"># ── Context &amp; Namespace ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> config get-contexts
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> config use-context production-cluster
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> config set-context <span class="tc-flag">--current --namespace=production</span>
+<span class="tc-cmt"># kubens và kubectx tools — chuyển context/namespace nhanh hơn</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubens</span> production   <span class="tc-cmt"># đặt default namespace</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectx</span> prod-cluster
+
+<span class="y-cmt"># ── Get resources ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get all <span class="tc-flag">-n</span> production                 <span class="tc-cmt"># mọi resource</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get pods <span class="tc-flag">-n</span> production <span class="tc-flag">-o wide</span>        <span class="tc-cmt"># thêm NODE, IP</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get pods <span class="tc-flag">-l</span> app=order-service           <span class="tc-cmt"># filter by label</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get pods <span class="tc-flag">--field-selector</span> status.phase=Running
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get pods <span class="tc-flag">-o</span> jsonpath=<span class="tc-str">'{.items[*].metadata.name}'</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> get node <span class="tc-flag">-o</span> custom-columns=NAME:.metadata.name,CPU:.status.capacity.cpu
+
+<span class="y-cmt"># ── Describe (chi tiết + events) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> describe pod order-service-7d4f9-abc <span class="tc-flag">-n</span> production
+<span class="tc-cmt"># Events section là nơi tìm nguyên nhân pod crash/pending!</span>
+
+<span class="y-cmt"># ── Logs ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> logs order-service-7d4f9-abc <span class="tc-flag">-n</span> production <span class="tc-flag">-f</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> logs <span class="tc-flag">-l</span> app=order-service <span class="tc-flag">--all-containers</span> <span class="tc-flag">--max-log-requests=10</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> logs order-service-7d4f9-abc <span class="tc-flag">--previous</span>  <span class="tc-cmt"># logs của container trước khi restart</span>
+
+<span class="y-cmt"># ── Exec ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> exec <span class="tc-flag">-it</span> order-service-7d4f9-abc <span class="tc-flag">-n</span> production <span class="tc-flag">--</span> bash
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> exec order-service-7d4f9-abc <span class="tc-flag">--</span> curl localhost:8080/actuator/health
+
+<span class="y-cmt"># ── Port forward ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> port-forward svc/order-service <span class="tc-arg">8080:80</span> <span class="tc-flag">-n</span> production
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> port-forward pod/postgres-0 <span class="tc-arg">5432:5432</span> <span class="tc-flag">-n</span> production
+
+<span class="y-cmt"># ── Debug pod (K8s 1.23+) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> debug <span class="tc-flag">-it</span> order-service-7d4f9-abc <span class="tc-flag">--image=busybox --target=order-service</span>
+<span class="tc-cmt"># Thêm debug container vào pod đang chạy!</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> debug node/worker-1 <span class="tc-flag">-it --image=ubuntu</span>  <span class="tc-cmt"># debug node</span>
+
+<span class="y-cmt"># ── Apply / Delete ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> apply <span class="tc-flag">-f</span> ./k8s/ <span class="tc-flag">-n</span> production       <span class="tc-cmt"># apply thư mục</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> apply <span class="tc-flag">-k</span> ./kustomize/prod/           <span class="tc-cmt"># apply kustomization</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> delete <span class="tc-flag">-f</span> deployment.yaml
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> delete pod <span class="tc-flag">--all -n</span> staging          <span class="tc-cmt"># xóa tất cả pods trong ns</span>
+
+<span class="y-cmt"># ── Top (requires metrics-server) ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> top pods <span class="tc-flag">-n</span> production
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> top nodes
+
+<span class="y-cmt"># ── Edit resource trực tiếp ──</span>
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> edit deployment/order-service <span class="tc-flag">-n</span> production
+<span class="tc-prompt">$</span> <span class="tc-cmd">kubectl</span> patch deployment/order-service <span class="tc-flag">-n</span> production \
+    <span class="tc-flag">-p</span> <span class="tc-str">'{"spec":{"replicas":5}}'</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S17 FULL EXAMPLE -->
+<div class="section" id="s17">
+  <div class="sec-head"><span class="sec-tag st-5">EXAMPLE</span>
+    <div><h2 class="sec-title">Deploy Spring Boot lên K8s — End-to-end</h2>
+    <p class="sec-sub">Ví dụ thực tế đầy đủ: ConfigMap + Secret + Deployment + Service + Ingress + HPA</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Full k8s manifest cho order-service</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">k8s/order-service/ — complete production manifests</span><span class="cb-tag ct-5">Full Example</span></div>
+      <div class="cb-body"><pre><span class="y-sec"># ════ 01-namespace.yaml ════</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Namespace</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-str">production</span>
+  <span class="y-key">labels</span>:
+    <span class="y-label">env</span>: <span class="y-str">production</span>
+---
+<span class="y-sec"># ════ 02-configmap.yaml ════</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">ConfigMap</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service-config</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">data</span>:
+  <span class="y-key">SPRING_PROFILES_ACTIVE</span>:             <span class="y-str">prod</span>
+  <span class="y-key">SPRING_DATASOURCE_URL</span>:              <span class="y-str">jdbc:postgresql://postgres:5432/shopdb</span>
+  <span class="y-key">SPRING_DATASOURCE_USERNAME</span>:         <span class="y-str">admin</span>
+  <span class="y-key">SPRING_DATA_REDIS_HOST</span>:             <span class="y-str">redis</span>
+  <span class="y-key">SPRING_KAFKA_BOOTSTRAP_SERVERS</span>:     <span class="y-str">kafka:9092</span>
+  <span class="y-key">MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE</span>: <span class="y-str">health,info,prometheus</span>
+  <span class="y-key">JAVA_OPTS</span>: <span class="y-str">"-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"</span>
+---
+<span class="y-sec"># ════ 03-deployment.yaml ════</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">apps/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Deployment</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">replicas</span>: <span class="y-num">3</span>
+  <span class="y-key">selector</span>:
+    <span class="y-key">matchLabels</span>:
+      <span class="y-label">app</span>: <span class="y-str">order-service</span>
+  <span class="y-key">strategy</span>:
+    <span class="y-key">rollingUpdate</span>: {<span class="y-key">maxSurge</span>: <span class="y-num">1</span>, <span class="y-key">maxUnavailable</span>: <span class="y-num">0</span>}
+  <span class="y-key">template</span>:
+    <span class="y-key">metadata</span>:
+      <span class="y-key">labels</span>:
+        <span class="y-label">app</span>: <span class="y-str">order-service</span>
+      <span class="y-key">annotations</span>:
+        <span class="y-ann">prometheus.io/scrape</span>: <span class="y-str">"true"</span>
+        <span class="y-ann">prometheus.io/path</span>:   <span class="y-str">"/actuator/prometheus"</span>
+        <span class="y-ann">prometheus.io/port</span>:   <span class="y-str">"8080"</span>
+    <span class="y-key">spec</span>:
+      <span class="y-key">serviceAccountName</span>: <span class="y-str">order-service-sa</span>
+      <span class="y-key">securityContext</span>:
+        <span class="y-key">runAsNonRoot</span>:  <span class="y-bool">true</span>
+        <span class="y-key">runAsUser</span>:     <span class="y-num">1001</span>
+        <span class="y-key">fsGroup</span>:       <span class="y-num">1001</span>
+        <span class="y-key">seccompProfile</span>: {<span class="y-key">type</span>: <span class="y-str">RuntimeDefault</span>}
+      <span class="y-key">containers</span>:
+      - <span class="y-key">name</span>:            <span class="y-str">order-service</span>
+        <span class="y-key">image</span>:           <span class="y-str">registry.company.com/order-service:v2.1.0</span>
+        <span class="y-key">imagePullPolicy</span>: <span class="y-str">IfNotPresent</span>
+        <span class="y-key">ports</span>:
+        - {<span class="y-key">containerPort</span>: <span class="y-num">8080</span>, <span class="y-key">name</span>: <span class="y-str">http</span>}
+        <span class="y-key">envFrom</span>:
+        - <span class="y-key">configMapRef</span>: {<span class="y-key">name</span>: <span class="y-str">order-service-config</span>}
+        - <span class="y-key">secretRef</span>:    {<span class="y-key">name</span>: <span class="y-str">order-service-secrets</span>}
+        <span class="y-key">resources</span>:
+          <span class="y-key">requests</span>: {<span class="y-key">memory</span>: <span class="y-str">512Mi</span>, <span class="y-key">cpu</span>: <span class="y-str">250m</span>}
+          <span class="y-key">limits</span>:   {<span class="y-key">memory</span>: <span class="y-str">1Gi</span>,   <span class="y-key">cpu</span>: <span class="y-str">1000m</span>}
+        <span class="y-key">startupProbe</span>:
+          <span class="y-key">httpGet</span>: {<span class="y-key">path</span>: <span class="y-str">/actuator/health</span>, <span class="y-key">port</span>: <span class="y-num">8080</span>}
+          <span class="y-key">failureThreshold</span>: <span class="y-num">30</span>
+          <span class="y-key">periodSeconds</span>:    <span class="y-num">10</span>
+        <span class="y-key">livenessProbe</span>:
+          <span class="y-key">httpGet</span>: {<span class="y-key">path</span>: <span class="y-str">/actuator/health/liveness</span>, <span class="y-key">port</span>: <span class="y-num">8080</span>}
+          <span class="y-key">periodSeconds</span>: <span class="y-num">10</span>
+          <span class="y-key">failureThreshold</span>: <span class="y-num">3</span>
+        <span class="y-key">readinessProbe</span>:
+          <span class="y-key">httpGet</span>: {<span class="y-key">path</span>: <span class="y-str">/actuator/health/readiness</span>, <span class="y-key">port</span>: <span class="y-num">8080</span>}
+          <span class="y-key">periodSeconds</span>: <span class="y-num">5</span>
+          <span class="y-key">failureThreshold</span>: <span class="y-num">3</span>
+        <span class="y-key">lifecycle</span>:
+          <span class="y-key">preStop</span>:
+            <span class="y-key">exec</span>: {<span class="y-key">command</span>: [<span class="y-str">/bin/sh</span>, <span class="y-str">-c</span>, <span class="y-str">"sleep 5"</span>]}
+        <span class="y-key">securityContext</span>:
+          <span class="y-key">allowPrivilegeEscalation</span>: <span class="y-bool">false</span>
+          <span class="y-key">readOnlyRootFilesystem</span>:   <span class="y-bool">true</span>
+          <span class="y-key">capabilities</span>: {<span class="y-key">drop</span>: [<span class="y-str">ALL</span>]}
+      <span class="y-key">terminationGracePeriodSeconds</span>: <span class="y-num">60</span>
+      <span class="y-key">imagePullSecrets</span>:
+      - {<span class="y-key">name</span>: <span class="y-str">registry-credentials</span>}
+---
+<span class="y-sec"># ════ 04-service.yaml ════</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">Service</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">selector</span>: {<span class="y-label">app</span>: <span class="y-str">order-service</span>}
+  <span class="y-key">ports</span>:
+  - {<span class="y-key">port</span>: <span class="y-num">80</span>, <span class="y-key">targetPort</span>: <span class="y-num">8080</span>, <span class="y-key">name</span>: <span class="y-str">http</span>}
+---
+<span class="y-sec"># ════ 05-hpa.yaml ════</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">autoscaling/v2</span>
+<span class="y-api">kind</span>: <span class="y-kind">HorizontalPodAutoscaler</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">scaleTargetRef</span>:
+    <span class="y-key">apiVersion</span>: <span class="y-str">apps/v1</span>
+    <span class="y-key">kind</span>:       <span class="y-str">Deployment</span>
+    <span class="y-key">name</span>:       <span class="y-str">order-service</span>
+  <span class="y-key">minReplicas</span>: <span class="y-num">3</span>
+  <span class="y-key">maxReplicas</span>: <span class="y-num">20</span>
+  <span class="y-key">metrics</span>:
+  - <span class="y-key">type</span>: <span class="y-str">Resource</span>
+    <span class="y-key">resource</span>: {<span class="y-key">name</span>: <span class="y-str">cpu</span>, <span class="y-key">target</span>: {<span class="y-key">type</span>: <span class="y-str">Utilization</span>, <span class="y-key">averageUtilization</span>: <span class="y-num">70</span>}}
+---
+<span class="y-sec"># ════ 06-pdb.yaml ════</span>
+<span class="y-api">apiVersion</span>: <span class="y-str">policy/v1</span>
+<span class="y-api">kind</span>: <span class="y-kind">PodDisruptionBudget</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>:      <span class="y-str">order-service</span>
+  <span class="y-key">namespace</span>: <span class="y-str">production</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">minAvailable</span>: <span class="y-num">2</span>
+  <span class="y-key">selector</span>: {<span class="y-key">matchLabels</span>: {<span class="y-label">app</span>: <span class="y-str">order-service</span>}}</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- S18 CHEAT SHEET -->
+<div class="section" id="s18">
+  <div class="sec-head"><span class="sec-tag st-1">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — K8s toàn tập</h2>
+    <p class="sec-sub">Tra cứu nhanh mọi lệnh và patterns quan trọng</p></div>
+  </div>
+  <div class="cheat-grid">
+    <div class="cheat-card"><h4 class="h4-1">🫛 Pod &amp; Workloads</h4>
+      <div class="cheat-row"><span class="ck">Xem pods + node</span><span class="cv">kubectl get pods -o wide</span></div>
+      <div class="cheat-row"><span class="ck">Vào pod shell</span><span class="cv">kubectl exec -it pod -- bash</span></div>
+      <div class="cheat-row"><span class="ck">Follow logs</span><span class="cv">kubectl logs -f pod -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Log container trước</span><span class="cv">kubectl logs pod --previous</span></div>
+      <div class="cheat-row"><span class="ck">Debug pod</span><span class="cv">kubectl debug -it pod --image=ubuntu</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-1">🔄 Deployment</h4>
+      <div class="cheat-row"><span class="ck">Update image</span><span class="cv">kubectl set image deploy/app app=img:tag</span></div>
+      <div class="cheat-row"><span class="ck">Rollout status</span><span class="cv">kubectl rollout status deploy/app</span></div>
+      <div class="cheat-row"><span class="ck">Rollback</span><span class="cv">kubectl rollout undo deploy/app</span></div>
+      <div class="cheat-row"><span class="ck">Scale</span><span class="cv">kubectl scale deploy/app --replicas=5</span></div>
+      <div class="cheat-row"><span class="ck">Restart pods</span><span class="cv">kubectl rollout restart deploy/app</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-2">⚙️ Config &amp; Secrets</h4>
+      <div class="cheat-row"><span class="ck">Tạo ConfigMap</span><span class="cv">kubectl create cm name --from-file=f</span></div>
+      <div class="cheat-row"><span class="ck">Tạo Secret</span><span class="cv">kubectl create secret generic n --from-literal=k=v</span></div>
+      <div class="cheat-row"><span class="ck">Decode secret</span><span class="cv">kubectl get secret n -o jsonpath='{.data.k}' | base64 -d</span></div>
+      <div class="cheat-row"><span class="ck">Xem env vars</span><span class="cv">kubectl exec pod -- env</span></div>
+      <div class="cheat-row"><span class="ck">Edit config</span><span class="cv">kubectl edit cm name -n ns</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-3">🌐 Network</h4>
+      <div class="cheat-row"><span class="ck">Port forward</span><span class="cv">kubectl port-forward svc/app 8080:80</span></div>
+      <div class="cheat-row"><span class="ck">Xem services</span><span class="cv">kubectl get svc -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Xem ingress</span><span class="cv">kubectl get ingress -n ns</span></div>
+      <div class="cheat-row"><span class="ck">DNS trong pod</span><span class="cv">svc.ns.svc.cluster.local</span></div>
+      <div class="cheat-row"><span class="ck">Test connectivity</span><span class="cv">kubectl exec pod -- curl http://svc</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-4">📊 Monitoring</h4>
+      <div class="cheat-row"><span class="ck">CPU/RAM pods</span><span class="cv">kubectl top pods -n ns</span></div>
+      <div class="cheat-row"><span class="ck">CPU/RAM nodes</span><span class="cv">kubectl top nodes</span></div>
+      <div class="cheat-row"><span class="ck">Events namespace</span><span class="cv">kubectl get events -n ns --sort-by=.lastTimestamp</span></div>
+      <div class="cheat-row"><span class="ck">HPA status</span><span class="cv">kubectl get hpa -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Describe node</span><span class="cv">kubectl describe node worker-1</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-5">⛑️ Helm</h4>
+      <div class="cheat-row"><span class="ck">Install</span><span class="cv">helm install name ./chart -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Upgrade + install</span><span class="cv">helm upgrade --install name ./chart</span></div>
+      <div class="cheat-row"><span class="ck">Rollback</span><span class="cv">helm rollback name 2 -n ns</span></div>
+      <div class="cheat-row"><span class="ck">List releases</span><span class="cv">helm list -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Template debug</span><span class="cv">helm template name ./chart --dry-run</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-5">🔐 RBAC</h4>
+      <div class="cheat-row"><span class="ck">Xem permissions</span><span class="cv">kubectl auth can-i list pods -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Xem roles</span><span class="cv">kubectl get role,rolebinding -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Check user perms</span><span class="cv">kubectl auth can-i --list --as=user</span></div>
+      <div class="cheat-row"><span class="ck">ServiceAccount token</span><span class="cv">kubectl create token sa-name -n ns</span></div>
+      <div class="cheat-row"><span class="ck">Impersonate</span><span class="cv">kubectl get pods --as=system:serviceaccount:ns:sa</span></div>
+    </div>
+    <div class="cheat-card"><h4 class="h4-1">🚨 Troubleshooting</h4>
+      <div class="cheat-row"><span class="ck">Pod Pending?</span><span class="cv">kubectl describe pod → Events</span></div>
+      <div class="cheat-row"><span class="ck">Pod CrashLoop?</span><span class="cv">kubectl logs pod --previous</span></div>
+      <div class="cheat-row"><span class="ck">OOMKilled?</span><span class="cv">limits.memory quá thấp</span></div>
+      <div class="cheat-row"><span class="ck">Pending lâu?</span><span class="cv">Insufficient resources hoặc PVC pending</span></div>
+      <div class="cheat-row"><span class="ck">Node NotReady?</span><span class="cv">kubectl describe node → Conditions</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="sub-title">Lộ trình học K8s — từ zero đến production</div>
+    <div class="steps">
+      <div class="step"><div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Setup local cluster — minikube hoặc kind</h4>
+        <p>Cài <code>minikube start</code> hoặc <code>kind create cluster</code>. Làm quen kubectl với namespace default. Apply Pod và Deployment đầu tiên.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Nắm Core Objects: Pod → Deployment → Service</h4>
+        <p>Tạo Deployment với 3 replicas. Expose qua ClusterIP Service. Test DNS resolution bên trong cluster. Hiểu label selectors.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>ConfigMap, Secret, Volumes</h4>
+        <p>Đưa toàn bộ config ra ConfigMap. Secret cho passwords. Mount ConfigMap làm file application.yml. PVC cho stateful apps.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Ingress, HPA, Probes, Resources</h4>
+        <p>Setup NGINX Ingress với TLS. Thêm liveness/readiness/startup probes. Set resource requests và limits. Enable HPA với CPU trigger.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">5</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Helm Charts và GitOps</h4>
+        <p>Đóng gói toàn bộ manifest thành Helm Chart. Tạo values-dev.yaml, values-prod.yaml riêng. Tích hợp <code>helm upgrade --install</code> vào GitLab CI.</p></div>
+      </div>
+      <div class="step"><div class="step-L"><div class="step-num">6</div></div>
+        <div class="step-B"><h4>RBAC, Network Policies, Security hardening</h4>
+        <p>ServiceAccount per deployment. RBAC với least privilege. Network Policy restrict traffic. SecurityContext non-root, readOnlyRootFilesystem. PDB cho zero-downtime maintenance.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px"><strong style="color:var(--text)">Tài nguyên học thêm:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://kubernetes.io/docs/" style="color:var(--k1)">Kubernetes Docs</a> &nbsp;·&nbsp;
+        <a href="https://helm.sh/docs/" style="color:var(--k1)">Helm Docs</a> &nbsp;·&nbsp;
+        <a href="https://killercoda.com/kubernetes" style="color:var(--k1)">Killercoda — K8s Labs</a> &nbsp;·&nbsp;
+        <a href="https://k8s.io/examples/" style="color:var(--k1)">K8s Examples</a> &nbsp;·&nbsp;
+        <a href="https://learnk8s.io/cheatsheet" style="color:var(--k1)">K8s Cheat Sheet</a>
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+<div class="footer">
+  <span>☸️ Kubernetes · Backend &amp; DevOps · Hướng dẫn toàn tập 2025</span>
+  <span style="margin-left:auto;color:var(--faint)">18 chủ đề · Pod → Deployment → HPA → Helm → Production</span>
+</div>
+</div><!-- /main -->
+<script>
+window.addEventListener('scroll',()=>{const e=document.documentElement;document.getElementById('pbar').style.width=(e.scrollTop/(e.scrollHeight-e.clientHeight)*100)+'%'});
+const sections=document.querySelectorAll('.section[id]'),links=document.querySelectorAll('.nav-link');
+const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const id=e.target.id;links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+id))}})},{rootMargin:'-28% 0px -60% 0px'});
+sections.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
