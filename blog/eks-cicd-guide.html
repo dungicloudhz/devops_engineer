@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EKS · CI/CD AWS · Lens — Hướng dẫn toàn tập cho DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090d;--bg2:#0e1018;--surface:#131520;--surface2:#1a1d2e;--surface3:#21253a;
+  --border:#252840;--border2:#2f3350;--accent:#7c6af8;--accent-lt:#a99dfa;
+  --amber:#f5a623;--green:#3ecf8e;--red:#f06b6b;--sky:#38bdf8;
+  --text:#dde1f5;--muted:#6b7094;--muted2:#8b90b8;
+  --nav-w:276px;--radius:10px;
+  --font-body:'Instrument Sans',sans-serif;--font-head:'Syne',sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:15px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);display:flex;min-height:100vh;line-height:1.75}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+/* ══ SIDEBAR ══ */
+#sidebar{width:var(--nav-w);min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:200;display:flex;flex-direction:column;transition:transform .3s ease}
+.sb-header{padding:24px 20px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(124,106,248,.06) 0%,transparent 100%)}
+.sb-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sb-orb{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent) 0%,#a55af4 100%);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;font-family:var(--font-mono);letter-spacing:-.05em;box-shadow:0 4px 18px rgba(124,106,248,.35)}
+.sb-title{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.sb-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.sb-ver{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-family:var(--font-mono);background:var(--surface2);padding:3px 8px;border-radius:5px;border:1px solid var(--border);margin-top:8px}
+.sb-ver .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sb-progress{padding:14px 20px 10px;border-bottom:1px solid var(--border)}
+.sb-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px}
+.sb-progress-bar{height:3px;background:var(--border);border-radius:99px;overflow:hidden}
+.sb-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#a55af4);border-radius:99px;width:0%;transition:width .4s ease}
+.sb-section{padding:18px 14px 6px}
+.sb-section-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:0 6px;margin-bottom:5px}
+.sb-link{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--muted2);font-size:13px;transition:all .18s;cursor:pointer;margin-bottom:1px;position:relative}
+.sb-link:hover{background:var(--surface);color:var(--text)}
+.sb-link.active{background:rgba(124,106,248,.12);color:var(--accent-lt)}
+.sb-link.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:2px;background:var(--accent);border-radius:1px}
+.sb-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;background:rgba(124,106,248,.18);color:var(--accent-lt);padding:1px 7px;border-radius:99px;font-family:var(--font-mono)}
+.sb-badge.green{background:rgba(62,207,142,.15);color:var(--green)}
+.sb-badge.amber{background:rgba(245,166,35,.15);color:var(--amber)}
+.sb-badge.sky{background:rgba(56,189,248,.15);color:var(--sky)}
+.sb-footer{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+
+/* ══ MAIN ══ */
+main{margin-left:var(--nav-w);flex:1;padding:0;max-width:970px}
+.section{padding:60px 64px;border-bottom:1px solid var(--border);scroll-margin-top:20px;animation:fadeUp .5s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.section-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-lt);font-weight:600;font-family:var(--font-mono);margin-bottom:14px}
+.section-tag::before{content:'';width:22px;height:1px;background:currentColor}
+h1{font-family:var(--font-head);font-size:48px;font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:20px}
+h1 .grad{background:linear-gradient(135deg,#fff 0%,var(--accent-lt) 60%,#a55af4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-family:var(--font-head);font-size:28px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px;display:flex;align-items:center;gap:12px;color:var(--text)}
+h3{font-size:15px;font-weight:600;color:var(--text);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+p{color:#9fa3c4;margin-bottom:14px}
+
+/* ══ CALLOUTS ══ */
+.callout{border-left:3px solid var(--accent);padding:14px 18px;background:rgba(124,106,248,.07);border-radius:0 8px 8px 0;margin:18px 0;font-size:13.5px;color:#bfc3e0}
+.callout-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-lt);margin-bottom:5px;display:flex;align-items:center;gap:5px;font-family:var(--font-mono)}
+.callout.warn{border-color:var(--amber);background:rgba(245,166,35,.07)}.callout.warn .callout-label{color:var(--amber)}
+.callout.good{border-color:var(--green);background:rgba(62,207,142,.07)}.callout.good .callout-label{color:var(--green)}
+.callout.err{border-color:var(--red);background:rgba(240,107,107,.07)}.callout.err .callout-label{color:var(--red)}
+.callout.sky{border-color:var(--sky);background:rgba(56,189,248,.07)}.callout.sky .callout-label{color:var(--sky)}
+
+/* ══ CARDS ══ */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.cards.col3{grid-template-columns:1fr 1fr 1fr}
+.cards.col4{grid-template-columns:1fr 1fr 1fr 1fr}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s,transform .2s,box-shadow .2s;cursor:default}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,106,248,.12)}
+.card-ico{font-size:22px;margin-bottom:10px}
+.card-title{font-weight:600;font-size:14px;margin-bottom:5px;color:var(--text)}
+.card-desc{font-size:13px;color:var(--muted2);line-height:1.55}
+
+/* ══ TABLE ══ */
+.tbl-wrap{overflow-x:auto;margin:16px 0;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:11px 16px;background:var(--surface2);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:#bbbdd6;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+td strong{color:var(--text)}
+.tag-new{background:rgba(62,207,142,.15);color:var(--green);padding:2px 8px;border-radius:99px;font-size:11px;font-family:var(--font-mono)}
+.tag-core{background:rgba(124,106,248,.15);color:var(--accent-lt);padding:2px 8px;border-radius:99px;font-size:11px;font-family:var(--font-mono)}
+.tag-pro{background:rgba(245,166,35,.15);color:var(--amber);padding:2px 8px;border-radius:99px;font-size:11px;font-family:var(--font-mono)}
+
+/* ══ STEPS ══ */
+.steps{margin:20px 0}
+.step{display:flex;gap:18px;margin-bottom:24px;align-items:flex-start}
+.step-num{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a55af4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;font-family:var(--font-mono);box-shadow:0 4px 14px rgba(124,106,248,.3)}
+.step-title{font-weight:600;color:var(--text);margin-bottom:5px}
+.step-desc{font-size:13.5px;color:var(--muted2)}
+
+/* ══ FEAT LIST ══ */
+.feat-list{list-style:none;margin:10px 0}
+.feat-list li{padding:9px 0 9px 22px;position:relative;font-size:14px;color:#9fa3c4;border-bottom:1px solid rgba(37,40,64,.6)}
+.feat-list li:last-child{border:none}
+.feat-list li::before{content:'▸';position:absolute;left:0;color:var(--accent)}
+.feat-list li strong{color:var(--text)}
+
+/* ══ CODE BLOCK ══ */
+.code-wrap{background:#07080d;border:1px solid var(--border);border-radius:var(--radius);margin:16px 0;overflow:hidden}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-dots{display:flex;gap:6px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.code-dot:nth-child(1){background:#ff5f57}
+.code-dot:nth-child(2){background:#febc2e}
+.code-dot:nth-child(3){background:#28c840}
+.code-lang{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.05em}
+.copy-btn{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:5px;cursor:pointer;transition:all .18s}
+.copy-btn:hover{color:var(--text);border-color:var(--accent)}
+.copy-btn.copied{color:var(--green);border-color:var(--green)}
+pre{padding:20px 22px;font-family:var(--font-mono);font-size:13px;line-height:1.75;overflow-x:auto;color:#9fa3c4}
+.kw{color:var(--accent-lt)}
+.str{color:var(--green)}
+.cmt{color:var(--muted);font-style:italic}
+.num{color:var(--amber)}
+.fn{color:#7dd3fc}
+.cls{color:#f0abfc}
+.prop{color:#93c5fd}
+.dir{color:var(--amber)}
+.val{color:var(--green)}
+.op{color:var(--sky)}
+.yaml-key{color:#93c5fd}
+.yaml-val{color:var(--green)}
+.yaml-anchor{color:var(--amber)}
+.sh-prompt{color:var(--muted)}
+.sh-cmd{color:var(--accent-lt)}
+.sh-flag{color:var(--amber)}
+.sh-out{color:#6b7094;font-style:italic}
+
+/* ══ CONCEPT CARDS ══ */
+.concept-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:18px 0}
+.concept{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;transition:all .2s}
+.concept::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c,var(--accent))}
+.concept:hover{border-color:var(--border2);transform:translateY(-1px)}
+.concept-icon{font-size:24px;margin-bottom:8px;display:block}
+.concept-name{font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--text);margin-bottom:3px}
+.concept-type{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.07em;margin-bottom:8px}
+.concept-desc{font-size:12.5px;color:var(--muted2);line-height:1.55}
+
+/* ══ FLOW ══ */
+.flow{display:flex;align-items:center;margin:20px 0;overflow-x:auto;padding:4px 0;flex-wrap:wrap;gap:8px}
+.flow-node{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:12px;font-family:var(--font-mono);color:var(--text);white-space:nowrap;flex-shrink:0;text-align:center;transition:border-color .2s}
+.flow-node:hover{border-color:var(--accent)}
+.flow-node.hl{background:rgba(124,106,248,.12);border-color:rgba(124,106,248,.4);color:var(--accent-lt)}
+.flow-node.gn{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.35);color:var(--green)}
+.flow-node.am{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.3);color:var(--amber)}
+.flow-node.sk{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.3);color:var(--sky)}
+.flow-node.rd{background:rgba(240,107,107,.1);border-color:rgba(240,107,107,.3);color:var(--red)}
+.flow-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--font-body)}
+.flow-arr{color:var(--border2);font-size:18px;padding:0 4px;flex-shrink:0}
+
+/* ══ CMD GRID ══ */
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.cmd-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border-color .2s}
+.cmd-card:hover{border-color:var(--border2)}
+.cmd-name{font-family:var(--font-mono);font-size:13px;color:var(--accent-lt);font-weight:500;margin-bottom:5px}
+.cmd-desc{font-size:13px;color:var(--muted2);line-height:1.5}
+
+/* ══ INLINE CODE ══ */
+code{font-family:var(--font-mono);background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:12.5px;color:var(--accent-lt)}
+
+/* ══ CHEAT GRID ══ */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.cheat-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.cheat-key{font-family:var(--font-mono);font-size:12px;color:var(--accent-lt);margin-bottom:4px}
+.cheat-val{font-size:13px;color:var(--muted2)}
+
+/* ══ ARCH DIAGRAM ══ */
+.arch-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin:20px 0;position:relative;overflow:hidden}
+.arch-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#a55af4,var(--sky))}
+
+/* ══ FILE TREE ══ */
+.file-tree{background:#07080d;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;font-family:var(--font-mono);font-size:13px;line-height:1.9;margin:16px 0;overflow-x:auto}
+.ft-dir{color:#7dd3fc;font-weight:500}
+.ft-file{color:#c4c9e0}
+.ft-yml{color:var(--accent-lt)}
+.ft-comment{color:var(--muted);margin-left:10px;font-size:12px}
+
+/* ══ LENS SCREENSHOT MOCK ══ */
+.lens-mock{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:20px 0}
+.lens-titlebar{background:var(--surface2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.lens-dots{display:flex;gap:6px}
+.lens-dot{width:10px;height:10px;border-radius:50%}
+.lens-dot:nth-child(1){background:#ff5f57}
+.lens-dot:nth-child(2){background:#febc2e}
+.lens-dot:nth-child(3){background:#28c840}
+.lens-title{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.05em}
+.lens-body{display:flex;min-height:180px}
+.lens-sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:12px;flex-shrink:0}
+.lens-sb-item{font-size:12px;font-family:var(--font-mono);color:var(--muted2);padding:5px 8px;border-radius:5px;margin-bottom:2px;cursor:default}
+.lens-sb-item:hover,.lens-sb-item.active{background:rgba(124,106,248,.12);color:var(--accent-lt)}
+.lens-sb-group{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 3px;font-weight:600}
+.lens-content{flex:1;padding:16px}
+.lens-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12.5px;font-family:var(--font-mono);border-bottom:1px solid rgba(37,40,64,.5);color:var(--muted2)}
+.lens-row:hover{background:rgba(255,255,255,.02)}
+.lens-status-green{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.lens-status-amber{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.lens-name{color:var(--text);font-weight:500;min-width:130px}
+.lens-tag{font-size:10px;padding:1px 7px;border-radius:99px;font-family:var(--font-mono)}
+.lens-tag-blue{background:rgba(124,106,248,.15);color:var(--accent-lt)}
+.lens-tag-green{background:rgba(62,207,142,.15);color:var(--green)}
+.lens-tag-amber{background:rgba(245,166,35,.15);color:var(--amber)}
+
+@media(max-width:900px){
+  #sidebar{display:none}
+  main{margin-left:0}
+  .section{padding:36px 22px}
+  .cards,.cards.col3,.cards.col4,.concept-grid,.cmd-grid,.cheat-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">☸</div>
+      <div>
+        <div class="sb-title">EKS · CI/CD · Lens</div>
+        <div class="sb-sub">AWS Kubernetes DevOps</div>
+      </div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span>EKS 1.29 · Lens 2024</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-progress-label"><span>Đọc tiến độ</span><span id="pct">0%</span></div>
+    <div class="sb-progress-bar"><div class="sb-progress-fill" id="pfill"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">📚 Series DevOps</div>
+    <a class="sb-link" href="terminal-macbook.html"><span class="sb-icon">💻</span>Terminal macOS</a>
+    <a class="sb-link" href="linux-guide.html"><span class="sb-icon">🐧</span>Linux</a>
+    <a class="sb-link" href="docker-guide.html"><span class="sb-icon">🐳</span>Docker</a>
+    <a class="sb-link" href="aws-guide.html"><span class="sb-icon">☁️</span>AWS</a>
+    <a class="sb-link" href="gcp-guide.html"><span class="sb-icon">🌐</span>GCP</a>
+    <a class="sb-link" href="azure-guide.html"><span class="sb-icon">🔷</span>Azure</a>
+    <a class="sb-link" href="teraform-guide.html"><span class="sb-icon">🏗️</span>Terraform</a>
+    <a class="sb-link" href="kubernate-guide.html"><span class="sb-icon">☸️</span>Kubernetes</a>
+    <a class="sb-link" href="gitlab-cicd-guide.html"><span class="sb-icon">🦊</span>GitLab CI/CD</a>
+    <a class="sb-link active" href="eks-cicd-guide.html"><span class="sb-icon">🚀</span>EKS · CI/CD · Lens</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Tổng quan</div>
+    <a class="sb-link active" href="#intro"><span class="sb-icon">🗺️</span>Kiến trúc &amp; Giới thiệu</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Amazon EKS</div>
+    <a class="sb-link" href="#eks-concepts"><span class="sb-icon">☸️</span>EKS là gì? Core concepts</a>
+    <a class="sb-link" href="#eks-create"><span class="sb-icon">🛠️</span>Tạo EKS Cluster<span class="sb-badge green">eksctl</span></a>
+    <a class="sb-link" href="#eks-nodegroup"><span class="sb-icon">🖥️</span>Node Groups &amp; Fargate</a>
+    <a class="sb-link" href="#eks-iam"><span class="sb-icon">🔐</span>IAM &amp; IRSA</a>
+    <a class="sb-link" href="#eks-addons"><span class="sb-icon">🔌</span>Add-ons: ALB, EBS, EFS</a>
+    <a class="sb-link" href="#eks-deploy"><span class="sb-icon">📦</span>Deploy Spring Boot lên EKS</a>
+    <a class="sb-link" href="#eks-hpa"><span class="sb-icon">📈</span>HPA &amp; Auto Scaling</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">CI/CD với AWS</div>
+    <a class="sb-link" href="#cicd-overview"><span class="sb-icon">🔁</span>Tổng quan Pipeline</a>
+    <a class="sb-link" href="#codepipeline"><span class="sb-icon">🚀</span>CodePipeline Setup</a>
+    <a class="sb-link" href="#codebuild"><span class="sb-icon">🔨</span>CodeBuild &amp; buildspec.yml</a>
+    <a class="sb-link" href="#ecr"><span class="sb-icon">🐳</span>ECR — Docker Registry</a>
+    <a class="sb-link" href="#github-actions-eks"><span class="sb-icon">⚡</span>GitHub Actions → EKS</a>
+    <a class="sb-link" href="#argocd"><span class="sb-icon">🔄</span>ArgoCD — GitOps<span class="sb-badge amber">GitOps</span></a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Lens IDE</div>
+    <a class="sb-link" href="#lens-intro"><span class="sb-icon">🔭</span>Lens là gì? Cài đặt</a>
+    <a class="sb-link" href="#lens-connect"><span class="sb-icon">🔗</span>Kết nối EKS Cluster</a>
+    <a class="sb-link" href="#lens-workloads"><span class="sb-icon">📊</span>Xem Workloads &amp; Pods</a>
+    <a class="sb-link" href="#lens-debug"><span class="sb-icon">🐛</span>Debug &amp; Troubleshoot</a>
+    <a class="sb-link" href="#lens-extensions"><span class="sb-icon">🧩</span>Extensions &amp; Tips</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Tổng kết</div>
+    <a class="sb-link" href="#cheatsheet"><span class="sb-icon">📋</span>Cheat Sheet</a>
+  </div>
+
+  <div class="sb-footer">eks · codepipeline · ecr · argocd · lens</div>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main>
+
+<!-- ════ INTRO ════ -->
+<div class="section" id="intro">
+  <div class="section-tag">Tổng quan</div>
+  <h1>EKS · CI/CD · Lens<br><span class="grad">AWS Kubernetes DevOps</span></h1>
+  <p>Hướng dẫn end-to-end từ tạo cluster EKS, xây dựng pipeline CI/CD tự động trên AWS, đến quản lý và debug Kubernetes cluster trực quan bằng Lens IDE — dành cho Java / Spring Boot developer.</p>
+
+  <div class="concept-grid">
+    <div class="concept" style="--c:var(--amber)">
+      <span class="concept-icon">☸️</span>
+      <div class="concept-name">Amazon EKS</div>
+      <div class="concept-type">MANAGED KUBERNETES</div>
+      <div class="concept-desc">Elastic Kubernetes Service — AWS quản lý control plane. Bạn chỉ cần lo worker nodes và workloads. HA tích hợp sẵn.</div>
+    </div>
+    <div class="concept" style="--c:var(--sky)">
+      <span class="concept-icon">🚀</span>
+      <div class="concept-name">AWS CI/CD</div>
+      <div class="concept-type">CODEPIPELINE · CODEBUILD</div>
+      <div class="concept-desc">CodePipeline orchestrate pipeline. CodeBuild chạy test và build Docker image. ECR lưu images. Tự động deploy lên EKS.</div>
+    </div>
+    <div class="concept" style="--c:var(--accent)">
+      <span class="concept-icon">🔭</span>
+      <div class="concept-name">Lens IDE</div>
+      <div class="concept-type">K8S DESKTOP CLIENT</div>
+      <div class="concept-desc">GUI mạnh mẽ nhất cho Kubernetes. Xem real-time pods/logs, exec vào container, port-forward chỉ với một click.</div>
+    </div>
+  </div>
+
+  <h3>🗺️ Kiến trúc tổng thể</h3>
+  <div class="arch-box">
+    <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em">Full DevOps Pipeline — từ code đến production</div>
+    <div class="flow">
+      <div class="flow-node gn"><div>Git Push</div><div class="flow-sub">GitHub / CodeCommit</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node sk"><div>CodePipeline</div><div class="flow-sub">trigger</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node sk"><div>CodeBuild</div><div class="flow-sub">test + build</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node am"><div>ECR</div><div class="flow-sub">push image</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node hl"><div>EKS</div><div class="flow-sub">kubectl apply</div></div>
+    </div>
+    <div class="flow" style="margin-top:8px">
+      <div class="flow-node hl"><div>Developer</div><div class="flow-sub">Lens IDE</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node hl"><div>EKS Cluster</div><div class="flow-sub">monitor + debug</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node gn"><div>Pods</div><div class="flow-sub">logs, exec, PF</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ EKS CONCEPTS ════ -->
+<div class="section" id="eks-concepts">
+  <div class="section-tag">EKS · Khái niệm</div>
+  <h2>☸️ EKS là gì? — Core Concepts</h2>
+  <p>Amazon EKS là dịch vụ Kubernetes được quản lý. AWS lo control plane (API Server, etcd, Scheduler), bạn chỉ cần quản lý worker nodes và deploy workloads.</p>
+
+  <div class="cards col3">
+    <div class="card">
+      <div class="card-ico">🧠</div>
+      <div class="card-title">Control Plane</div>
+      <div class="card-desc">AWS quản lý hoàn toàn. API Server, etcd, Controller Manager, Scheduler — multi-AZ, auto-heal. Bạn không thể SSH vào control plane.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🖥️</div>
+      <div class="card-title">Worker Nodes</div>
+      <div class="card-desc">EC2 instances hoặc Fargate pods chạy workloads. Managed Node Groups tự động cập nhật AMI. Bạn kiểm soát instance type, spot/on-demand.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔌</div>
+      <div class="card-title">Add-ons</div>
+      <div class="card-desc">AWS Load Balancer Controller, EBS CSI Driver, CoreDNS, kube-proxy, VPC CNI — cài thêm để tích hợp với các dịch vụ AWS.</div>
+    </div>
+  </div>
+
+  <h3>EKS vs tự cài Kubernetes</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Tiêu chí</th><th>EKS (Managed)</th><th>Self-managed K8s</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Control Plane</strong></td><td>AWS quản lý, SLA 99.95%</td><td>Tự cài và maintain</td></tr>
+        <tr><td><strong>Upgrade</strong></td><td>1-click trong console, zero downtime</td><td>Manual, phức tạp</td></tr>
+        <tr><td><strong>HA</strong></td><td>Tích hợp sẵn, multi-AZ</td><td>Cần tự setup</td></tr>
+        <tr><td><strong>AWS Integration</strong></td><td>ALB, RDS, IAM, ECR native</td><td>Cần config thêm</td></tr>
+        <tr><td><strong>Chi phí</strong></td><td>$0.10/giờ/cluster + EC2</td><td>Chỉ EC2, nhưng tốn time ops</td></tr>
+        <tr><td><strong>Khi nào dùng</strong></td><td><span class="tag-new">Production</span></td><td><span class="tag-pro">Learning / On-prem</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Các khái niệm K8s cần biết trước khi làm EKS</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">📦</div>
+      <div class="card-title">Pod</div>
+      <div class="card-desc">Đơn vị nhỏ nhất trong K8s. Chứa 1 hoặc nhiều containers chia sẻ network và storage. Pods là ephemeral — có thể bị restart bất cứ lúc nào.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔄</div>
+      <div class="card-title">Deployment</div>
+      <div class="card-desc">Quản lý replicas của Pods. Định nghĩa số lượng, rolling update strategy. Đây là resource bạn sẽ dùng nhiều nhất.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🌐</div>
+      <div class="card-title">Service</div>
+      <div class="card-desc">Stable endpoint cho Pods. ClusterIP (nội bộ), NodePort (expose qua node), LoadBalancer (AWS ALB/NLB).</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">⚙️</div>
+      <div class="card-title">ConfigMap &amp; Secret</div>
+      <div class="card-desc">ConfigMap lưu config không nhạy cảm. Secret lưu password, API keys — được base64 encode (không encrypt, dùng AWS Secrets Manager cho production).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ EKS CREATE ════ -->
+<div class="section" id="eks-create">
+  <div class="section-tag">EKS · Tạo Cluster</div>
+  <h2>🛠️ Tạo EKS Cluster với eksctl</h2>
+  <p><code>eksctl</code> là công cụ CLI chính thức từ AWS để tạo và quản lý EKS clusters. Nhanh hơn nhiều so với console hoặc CloudFormation thủ công.</p>
+
+  <h3>Cài đặt tools cần thiết</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — cài aws-cli, eksctl, kubectl, helm</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── AWS CLI v2 ──</span>
+curl <span class="str">"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"</span> -o awscliv2.zip
+unzip awscliv2.zip && sudo ./aws/install
+aws configure   <span class="cmt"># nhập Access Key ID, Secret, region (ap-southeast-1)</span>
+
+<span class="cmt"># ── eksctl ──</span>
+ARCH=amd64
+PLATFORM=$(uname -s)_$ARCH
+curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${PLATFORM}.tar.gz"
+tar -xzf eksctl_${PLATFORM}.tar.gz -C /tmp && sudo mv /tmp/eksctl /usr/local/bin
+eksctl version   <span class="cmt"># 0.174.0</span>
+
+<span class="cmt"># ── kubectl ──</span>
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl && sudo mv kubectl /usr/local/bin
+kubectl version --client
+
+<span class="cmt"># ── helm ──</span>
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash</pre>
+  </div>
+
+  <h3>Tạo cluster bằng config file (khuyến nghị)</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">cluster.yaml — EKS cluster config đầy đủ</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="yaml-key">apiVersion</span>: eksctl.io/v1alpha5
+<span class="yaml-key">kind</span>: ClusterConfig
+
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">prod-cluster</span>
+  <span class="yaml-key">region</span>: <span class="yaml-val">ap-southeast-1</span>     <span class="cmt"># Singapore</span>
+  <span class="yaml-key">version</span>: <span class="yaml-val">"1.29"</span>
+
+<span class="cmt"># ── Availability Zones ──</span>
+<span class="yaml-key">availabilityZones</span>: [<span class="yaml-val">"ap-southeast-1a"</span>, <span class="yaml-val">"ap-southeast-1b"</span>, <span class="yaml-val">"ap-southeast-1c"</span>]
+
+<span class="cmt"># ── VPC config ──</span>
+<span class="yaml-key">vpc</span>:
+  <span class="yaml-key">cidr</span>: <span class="yaml-val">10.0.0.0/16</span>
+  <span class="yaml-key">nat</span>:
+    <span class="yaml-key">gateway</span>: <span class="yaml-val">HighlyAvailable</span>  <span class="cmt"># 1 NAT GW mỗi AZ</span>
+  <span class="yaml-key">clusterEndpoints</span>:
+    <span class="yaml-key">publicAccess</span>:  <span class="kw">true</span>
+    <span class="yaml-key">privateAccess</span>: <span class="kw">true</span>
+
+<span class="cmt"># ── Managed Node Groups ──</span>
+<span class="yaml-key">managedNodeGroups</span>:
+  <span class="cmt"># On-demand nodes cho production workloads</span>
+  - <span class="yaml-key">name</span>: <span class="yaml-val">ng-prod</span>
+    <span class="yaml-key">instanceType</span>: <span class="yaml-val">t3.medium</span>      <span class="cmt"># 2 vCPU, 4 GB RAM</span>
+    <span class="yaml-key">minSize</span>: <span class="num">2</span>
+    <span class="yaml-key">maxSize</span>: <span class="num">10</span>
+    <span class="yaml-key">desiredCapacity</span>: <span class="num">3</span>
+    <span class="yaml-key">volumeSize</span>: <span class="num">30</span>               <span class="cmt"># GB, EBS gp3</span>
+    <span class="yaml-key">privateNetworking</span>: <span class="kw">true</span>     <span class="cmt"># nodes trong private subnet</span>
+    <span class="yaml-key">labels</span>:
+      <span class="yaml-key">role</span>: <span class="yaml-val">production</span>
+    <span class="yaml-key">tags</span>:
+      <span class="yaml-key">Environment</span>: <span class="yaml-val">production</span>
+      <span class="yaml-key">k8s.io/cluster-autoscaler/enabled</span>: <span class="yaml-val">"true"</span>
+    <span class="yaml-key">iam</span>:
+      <span class="yaml-key">withAddonPolicies</span>:
+        <span class="yaml-key">autoScaler</span>:           <span class="kw">true</span>
+        <span class="yaml-key">albIngress</span>:           <span class="kw">true</span>
+        <span class="yaml-key">cloudWatch</span>:           <span class="kw">true</span>
+        <span class="yaml-key">ebs</span>:                  <span class="kw">true</span>
+        <span class="yaml-key">efs</span>:                  <span class="kw">true</span>
+
+  <span class="cmt"># Spot nodes cho batch / non-critical workloads (rẻ hơn 70%)</span>
+  - <span class="yaml-key">name</span>: <span class="yaml-val">ng-spot</span>
+    <span class="yaml-key">instanceTypes</span>: [<span class="yaml-val">t3.medium</span>, <span class="yaml-val">t3a.medium</span>, <span class="yaml-val">m5.large</span>]
+    <span class="yaml-key">spot</span>: <span class="kw">true</span>
+    <span class="yaml-key">minSize</span>: <span class="num">0</span>
+    <span class="yaml-key">maxSize</span>: <span class="num">20</span>
+    <span class="yaml-key">desiredCapacity</span>: <span class="num">2</span>
+    <span class="yaml-key">labels</span>:
+      <span class="yaml-key">role</span>: <span class="yaml-val">spot</span>
+    <span class="yaml-key">taints</span>:
+      - <span class="yaml-key">key</span>: spot
+        <span class="yaml-key">value</span>: <span class="yaml-val">"true"</span>
+        <span class="yaml-key">effect</span>: NoSchedule    <span class="cmt"># pods phải explicitly tolerate spot</span>
+
+<span class="cmt"># ── Add-ons ──</span>
+<span class="yaml-key">addons</span>:
+  - <span class="yaml-key">name</span>: vpc-cni
+    <span class="yaml-key">version</span>: latest
+  - <span class="yaml-key">name</span>: coredns
+    <span class="yaml-key">version</span>: latest
+  - <span class="yaml-key">name</span>: kube-proxy
+    <span class="yaml-key">version</span>: latest
+  - <span class="yaml-key">name</span>: aws-ebs-csi-driver
+    <span class="yaml-key">version</span>: latest
+
+<span class="cmt"># ── CloudWatch logging ──</span>
+<span class="yaml-key">cloudWatch</span>:
+  <span class="yaml-key">clusterLogging</span>:
+    <span class="yaml-key">enableTypes</span>: [<span class="yaml-val">"api"</span>, <span class="yaml-val">"audit"</span>, <span class="yaml-val">"authenticator"</span>]</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — tạo cluster và verify</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># Tạo cluster (~15-20 phút)</span>
+eksctl create cluster -f cluster.yaml
+
+<span class="cmt"># Output khi hoàn thành:</span>
+<span class="sh-out">[✔]  EKS cluster "prod-cluster" in "ap-southeast-1" region is ready</span>
+
+<span class="cmt"># Update kubeconfig để kubectl kết nối</span>
+aws eks update-kubeconfig --region ap-southeast-1 --name prod-cluster
+
+<span class="cmt"># Verify</span>
+kubectl get nodes
+<span class="sh-out">NAME                                          STATUS   ROLES    AGE   VERSION
+ip-10-0-1-101.ap-southeast-1.compute.internal Ready    &lt;none&gt;   2m    v1.29.3-eks-ae9a62a
+ip-10-0-2-52.ap-southeast-1.compute.internal  Ready    &lt;none&gt;   2m    v1.29.3-eks-ae9a62a
+ip-10-0-3-88.ap-southeast-1.compute.internal  Ready    &lt;none&gt;   2m    v1.29.3-eks-ae9a62a</span>
+
+kubectl get pods -A    <span class="cmt"># xem tất cả system pods</span></pre>
+  </div>
+</div>
+
+<!-- ════ EKS NODE GROUPS ════ -->
+<div class="section" id="eks-nodegroup">
+  <div class="section-tag">EKS · Node Groups</div>
+  <h2>🖥️ Node Groups &amp; AWS Fargate</h2>
+  <p>EKS hỗ trợ 3 loại compute: <strong style="color:var(--text)">Managed Node Groups</strong> (EC2 bạn quản lý), <strong style="color:var(--text)">Self-managed Nodes</strong>, và <strong style="color:var(--text)">Fargate</strong> (serverless).</p>
+
+  <div class="cards col3">
+    <div class="card">
+      <div class="card-ico">🔧</div>
+      <div class="card-title">Managed Node Groups</div>
+      <div class="card-desc">AWS tự động provision EC2, cài kubelet, update AMI, drain trước khi terminate. Bạn chọn instance type và scaling policy. <strong style="color:var(--text)">Phổ biến nhất cho production.</strong></div>
+    </div>
+    <div class="card">
+      <div class="card-ico">☁️</div>
+      <div class="card-title">Fargate Profiles</div>
+      <div class="card-desc">Serverless — không cần quản lý EC2. AWS tự allocate compute cho từng Pod. Tốt cho batch jobs, dev environments. Không hỗ trợ DaemonSets.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">💰</div>
+      <div class="card-title">Spot Instances</div>
+      <div class="card-desc">Giảm chi phí 60–90%. Phù hợp workloads chịu được interruption: batch processing, stateless services với nhiều replicas.</div>
+    </div>
+  </div>
+
+  <h3>Thêm Fargate Profile cho dev namespace</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — tạo Fargate profile</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre>eksctl create fargateprofile \
+  --cluster  prod-cluster \
+  --region   ap-southeast-1 \
+  --name     fp-dev \
+  --namespace dev \
+  --labels   env=dev
+
+<span class="cmt"># Pods trong namespace "dev" với label env=dev → chạy trên Fargate</span>
+<span class="cmt"># Không cần tạo EC2 node group riêng cho dev!</span></pre>
+  </div>
+
+  <h3>Cluster Autoscaler — tự động thêm/bớt nodes</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — deploy Cluster Autoscaler</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># Deploy Cluster Autoscaler với Helm</span>
+helm repo add autoscaler https://kubernetes.github.io/autoscaler
+helm install cluster-autoscaler autoscaler/cluster-autoscaler \
+  --namespace kube-system \
+  --set autoDiscovery.clusterName=prod-cluster \
+  --set awsRegion=ap-southeast-1 \
+  --set rbac.serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=arn:aws:iam::123456789:role/AmazonEKSClusterAutoscalerRole
+
+<span class="cmt"># Verify</span>
+kubectl -n kube-system logs -f deployment/cluster-autoscaler</pre>
+  </div>
+</div>
+
+<!-- ════ EKS IAM ════ -->
+<div class="section" id="eks-iam">
+  <div class="section-tag">EKS · Security</div>
+  <h2>🔐 IAM &amp; IRSA — Phân quyền đúng cách</h2>
+  <p><strong style="color:var(--text)">IRSA</strong> (IAM Roles for Service Accounts) cho phép Pods có IAM permissions mà <em>không cần</em> hardcode credentials. Đây là cách bảo mật chuẩn cho EKS.</p>
+
+  <div class="flow">
+    <div class="flow-node gn"><div>Pod</div><div class="flow-sub">K8s ServiceAccount</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node sk"><div>OIDC Provider</div><div class="flow-sub">EKS built-in</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node am"><div>IAM Role</div><div class="flow-sub">AssumeRole</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node gn"><div>AWS Services</div><div class="flow-sub">S3, RDS, SQS...</div></div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — setup IRSA cho Spring Boot app truy cập S3</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># 1. Enable OIDC provider cho cluster</span>
+eksctl utils associate-iam-oidc-provider \
+  --cluster prod-cluster \
+  --region  ap-southeast-1 \
+  --approve
+
+<span class="cmt"># 2. Tạo IAM Role và Service Account liên kết</span>
+eksctl create iamserviceaccount \
+  --cluster           prod-cluster \
+  --namespace         production \
+  --name              order-service-sa \
+  --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
+  --attach-policy-arn arn:aws:iam::aws:policy/AmazonSQSFullAccess \
+  --approve
+
+<span class="cmt"># eksctl tự tạo IAM Role và annotate ServiceAccount với role ARN</span>
+kubectl describe sa order-service-sa -n production
+<span class="sh-out">Annotations: eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/eksctl-prod-cluster-addon-iamserviceaccount-...</span>
+
+<span class="cmt"># 3. Dùng ServiceAccount trong Deployment</span>
+<span class="cmt"># Thêm vào spec.template.spec:</span>
+<span class="yaml-key">serviceAccountName</span>: order-service-sa
+<span class="cmt"># → Pod tự động có AWS credentials qua mounted token!</span>
+<span class="cmt"># Trong Java: DefaultAWSCredentialsProviderChain tự detect</span></pre>
+  </div>
+
+  <h3>aws-auth ConfigMap — cho phép IAM users/roles truy cập cluster</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — thêm developer và CI/CD role vào cluster</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># Thêm IAM user cho developer</span>
+eksctl create iamidentitymapping \
+  --cluster  prod-cluster \
+  --arn      arn:aws:iam::123456789:user/dev-john \
+  --group    system:masters \
+  --username dev-john
+
+<span class="cmt"># Thêm IAM Role cho CodeBuild (để kubectl apply)</span>
+eksctl create iamidentitymapping \
+  --cluster  prod-cluster \
+  --arn      arn:aws:iam::123456789:role/CodeBuildDeployRole \
+  --group    system:masters \
+  --username codebuild
+
+<span class="cmt"># Xem aws-auth configmap</span>
+kubectl get configmap aws-auth -n kube-system -o yaml</pre>
+  </div>
+</div>
+
+<!-- ════ EKS ADDONS ════ -->
+<div class="section" id="eks-addons">
+  <div class="section-tag">EKS · Add-ons</div>
+  <h2>🔌 Add-ons: ALB Ingress, EBS, EFS</h2>
+
+  <h3>AWS Load Balancer Controller — Ingress với ALB</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash + yaml — cài ALB Controller và tạo Ingress</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── Cài AWS Load Balancer Controller ──</span>
+helm repo add eks https://aws.github.io/eks-charts
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=prod-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller
+
+<span class="cmt"># ── Ingress dùng ALB ──</span>
+<span class="yaml-key">apiVersion</span>: networking.k8s.io/v1
+<span class="yaml-key">kind</span>: Ingress
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">order-service-ingress</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">production</span>
+  <span class="yaml-key">annotations</span>:
+    <span class="yaml-key">kubernetes.io/ingress.class</span>: <span class="yaml-val">alb</span>
+    <span class="yaml-key">alb.ingress.kubernetes.io/scheme</span>: <span class="yaml-val">internet-facing</span>
+    <span class="yaml-key">alb.ingress.kubernetes.io/target-type</span>: <span class="yaml-val">ip</span>
+    <span class="yaml-key">alb.ingress.kubernetes.io/certificate-arn</span>: <span class="yaml-val">arn:aws:acm:...</span>
+    <span class="yaml-key">alb.ingress.kubernetes.io/listen-ports</span>: <span class="yaml-val">'[{"HTTP": 80}, {"HTTPS": 443}]'</span>
+    <span class="yaml-key">alb.ingress.kubernetes.io/ssl-redirect</span>: <span class="yaml-val">"443"</span>
+    <span class="yaml-key">alb.ingress.kubernetes.io/group.name</span>: <span class="yaml-val">production-alb</span>  <span class="cmt"># share ALB</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">host</span>: <span class="yaml-val">api.company.com</span>
+    <span class="yaml-key">http</span>:
+      <span class="yaml-key">paths</span>:
+      - <span class="yaml-key">path</span>: <span class="yaml-val">/api/orders</span>
+        <span class="yaml-key">pathType</span>: Prefix
+        <span class="yaml-key">backend</span>:
+          <span class="yaml-key">service</span>:
+            <span class="yaml-key">name</span>: order-service
+            <span class="yaml-key">port</span>: {<span class="yaml-key">number</span>: <span class="num">8080</span>}
+      - <span class="yaml-key">path</span>: <span class="yaml-val">/api/payments</span>
+        <span class="yaml-key">pathType</span>: Prefix
+        <span class="yaml-key">backend</span>:
+          <span class="yaml-key">service</span>:
+            <span class="yaml-key">name</span>: payment-service
+            <span class="yaml-key">port</span>: {<span class="yaml-key">number</span>: <span class="num">8081</span>}</pre>
+  </div>
+</div>
+
+<!-- ════ EKS DEPLOY ════ -->
+<div class="section" id="eks-deploy">
+  <div class="section-tag">EKS · Deploy</div>
+  <h2>📦 Deploy Spring Boot lên EKS</h2>
+  <p>Ví dụ đầy đủ — Deployment, Service, HPA, ConfigMap, Secret cho một Spring Boot microservice.</p>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">k8s/order-service.yaml — manifest hoàn chỉnh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">---</span>
+<span class="cmt"># ── Namespace ──</span>
+<span class="yaml-key">apiVersion</span>: v1
+<span class="yaml-key">kind</span>: Namespace
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: production
+  <span class="yaml-key">labels</span>: {<span class="yaml-key">env</span>: production}
+<span class="cmt">---</span>
+<span class="cmt"># ── ConfigMap ──</span>
+<span class="yaml-key">apiVersion</span>: v1
+<span class="yaml-key">kind</span>: ConfigMap
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: order-service-config
+  <span class="yaml-key">namespace</span>: production
+<span class="yaml-key">data</span>:
+  <span class="yaml-key">SPRING_PROFILES_ACTIVE</span>: <span class="yaml-val">production</span>
+  <span class="yaml-key">SERVER_PORT</span>: <span class="yaml-val">"8080"</span>
+  <span class="yaml-key">SPRING_DATASOURCE_URL</span>: <span class="yaml-val">jdbc:postgresql://rds-host.rds.amazonaws.com:5432/shopdb</span>
+<span class="cmt">---</span>
+<span class="cmt"># ── Secret (giá trị từ AWS Secrets Manager qua external-secrets) ──</span>
+<span class="yaml-key">apiVersion</span>: external-secrets.io/v1beta1
+<span class="yaml-key">kind</span>: ExternalSecret
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: order-service-secrets
+  <span class="yaml-key">namespace</span>: production
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">refreshInterval</span>: 1h
+  <span class="yaml-key">secretStoreRef</span>: {<span class="yaml-key">name</span>: aws-secrets-manager, <span class="yaml-key">kind</span>: SecretStore}
+  <span class="yaml-key">target</span>: {<span class="yaml-key">name</span>: order-service-secret}
+  <span class="yaml-key">data</span>:
+    - {<span class="yaml-key">secretKey</span>: DB_PASSWORD, <span class="yaml-key">remoteRef</span>: {<span class="yaml-key">key</span>: prod/order-service/db-password}}
+    - {<span class="yaml-key">secretKey</span>: JWT_SECRET,  <span class="yaml-key">remoteRef</span>: {<span class="yaml-key">key</span>: prod/order-service/jwt-secret}}
+<span class="cmt">---</span>
+<span class="cmt"># ── Deployment ──</span>
+<span class="yaml-key">apiVersion</span>: apps/v1
+<span class="yaml-key">kind</span>: Deployment
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: order-service
+  <span class="yaml-key">namespace</span>: production
+  <span class="yaml-key">labels</span>: {<span class="yaml-key">app</span>: order-service}
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">replicas</span>: <span class="num">3</span>
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">matchLabels</span>: {<span class="yaml-key">app</span>: order-service}
+  <span class="yaml-key">strategy</span>:
+    <span class="yaml-key">type</span>: RollingUpdate
+    <span class="yaml-key">rollingUpdate</span>: {<span class="yaml-key">maxSurge</span>: 1, <span class="yaml-key">maxUnavailable</span>: 0}  <span class="cmt"># zero downtime</span>
+  <span class="yaml-key">template</span>:
+    <span class="yaml-key">metadata</span>:
+      <span class="yaml-key">labels</span>: {<span class="yaml-key">app</span>: order-service}
+      <span class="yaml-key">annotations</span>:
+        <span class="yaml-key">prometheus.io/scrape</span>: <span class="yaml-val">"true"</span>
+        <span class="yaml-key">prometheus.io/port</span>: <span class="yaml-val">"8080"</span>
+        <span class="yaml-key">prometheus.io/path</span>: <span class="yaml-val">/actuator/prometheus</span>
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">serviceAccountName</span>: order-service-sa   <span class="cmt"># IRSA</span>
+      <span class="yaml-key">containers</span>:
+      - <span class="yaml-key">name</span>: order-service
+        <span class="yaml-key">image</span>: <span class="yaml-val">123456789.dkr.ecr.ap-southeast-1.amazonaws.com/order-service:v2.1.0</span>
+        <span class="yaml-key">ports</span>:
+        - {<span class="yaml-key">containerPort</span>: <span class="num">8080</span>}
+        <span class="yaml-key">envFrom</span>:
+        - {<span class="yaml-key">configMapRef</span>: {<span class="yaml-key">name</span>: order-service-config}}
+        - {<span class="yaml-key">secretRef</span>:    {<span class="yaml-key">name</span>: order-service-secret}}
+        <span class="yaml-key">resources</span>:
+          <span class="yaml-key">requests</span>: {<span class="yaml-key">cpu</span>: 250m, <span class="yaml-key">memory</span>: 512Mi}
+          <span class="yaml-key">limits</span>:   {<span class="yaml-key">cpu</span>: 1,    <span class="yaml-key">memory</span>: 1Gi}
+        <span class="yaml-key">readinessProbe</span>:
+          <span class="yaml-key">httpGet</span>: {<span class="yaml-key">path</span>: /actuator/health/readiness, <span class="yaml-key">port</span>: 8080}
+          <span class="yaml-key">initialDelaySeconds</span>: 20
+          <span class="yaml-key">periodSeconds</span>: 10
+        <span class="yaml-key">livenessProbe</span>:
+          <span class="yaml-key">httpGet</span>: {<span class="yaml-key">path</span>: /actuator/health/liveness, <span class="yaml-key">port</span>: 8080}
+          <span class="yaml-key">initialDelaySeconds</span>: 60
+          <span class="yaml-key">periodSeconds</span>: 20
+<span class="cmt">---</span>
+<span class="cmt"># ── Service ──</span>
+<span class="yaml-key">apiVersion</span>: v1
+<span class="yaml-key">kind</span>: Service
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: order-service
+  <span class="yaml-key">namespace</span>: production
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">selector</span>: {<span class="yaml-key">app</span>: order-service}
+  <span class="yaml-key">ports</span>:
+  - {<span class="yaml-key">port</span>: 80, <span class="yaml-key">targetPort</span>: 8080}
+  <span class="yaml-key">type</span>: ClusterIP</pre>
+  </div>
+</div>
+
+<!-- ════ EKS HPA ════ -->
+<div class="section" id="eks-hpa">
+  <div class="section-tag">EKS · Auto Scaling</div>
+  <h2>📈 HPA — Horizontal Pod Autoscaler</h2>
+  <p>HPA tự động tăng/giảm số replicas dựa trên CPU, memory hoặc custom metrics từ Prometheus.</p>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">hpa.yaml — scale dựa trên CPU và custom metrics</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── Cài Metrics Server trước ──</span>
+<span class="cmt"># kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml</span>
+
+<span class="yaml-key">apiVersion</span>: autoscaling/v2
+<span class="yaml-key">kind</span>: HorizontalPodAutoscaler
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: order-service-hpa
+  <span class="yaml-key">namespace</span>: production
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">scaleTargetRef</span>:
+    <span class="yaml-key">apiVersion</span>: apps/v1
+    <span class="yaml-key">kind</span>: Deployment
+    <span class="yaml-key">name</span>: order-service
+  <span class="yaml-key">minReplicas</span>: <span class="num">3</span>
+  <span class="yaml-key">maxReplicas</span>: <span class="num">20</span>
+  <span class="yaml-key">metrics</span>:
+  <span class="cmt">  # Scale khi CPU > 70%</span>
+  - <span class="yaml-key">type</span>: Resource
+    <span class="yaml-key">resource</span>:
+      <span class="yaml-key">name</span>: cpu
+      <span class="yaml-key">target</span>:
+        <span class="yaml-key">type</span>: Utilization
+        <span class="yaml-key">averageUtilization</span>: <span class="num">70</span>
+  <span class="cmt">  # Scale khi Memory > 80%</span>
+  - <span class="yaml-key">type</span>: Resource
+    <span class="yaml-key">resource</span>:
+      <span class="yaml-key">name</span>: memory
+      <span class="yaml-key">target</span>:
+        <span class="yaml-key">type</span>: Utilization
+        <span class="yaml-key">averageUtilization</span>: <span class="num">80</span>
+  <span class="yaml-key">behavior</span>:
+    <span class="yaml-key">scaleUp</span>:
+      <span class="yaml-key">stabilizationWindowSeconds</span>: <span class="num">60</span>   <span class="cmt"># đợi 60s mới scale up tiếp</span>
+      <span class="yaml-key">policies</span>:
+      - {<span class="yaml-key">type</span>: Pods, <span class="yaml-key">value</span>: <span class="num">4</span>, <span class="yaml-key">periodSeconds</span>: 60}  <span class="cmt"># max 4 pods/phút</span>
+    <span class="yaml-key">scaleDown</span>:
+      <span class="yaml-key">stabilizationWindowSeconds</span>: <span class="num">300</span>  <span class="cmt"># đợi 5 phút mới scale down</span>
+      <span class="yaml-key">policies</span>:
+      - {<span class="yaml-key">type</span>: Pods, <span class="yaml-key">value</span>: 1, <span class="yaml-key">periodSeconds</span>: 60}</pre>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-label">✅ Verify HPA</div>
+    <code>kubectl get hpa -n production</code> — xem trạng thái HPA, targets và replicas hiện tại.<br>
+    <code>kubectl describe hpa order-service-hpa -n production</code> — xem lịch sử scale events.
+  </div>
+</div>
+
+<!-- ════════ CI/CD ════════ -->
+
+<!-- ════ CICD OVERVIEW ════ -->
+<div class="section" id="cicd-overview">
+  <div class="section-tag">CI/CD · Tổng quan</div>
+  <h2>🔁 Pipeline CI/CD trên AWS</h2>
+  <p>AWS cung cấp bộ công cụ CI/CD native tích hợp chặt với IAM, ECR, EKS: <strong style="color:var(--text)">CodePipeline</strong> (orchestrator), <strong style="color:var(--text)">CodeBuild</strong> (runner), <strong style="color:var(--text)">CodeDeploy</strong> (deploy).</p>
+
+  <div class="arch-box">
+    <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em">AWS Native CI/CD Pipeline</div>
+    <div class="flow">
+      <div class="flow-node gn"><div>Source</div><div class="flow-sub">GitHub / CodeCommit</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node sk"><div>CodeBuild Test</div><div class="flow-sub">mvn test, sonar</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node sk"><div>CodeBuild Build</div><div class="flow-sub">docker build + push ECR</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node am"><div>Approve</div><div class="flow-sub">manual gate (opt)</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node hl"><div>Deploy EKS</div><div class="flow-sub">kubectl apply</div></div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🚀</div>
+      <div class="card-title">CodePipeline</div>
+      <div class="card-desc">Orchestrate toàn bộ pipeline. Trigger từ GitHub/CodeCommit. Kết nối các stages. Notify qua SNS. Tích hợp với mọi AWS service.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔨</div>
+      <div class="card-title">CodeBuild</div>
+      <div class="card-desc">Managed build server. Chạy commands trong Docker container. Tự scale. Trả tiền theo phút. Tích hợp ECR, SSM, Secrets Manager.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🐳</div>
+      <div class="card-title">ECR</div>
+      <div class="card-desc">Elastic Container Registry — private Docker registry của AWS. Tích hợp IAM, quét lỗ hổng bảo mật, lifecycle policies tự xóa image cũ.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔄</div>
+      <div class="card-title">ArgoCD</div>
+      <div class="card-desc">GitOps CD tool. Sync K8s manifests từ Git repo. Auto-heal khi cluster drift khỏi desired state. Audit trail đầy đủ.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CODEPIPELINE ════ -->
+<div class="section" id="codepipeline">
+  <div class="section-tag">CI/CD · CodePipeline</div>
+  <h2>🚀 CodePipeline — Tạo Pipeline</h2>
+
+  <h3>Tạo Pipeline bằng AWS CLI / CloudFormation</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">cloudformation/pipeline.yaml — CodePipeline + CodeBuild</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="yaml-key">AWSTemplateFormatVersion</span>: <span class="yaml-val">'2010-09-09'</span>
+<span class="yaml-key">Description</span>: CI/CD Pipeline for order-service
+
+<span class="yaml-key">Parameters</span>:
+  <span class="yaml-key">GitHubOwner</span>:
+    <span class="yaml-key">Type</span>: String
+    <span class="yaml-key">Default</span>: <span class="yaml-val">company</span>
+  <span class="yaml-key">GitHubRepo</span>:
+    <span class="yaml-key">Type</span>: String
+    <span class="yaml-key">Default</span>: <span class="yaml-val">order-service</span>
+  <span class="yaml-key">EKSClusterName</span>:
+    <span class="yaml-key">Type</span>: String
+    <span class="yaml-key">Default</span>: <span class="yaml-val">prod-cluster</span>
+
+<span class="yaml-key">Resources</span>:
+  <span class="yaml-key">ArtifactBucket</span>:
+    <span class="yaml-key">Type</span>: AWS::S3::Bucket
+    <span class="yaml-key">Properties</span>:
+      <span class="yaml-key">VersioningConfiguration</span>: {<span class="yaml-key">Status</span>: Enabled}
+
+  <span class="yaml-key">Pipeline</span>:
+    <span class="yaml-key">Type</span>: AWS::CodePipeline::Pipeline
+    <span class="yaml-key">Properties</span>:
+      <span class="yaml-key">RoleArn</span>: !GetAtt PipelineRole.Arn
+      <span class="yaml-key">ArtifactStore</span>:
+        <span class="yaml-key">Type</span>: S3
+        <span class="yaml-key">Location</span>: !Ref ArtifactBucket
+      <span class="yaml-key">Stages</span>:
+
+        <span class="cmt"># Stage 1: Source từ GitHub</span>
+        - <span class="yaml-key">Name</span>: Source
+          <span class="yaml-key">Actions</span>:
+          - <span class="yaml-key">Name</span>: GitHubSource
+            <span class="yaml-key">ActionTypeId</span>:
+              <span class="yaml-key">Category</span>: Source
+              <span class="yaml-key">Owner</span>: ThirdParty
+              <span class="yaml-key">Provider</span>: GitHub
+              <span class="yaml-key">Version</span>: <span class="yaml-val">'1'</span>
+            <span class="yaml-key">Configuration</span>:
+              <span class="yaml-key">Owner</span>: !Ref GitHubOwner
+              <span class="yaml-key">Repo</span>:  !Ref GitHubRepo
+              <span class="yaml-key">Branch</span>: main
+              <span class="yaml-key">OAuthToken</span>: !Sub <span class="yaml-val">"{{resolve:secretsmanager:github-token:SecretString:token}}"</span>
+            <span class="yaml-key">OutputArtifacts</span>: [{<span class="yaml-key">Name</span>: SourceCode}]
+
+        <span class="cmt"># Stage 2: Test</span>
+        - <span class="yaml-key">Name</span>: Test
+          <span class="yaml-key">Actions</span>:
+          - <span class="yaml-key">Name</span>: UnitTest
+            <span class="yaml-key">ActionTypeId</span>:
+              <span class="yaml-key">Category</span>: Build
+              <span class="yaml-key">Owner</span>: AWS
+              <span class="yaml-key">Provider</span>: CodeBuild
+              <span class="yaml-key">Version</span>: <span class="yaml-val">'1'</span>
+            <span class="yaml-key">Configuration</span>:
+              <span class="yaml-key">ProjectName</span>: !Ref TestProject
+            <span class="yaml-key">InputArtifacts</span>:  [{<span class="yaml-key">Name</span>: SourceCode}]
+
+        <span class="cmt"># Stage 3: Build Docker + Push ECR</span>
+        - <span class="yaml-key">Name</span>: Build
+          <span class="yaml-key">Actions</span>:
+          - <span class="yaml-key">Name</span>: BuildAndPush
+            <span class="yaml-key">ActionTypeId</span>:
+              <span class="yaml-key">Category</span>: Build
+              <span class="yaml-key">Owner</span>: AWS
+              <span class="yaml-key">Provider</span>: CodeBuild
+              <span class="yaml-key">Version</span>: <span class="yaml-val">'1'</span>
+            <span class="yaml-key">Configuration</span>:
+              <span class="yaml-key">ProjectName</span>: !Ref BuildProject
+            <span class="yaml-key">InputArtifacts</span>:  [{<span class="yaml-key">Name</span>: SourceCode}]
+            <span class="yaml-key">OutputArtifacts</span>: [{<span class="yaml-key">Name</span>: BuildOutput}]
+
+        <span class="cmt"># Stage 4: Manual approval trước production</span>
+        - <span class="yaml-key">Name</span>: Approve
+          <span class="yaml-key">Actions</span>:
+          - <span class="yaml-key">Name</span>: ManualApproval
+            <span class="yaml-key">ActionTypeId</span>:
+              <span class="yaml-key">Category</span>: Approval
+              <span class="yaml-key">Owner</span>: AWS
+              <span class="yaml-key">Provider</span>: Manual
+              <span class="yaml-key">Version</span>: <span class="yaml-val">'1'</span>
+
+        <span class="cmt"># Stage 5: Deploy lên EKS</span>
+        - <span class="yaml-key">Name</span>: Deploy
+          <span class="yaml-key">Actions</span>:
+          - <span class="yaml-key">Name</span>: DeployToEKS
+            <span class="yaml-key">ActionTypeId</span>:
+              <span class="yaml-key">Category</span>: Build
+              <span class="yaml-key">Owner</span>: AWS
+              <span class="yaml-key">Provider</span>: CodeBuild
+              <span class="yaml-key">Version</span>: <span class="yaml-val">'1'</span>
+            <span class="yaml-key">Configuration</span>:
+              <span class="yaml-key">ProjectName</span>: !Ref DeployProject
+            <span class="yaml-key">InputArtifacts</span>: [{<span class="yaml-key">Name</span>: BuildOutput}]</pre>
+  </div>
+</div>
+
+<!-- ════ CODEBUILD ════ -->
+<div class="section" id="codebuild">
+  <div class="section-tag">CI/CD · CodeBuild</div>
+  <h2>🔨 CodeBuild &amp; buildspec.yml</h2>
+  <p>File <code>buildspec.yml</code> định nghĩa chính xác những gì CodeBuild chạy trong mỗi giai đoạn.</p>
+
+  <h3>buildspec-test.yml — chạy unit tests</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">buildspec-test.yml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="yaml-key">version</span>: <span class="num">0.2</span>
+
+<span class="yaml-key">env</span>:
+  <span class="yaml-key">variables</span>:
+    <span class="yaml-key">JAVA_HOME</span>: <span class="yaml-val">/usr/lib/jvm/java-21-amazon-corretto</span>
+  <span class="yaml-key">parameter-store</span>:
+    <span class="yaml-key">SONAR_TOKEN</span>: <span class="yaml-val">/prod/sonar/token</span>
+    <span class="yaml-key">DB_URL</span>: <span class="yaml-val">/prod/order-service/test-db-url</span>
+
+<span class="yaml-key">phases</span>:
+  <span class="yaml-key">install</span>:
+    <span class="yaml-key">runtime-versions</span>:
+      <span class="yaml-key">java</span>: <span class="yaml-val">corretto21</span>
+    <span class="yaml-key">commands</span>:
+      - echo "Installing dependencies..."
+      - mvn dependency:go-offline -q   <span class="cmt"># cache deps trước</span>
+
+  <span class="yaml-key">pre_build</span>:
+    <span class="yaml-key">commands</span>:
+      - echo "Pre-build phase..."
+      - echo "Commit SHA $CODEBUILD_RESOLVED_SOURCE_VERSION"
+
+  <span class="yaml-key">build</span>:
+    <span class="yaml-key">commands</span>:
+      - echo "Running tests..."
+      - mvn clean test
+      <span class="cmt"># SonarQube analysis</span>
+      - mvn sonar:sonar
+          -Dsonar.projectKey=order-service
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=$SONAR_TOKEN
+
+  <span class="yaml-key">post_build</span>:
+    <span class="yaml-key">commands</span>:
+      - echo "Tests completed on `date`"
+
+<span class="yaml-key">reports</span>:
+  <span class="yaml-key">test-reports</span>:
+    <span class="yaml-key">files</span>: [<span class="yaml-val">"target/surefire-reports/**/*.xml"</span>]
+    <span class="yaml-key">file-format</span>: JUNITXML
+  <span class="yaml-key">coverage-reports</span>:
+    <span class="yaml-key">files</span>: [<span class="yaml-val">"target/site/jacoco/jacoco.xml"</span>]
+    <span class="yaml-key">file-format</span>: JACOCOXML
+
+<span class="yaml-key">cache</span>:
+  <span class="yaml-key">paths</span>:
+    - <span class="yaml-val">'/root/.m2/**/*'</span>  <span class="cmt"># cache Maven local repo → tăng tốc build lần sau</span></pre>
+  </div>
+
+  <h3>buildspec-build.yml — build Docker image và push ECR</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">buildspec-build.yml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="yaml-key">version</span>: <span class="num">0.2</span>
+
+<span class="yaml-key">env</span>:
+  <span class="yaml-key">variables</span>:
+    <span class="yaml-key">ECR_REGISTRY</span>: <span class="yaml-val">123456789.dkr.ecr.ap-southeast-1.amazonaws.com</span>
+    <span class="yaml-key">IMAGE_REPO</span>:   <span class="yaml-val">order-service</span>
+    <span class="yaml-key">AWS_REGION</span>:   <span class="yaml-val">ap-southeast-1</span>
+
+<span class="yaml-key">phases</span>:
+  <span class="yaml-key">pre_build</span>:
+    <span class="yaml-key">commands</span>:
+      <span class="cmt"># Login vào ECR</span>
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+      <span class="cmt"># Tag image với commit SHA và "latest"</span>
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo "IMAGE_TAG=$IMAGE_TAG" >> /tmp/env.sh
+
+  <span class="yaml-key">build</span>:
+    <span class="yaml-key">commands</span>:
+      - echo "Building Docker image..."
+      <span class="cmt"># Multi-stage build — production image nhỏ, không có Maven, không có src</span>
+      - docker build
+          --build-arg JAR_FILE=target/order-service.jar
+          --cache-from $ECR_REGISTRY/$IMAGE_REPO:latest
+          -t $ECR_REGISTRY/$IMAGE_REPO:$IMAGE_TAG
+          -t $ECR_REGISTRY/$IMAGE_REPO:latest
+          .
+      - echo "Build completed at `date`"
+
+  <span class="yaml-key">post_build</span>:
+    <span class="yaml-key">commands</span>:
+      - echo "Pushing images to ECR..."
+      - docker push $ECR_REGISTRY/$IMAGE_REPO:$IMAGE_TAG
+      - docker push $ECR_REGISTRY/$IMAGE_REPO:latest
+      <span class="cmt"># Tạo imagedefinitions.json cho CodeDeploy</span>
+      - printf '[{"name":"order-service","imageUri":"%s"}]' $ECR_REGISTRY/$IMAGE_REPO:$IMAGE_TAG > imagedefinitions.json
+      <span class="cmt"># Tạo imageTag.txt để build stage sau đọc</span>
+      - echo $IMAGE_TAG > imageTag.txt
+
+<span class="yaml-key">artifacts</span>:
+  <span class="yaml-key">files</span>:
+    - <span class="yaml-val">imagedefinitions.json</span>
+    - <span class="yaml-val">imageTag.txt</span>
+    - <span class="yaml-val">k8s/**</span>     <span class="cmt"># K8s manifests để deploy stage dùng</span></pre>
+  </div>
+
+  <h3>buildspec-deploy.yml — deploy lên EKS</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">buildspec-deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="yaml-key">version</span>: <span class="num">0.2</span>
+
+<span class="yaml-key">env</span>:
+  <span class="yaml-key">variables</span>:
+    <span class="yaml-key">EKS_CLUSTER</span>:  <span class="yaml-val">prod-cluster</span>
+    <span class="yaml-key">AWS_REGION</span>:   <span class="yaml-val">ap-southeast-1</span>
+    <span class="yaml-key">NAMESPACE</span>:    <span class="yaml-val">production</span>
+    <span class="yaml-key">ECR_REGISTRY</span>: <span class="yaml-val">123456789.dkr.ecr.ap-southeast-1.amazonaws.com</span>
+
+<span class="yaml-key">phases</span>:
+  <span class="yaml-key">install</span>:
+    <span class="yaml-key">commands</span>:
+      - curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
+      - chmod +x kubectl && mv kubectl /usr/local/bin
+
+  <span class="yaml-key">pre_build</span>:
+    <span class="yaml-key">commands</span>:
+      <span class="cmt"># Cập nhật kubeconfig để trỏ đến EKS cluster</span>
+      - aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
+      <span class="cmt"># Đọc image tag từ build stage</span>
+      - IMAGE_TAG=$(cat imageTag.txt)
+      - echo "Deploying image $IMAGE_TAG"
+
+  <span class="yaml-key">build</span>:
+    <span class="yaml-key">commands</span>:
+      <span class="cmt"># Thay IMAGE_TAG trong K8s manifests</span>
+      - sed -i "s|IMAGE_TAG_PLACEHOLDER|$IMAGE_TAG|g" k8s/order-service.yaml
+      <span class="cmt"># Apply manifests</span>
+      - kubectl apply -f k8s/ -n $NAMESPACE
+      <span class="cmt"># Chờ rollout hoàn thành</span>
+      - kubectl rollout status deployment/order-service -n $NAMESPACE --timeout=5m
+
+  <span class="yaml-key">post_build</span>:
+    <span class="yaml-key">commands</span>:
+      - echo "Deploy completed. Current pods:"
+      - kubectl get pods -n $NAMESPACE -l app=order-service</pre>
+  </div>
+</div>
+
+<!-- ════ ECR ════ -->
+<div class="section" id="ecr">
+  <div class="section-tag">CI/CD · ECR</div>
+  <h2>🐳 ECR — Docker Private Registry trên AWS</h2>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — tạo ECR repo, lifecycle policy, Dockerfile</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── Tạo ECR repository ──</span>
+aws ecr create-repository \
+  --repository-name order-service \
+  --region ap-southeast-1 \
+  --image-scanning-configuration scanOnPush=true \
+  --encryption-configuration encryptionType=AES256
+
+<span class="cmt"># ── Lifecycle policy: giữ 30 images gần nhất ──</span>
+aws ecr put-lifecycle-policy \
+  --repository-name order-service \
+  --lifecycle-policy-text '{
+    "rules": [{
+      "rulePriority": 1,
+      "description": "Keep last 30 images",
+      "selection": {
+        "tagStatus": "tagged",
+        "tagPatternList": ["*"],
+        "countType": "imageCountMoreThan",
+        "countNumber": 30
+      },
+      "action": {"type": "expire"}
+    }]
+  }'
+
+<span class="cmt"># ── Login từ máy local ──</span>
+aws ecr get-login-password --region ap-southeast-1 | \
+  docker login --username AWS --password-stdin \
+  123456789.dkr.ecr.ap-southeast-1.amazonaws.com</pre>
+  </div>
+
+  <h3>Dockerfile multi-stage — Spring Boot production image</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">Dockerfile</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── Stage 1: Build ──</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:21-jdk-alpine</span> <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> .mvn/   .mvn/
+<span class="kw">COPY</span> mvnw    pom.xml  ./
+<span class="kw">RUN</span> ./mvnw dependency:go-offline -q    <span class="cmt"># cache layer</span>
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> ./mvnw clean package -DskipTests
+
+<span class="cmt"># ── Stage 2: Extract layers (Spring Boot layered jar) ──</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:21-jre-alpine</span> <span class="kw">AS</span> extractor
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=builder /app/target/*.jar app.jar
+<span class="kw">RUN</span> java -Djarmode=layertools -jar app.jar extract
+
+<span class="cmt"># ── Stage 3: Production image — nhỏ nhất ──</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:21-jre-alpine</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Non-root user</span>
+<span class="kw">RUN</span> addgroup -S spring && adduser -S spring -G spring
+<span class="kw">USER</span> spring:spring
+
+<span class="cmt"># Copy layers (caching tốt hơn)</span>
+<span class="kw">COPY</span> --from=extractor /app/dependencies/          ./
+<span class="kw">COPY</span> --from=extractor /app/spring-boot-loader/    ./
+<span class="kw">COPY</span> --from=extractor /app/snapshot-dependencies/ ./
+<span class="kw">COPY</span> --from=extractor /app/application/           ./
+
+<span class="kw">EXPOSE</span> 8080
+<span class="kw">HEALTHCHECK</span> --interval=30s --timeout=5s --retries=3 \
+  <span class="kw">CMD</span> wget -qO- http://localhost:8080/actuator/health | grep UP || exit 1
+
+<span class="kw">ENTRYPOINT</span> [<span class="str">"java"</span>, <span class="str">"-XX:+UseContainerSupport"</span>, <span class="str">"-XX:MaxRAMPercentage=75"</span>, <span class="str">"org.springframework.boot.loader.launch.JarLauncher"</span>]</pre>
+  </div>
+</div>
+
+<!-- ════ GITHUB ACTIONS ════ -->
+<div class="section" id="github-actions-eks">
+  <div class="section-tag">CI/CD · GitHub Actions</div>
+  <h2>⚡ GitHub Actions → EKS</h2>
+  <p>Thay thế CodePipeline bằng GitHub Actions — phổ biến hơn, dễ debug, OIDC authentication không cần AWS credentials.</p>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">.github/workflows/deploy-eks.yml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="yaml-key">name</span>: Deploy to EKS
+
+<span class="yaml-key">on</span>:
+  <span class="yaml-key">push</span>:
+    <span class="yaml-key">branches</span>: [main]
+  <span class="yaml-key">pull_request</span>:
+    <span class="yaml-key">branches</span>: [main]
+
+<span class="yaml-key">env</span>:
+  <span class="yaml-key">AWS_REGION</span>:   ap-southeast-1
+  <span class="yaml-key">EKS_CLUSTER</span>:  prod-cluster
+  <span class="yaml-key">ECR_REGISTRY</span>: 123456789.dkr.ecr.ap-southeast-1.amazonaws.com
+  <span class="yaml-key">IMAGE_NAME</span>:   order-service
+
+<span class="yaml-key">jobs</span>:
+  <span class="yaml-key">test</span>:
+    <span class="yaml-key">runs-on</span>: ubuntu-latest
+    <span class="yaml-key">steps</span>:
+      - <span class="yaml-key">uses</span>: actions/checkout@v4
+      - <span class="yaml-key">uses</span>: actions/setup-java@v4
+        <span class="yaml-key">with</span>: {<span class="yaml-key">java-version</span>: <span class="yaml-val">'21'</span>, <span class="yaml-key">distribution</span>: temurin, <span class="yaml-key">cache</span>: maven}
+      - <span class="yaml-key">name</span>: Run tests
+        <span class="yaml-key">run</span>: mvn clean test
+
+  <span class="yaml-key">build-and-deploy</span>:
+    <span class="yaml-key">needs</span>: test
+    <span class="yaml-key">runs-on</span>: ubuntu-latest
+    <span class="yaml-key">if</span>: github.ref == 'refs/heads/main'
+    <span class="yaml-key">permissions</span>:
+      <span class="yaml-key">id-token</span>: write   <span class="cmt"># cần cho OIDC</span>
+      <span class="yaml-key">contents</span>: read
+
+    <span class="yaml-key">steps</span>:
+      - <span class="yaml-key">uses</span>: actions/checkout@v4
+
+      <span class="cmt"># ── Auth AWS bằng OIDC (không cần hardcode credentials!) ──</span>
+      - <span class="yaml-key">name</span>: Configure AWS credentials (OIDC)
+        <span class="yaml-key">uses</span>: aws-actions/configure-aws-credentials@v4
+        <span class="yaml-key">with</span>:
+          <span class="yaml-key">role-to-assume</span>: arn:aws:iam::123456789:role/GitHubActionsDeployRole
+          <span class="yaml-key">aws-region</span>: ${{ env.AWS_REGION }}
+
+      - <span class="yaml-key">name</span>: Login to Amazon ECR
+        <span class="yaml-key">id</span>: login-ecr
+        <span class="yaml-key">uses</span>: aws-actions/amazon-ecr-login@v2
+
+      - <span class="yaml-key">name</span>: Build, tag, push Docker image
+        <span class="yaml-key">env</span>:
+          <span class="yaml-key">IMAGE_TAG</span>: ${{ github.sha }}
+        <span class="yaml-key">run</span>: |
+          docker build -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG $ECR_REGISTRY/$IMAGE_NAME:latest
+          docker push $ECR_REGISTRY/$IMAGE_NAME:latest
+
+      - <span class="yaml-key">name</span>: Update kubeconfig for EKS
+        <span class="yaml-key">run</span>: aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
+
+      - <span class="yaml-key">name</span>: Deploy to EKS
+        <span class="yaml-key">env</span>:
+          <span class="yaml-key">IMAGE_TAG</span>: ${{ github.sha }}
+        <span class="yaml-key">run</span>: |
+          sed -i "s|IMAGE_TAG_PLACEHOLDER|$IMAGE_TAG|g" k8s/order-service.yaml
+          kubectl apply -f k8s/ -n production
+          kubectl rollout status deployment/order-service -n production --timeout=5m
+
+      - <span class="yaml-key">name</span>: Verify deployment
+        <span class="yaml-key">run</span>: kubectl get pods -n production -l app=order-service</pre>
+  </div>
+
+  <div class="callout sky">
+    <div class="callout-label">💡 Setup OIDC cho GitHub Actions</div>
+    Tạo OIDC Identity Provider trong AWS IAM với URL <code>https://token.actions.githubusercontent.com</code> → Tạo IAM Role trust policy cho GitHub repo → Không cần <code>AWS_ACCESS_KEY_ID</code> trong Secrets nữa. An toàn hơn nhiều.
+  </div>
+</div>
+
+<!-- ════ ARGOCD ════ -->
+<div class="section" id="argocd">
+  <div class="section-tag">CI/CD · GitOps</div>
+  <h2>🔄 ArgoCD — GitOps trên EKS</h2>
+  <p>GitOps: <strong style="color:var(--text)">Git là source of truth</strong>. ArgoCD liên tục sync cluster với trạng thái trong Git — không cần <code>kubectl apply</code> thủ công.</p>
+
+  <div class="flow">
+    <div class="flow-node gn"><div>Dev push code</div><div class="flow-sub">app repo</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node sk"><div>CI build</div><div class="flow-sub">push ECR</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node sk"><div>Update image tag</div><div class="flow-sub">infra repo</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node hl"><div>ArgoCD detect</div><div class="flow-sub">Git changed</div></div>
+    <div class="flow-arr">→</div>
+    <div class="flow-node gn"><div>Sync EKS</div><div class="flow-sub">auto deploy</div></div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash + yaml — cài ArgoCD và tạo Application</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── Cài ArgoCD ──</span>
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+<span class="cmt"># Expose ArgoCD UI qua LoadBalancer</span>
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+
+<span class="cmt"># Lấy admin password</span>
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+
+<span class="cmt"># ── ArgoCD Application ──</span>
+<span class="yaml-key">apiVersion</span>: argoproj.io/v1alpha1
+<span class="yaml-key">kind</span>: Application
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: order-service
+  <span class="yaml-key">namespace</span>: argocd
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">project</span>: default
+  <span class="yaml-key">source</span>:
+    <span class="yaml-key">repoURL</span>: <span class="yaml-val">https://github.com/company/k8s-manifests</span>
+    <span class="yaml-key">targetRevision</span>: HEAD
+    <span class="yaml-key">path</span>: <span class="yaml-val">production/order-service</span>   <span class="cmt"># thư mục chứa K8s yamls</span>
+  <span class="yaml-key">destination</span>:
+    <span class="yaml-key">server</span>: <span class="yaml-val">https://kubernetes.default.svc</span>
+    <span class="yaml-key">namespace</span>: production
+  <span class="yaml-key">syncPolicy</span>:
+    <span class="yaml-key">automated</span>:
+      <span class="yaml-key">prune</span>:    <span class="kw">true</span>   <span class="cmt"># xóa resources không còn trong Git</span>
+      <span class="yaml-key">selfHeal</span>: <span class="kw">true</span>   <span class="cmt"># tự fix khi ai đó kubectl edit thủ công</span>
+    <span class="yaml-key">syncOptions</span>:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  <span class="yaml-key">ignoreDifferences</span>:
+  - <span class="yaml-key">group</span>: apps
+    <span class="yaml-key">kind</span>: Deployment
+    <span class="yaml-key">jsonPointers</span>: [/spec/replicas]  <span class="cmt"># ignore HPA managed replicas</span>
+
+<span class="cmt"># ── CI update image tag và push lên infra repo ──</span>
+<span class="cmt"># Thêm vào GitHub Actions workflow sau khi push image:</span>
+<span class="yaml-key">run</span>: |
+  git clone https://github.com/company/k8s-manifests
+  cd k8s-manifests
+  sed -i "s|order-service:.*|order-service:$IMAGE_TAG|" production/order-service/deployment.yaml
+  git commit -am "chore: update order-service image to $IMAGE_TAG"
+  git push
+<span class="cmt"># ArgoCD tự phát hiện change trong vài giây và sync!</span></pre>
+  </div>
+</div>
+
+<!-- ════ LENS INTRO ════ -->
+<div class="section" id="lens-intro">
+  <div class="section-tag">Lens · Giới thiệu</div>
+  <h2>🔭 Lens IDE — Desktop Client cho Kubernetes</h2>
+  <p>Lens là Kubernetes IDE mạnh mẽ nhất cho desktop. Xem real-time cluster state, debug pods, quản lý resources — không cần gõ <code>kubectl</code> cho mọi việc.</p>
+
+  <div class="cards col4">
+    <div class="card">
+      <div class="card-ico">📊</div>
+      <div class="card-title">Real-time metrics</div>
+      <div class="card-desc">CPU, RAM, network của từng pod hiển thị live charts.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📝</div>
+      <div class="card-title">Logs viewer</div>
+      <div class="card-desc">Xem logs nhiều pods cùng lúc, filter, search, download.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">💻</div>
+      <div class="card-title">Terminal</div>
+      <div class="card-desc">Exec vào container với 1 click. Built-in kubectl terminal.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔌</div>
+      <div class="card-title">Port forwarding</div>
+      <div class="card-desc">Forward port từ pod/service về localhost chỉ 1 click.</div>
+    </div>
+  </div>
+
+  <h3>Cài đặt Lens</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — cài Lens trên các OS</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── macOS ──</span>
+brew install --cask lens
+
+<span class="cmt"># ── Windows ── (PowerShell)</span>
+winget install Mirantis.Lens
+
+<span class="cmt"># ── Ubuntu/Debian ──</span>
+curl -fsSL https://downloads.k8slens.dev/keys/gpg | sudo gpg --dearmor -o /usr/share/keyrings/lens-archive-keyring.gpg
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main" | sudo tee /etc/apt/sources.list.d/lens.list
+sudo apt update && sudo apt install lens
+
+<span class="cmt"># Mở Lens</span>
+lens    <span class="cmt"># hoặc tìm "Lens" trong Applications</span></pre>
+  </div>
+</div>
+
+<!-- ════ LENS CONNECT ════ -->
+<div class="section" id="lens-connect">
+  <div class="section-tag">Lens · Kết nối</div>
+  <h2>🔗 Kết nối EKS Cluster vào Lens</h2>
+  <p>Lens đọc kubeconfig từ <code>~/.kube/config</code> — sau khi <code>aws eks update-kubeconfig</code> là Lens tự phát hiện cluster.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Cập nhật kubeconfig với EKS cluster</div>
+        <div class="step-desc">
+          <div class="code-wrap" style="margin-top:10px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash</span></div>
+            <pre><span class="cmt"># Thêm EKS cluster vào kubeconfig</span>
+aws eks update-kubeconfig \
+  --region ap-southeast-1 \
+  --name   prod-cluster \
+  --alias  prod-cluster      <span class="cmt"># tên hiển thị trong Lens</span>
+
+<span class="cmt"># Thêm nhiều clusters</span>
+aws eks update-kubeconfig --region ap-southeast-1 --name dev-cluster  --alias dev
+aws eks update-kubeconfig --region ap-southeast-1 --name prod-cluster --alias prod
+
+<span class="cmt"># Verify</span>
+kubectl config get-contexts
+<span class="sh-out">CURRENT   NAME         CLUSTER      AUTHINFO
+          dev          dev-cluster  dev-cluster
+*         prod         prod-cluster prod-cluster</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Mở Lens và thêm cluster</div>
+        <div class="step-desc">Mở Lens → Click <strong style="color:var(--text)">"+"</strong> ở góc trái → <strong style="color:var(--text)">"Add from kubeconfig"</strong> → Lens tự detect tất cả contexts trong <code>~/.kube/config</code> → Chọn cluster cần thêm → <strong style="color:var(--text)">"Add Cluster"</strong>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Cài Lens Metrics (Prometheus tích hợp)</div>
+        <div class="step-desc">
+          Sau khi connect: <strong style="color:var(--text)">Cluster Settings</strong> → <strong style="color:var(--text)">Features</strong> → <strong style="color:var(--text)">"Install"</strong> Prometheus Stack → Lens tự deploy kube-prometheus-stack vào namespace <code>lens-metrics</code>. Sau vài phút thấy CPU/RAM charts real-time cho từng pod.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lens UI mockup -->
+  <div class="lens-mock">
+    <div class="lens-titlebar">
+      <div class="lens-dots"><div class="lens-dot"></div><div class="lens-dot"></div><div class="lens-dot"></div></div>
+      <div class="lens-title">Lens — prod-cluster · namespace: production</div>
+    </div>
+    <div class="lens-body">
+      <div class="lens-sidebar">
+        <div class="lens-sb-group">Cluster</div>
+        <div class="lens-sb-item">🏠 Overview</div>
+        <div class="lens-sb-item">🔢 Nodes</div>
+        <div class="lens-sb-group">Workloads</div>
+        <div class="lens-sb-item active">📦 Pods</div>
+        <div class="lens-sb-item">🔄 Deployments</div>
+        <div class="lens-sb-item">📋 ReplicaSets</div>
+        <div class="lens-sb-group">Network</div>
+        <div class="lens-sb-item">🌐 Services</div>
+        <div class="lens-sb-item">🔀 Ingresses</div>
+        <div class="lens-sb-group">Config</div>
+        <div class="lens-sb-item">⚙️ ConfigMaps</div>
+        <div class="lens-sb-item">🔑 Secrets</div>
+      </div>
+      <div class="lens-content">
+        <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">Pods · production · 5 items</div>
+        <div class="lens-row"><div class="lens-status-green"></div><div class="lens-name">order-service-7d9f8b-xk9pl</div><div class="lens-tag lens-tag-green">Running</div><div style="margin-left:auto;font-size:11px;color:var(--muted)">2m · 256m CPU · 512Mi</div></div>
+        <div class="lens-row"><div class="lens-status-green"></div><div class="lens-name">order-service-7d9f8b-m2n4r</div><div class="lens-tag lens-tag-green">Running</div><div style="margin-left:auto;font-size:11px;color:var(--muted)">2m · 244m CPU · 498Mi</div></div>
+        <div class="lens-row"><div class="lens-status-green"></div><div class="lens-name">payment-service-6c8f7d-p1q3s</div><div class="lens-tag lens-tag-green">Running</div><div style="margin-left:auto;font-size:11px;color:var(--muted)">5m · 180m CPU · 386Mi</div></div>
+        <div class="lens-row"><div class="lens-status-amber"></div><div class="lens-name">inventory-service-9b2e4a-rs7vw</div><div class="lens-tag lens-tag-amber">Pending</div><div style="margin-left:auto;font-size:11px;color:var(--muted)">30s · — · —</div></div>
+        <div class="lens-row"><div class="lens-status-green"></div><div class="lens-name">user-service-5a3c1f-ty8zx</div><div class="lens-tag lens-tag-green">Running</div><div style="margin-left:auto;font-size:11px;color:var(--muted)">8m · 95m CPU · 210Mi</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Quản lý nhiều clusters và namespaces</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — quản lý kubeconfig nhiều clusters</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># Xem tất cả contexts</span>
+kubectl config get-contexts
+
+<span class="cmt"># Switch context (Lens cũng có dropdown để switch)</span>
+kubectl config use-context prod
+
+<span class="cmt"># Đổi tên context cho dễ đọc trong Lens</span>
+kubectl config rename-context \
+  arn:aws:eks:ap-southeast-1:123456789:cluster/prod-cluster \
+  production-eks
+
+<span class="cmt"># Merge nhiều kubeconfig files</span>
+KUBECONFIG=~/.kube/config:~/.kube/dev-config:~/.kube/staging-config \
+  kubectl config view --flatten > ~/.kube/merged-config
+cp ~/.kube/merged-config ~/.kube/config</pre>
+  </div>
+</div>
+
+<!-- ════ LENS WORKLOADS ════ -->
+<div class="section" id="lens-workloads">
+  <div class="section-tag">Lens · Workloads</div>
+  <h2>📊 Xem Workloads &amp; Pods trong Lens</h2>
+
+  <h3>Các thao tác thường dùng trong Lens UI</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Thao tác</th><th>Cách làm trong Lens</th><th>kubectl tương đương</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Xem logs pod</strong></td><td>Click pod → <strong>Logs</strong> tab → filter real-time</td><td><code>kubectl logs -f pod-name -n ns</code></td></tr>
+        <tr><td><strong>Exec vào container</strong></td><td>Click pod → <strong>Shell</strong> button → terminal mở ngay</td><td><code>kubectl exec -it pod-name -- /bin/sh</code></td></tr>
+        <tr><td><strong>Port forward</strong></td><td>Click pod/service → <strong>Port Forward</strong> → chọn port</td><td><code>kubectl port-forward pod-name 8080:8080</code></td></tr>
+        <tr><td><strong>Describe resource</strong></td><td>Click bất kỳ resource → xem full YAML/details</td><td><code>kubectl describe pod pod-name</code></td></tr>
+        <tr><td><strong>Edit manifest</strong></td><td>Click resource → <strong>Edit</strong> button → YAML editor built-in</td><td><code>kubectl edit deployment app-name</code></td></tr>
+        <tr><td><strong>Delete resource</strong></td><td>Right-click resource → Delete</td><td><code>kubectl delete pod pod-name</code></td></tr>
+        <tr><td><strong>Scale deployment</strong></td><td>Deployment → <strong>Scale</strong> icon → nhập số replicas</td><td><code>kubectl scale deploy app --replicas=5</code></td></tr>
+        <tr><td><strong>Rollout restart</strong></td><td>Deployment → <strong>Restart</strong> icon</td><td><code>kubectl rollout restart deploy/app</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Port Forward qua Lens — debug service nội bộ</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Chọn Service hoặc Pod cần debug</div>
+        <div class="step-desc">Vào <strong>Network → Services</strong> hoặc <strong>Workloads → Pods</strong>. Click vào service/pod cần truy cập từ máy local.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Click nút Port Forward</div>
+        <div class="step-desc">Nhấn biểu tượng <strong style="color:var(--text)">⚡ Port Forward</strong> → Chọn local port (VD: 8080) và remote port (8080) → <strong style="color:var(--text)">Start</strong>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Truy cập từ localhost</div>
+        <div class="step-desc">Mở <code>http://localhost:8080</code> — truy cập thẳng vào service trong EKS mà không cần thay đổi Ingress hay tạo service type LoadBalancer. Rất hữu ích khi debug RDS (port 5432), Redis (6379).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ LENS DEBUG ════ -->
+<div class="section" id="lens-debug">
+  <div class="section-tag">Lens · Debug</div>
+  <h2>🐛 Debug &amp; Troubleshoot với Lens</h2>
+
+  <h3>Tình huống thường gặp và cách debug</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico" style="color:var(--amber)">⚠️</div>
+      <div class="card-title">Pod ở trạng thái Pending</div>
+      <div class="card-desc">Lens → click pod → <strong>Events</strong> tab → xem lý do. Thường do: không đủ CPU/RAM trên nodes, PVC chưa được bound, taint/toleration mismatch.<br><br>
+      <code>kubectl describe pod pod-name</code></div>
+    </div>
+    <div class="card">
+      <div class="card-ico" style="color:var(--red)">❌</div>
+      <div class="card-title">Pod CrashLoopBackOff</div>
+      <div class="card-desc">Lens → click pod → <strong>Logs</strong> → bật <strong>"Previous"</strong> để xem logs lần crash trước. Thường do: lỗi startup, sai env vars, OOMKilled.<br><br>
+      <code>kubectl logs pod-name --previous</code></div>
+    </div>
+    <div class="card">
+      <div class="card-ico" style="color:var(--sky)">🔍</div>
+      <div class="card-title">ImagePullBackOff</div>
+      <div class="card-desc">Không pull được image từ ECR. Kiểm tra: IAM role của node có quyền ECR không, image tag đúng không, ECR lifecycle chưa xóa image.<br><br>
+      <code>kubectl describe pod → Events</code></div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🌐</div>
+      <div class="card-title">Service không nhận được traffic</div>
+      <div class="card-desc">Lens → <strong>Services</strong> → click service → kiểm tra Endpoints. Nếu Endpoints rỗng = selector không match pod labels. Dùng port-forward để test trực tiếp pod.<br><br>
+      <code>kubectl get endpoints service-name</code></div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-lang">bash — debug commands hay dùng (cũng chạy được từ Lens terminal)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ── Pod debug ──</span>
+kubectl get pods -n production -o wide     <span class="cmt"># xem pod đang chạy trên node nào</span>
+kubectl describe pod &lt;pod-name&gt; -n production
+kubectl logs &lt;pod-name&gt; -n production -f   <span class="cmt"># follow log real-time</span>
+kubectl logs &lt;pod-name&gt; -n production --previous  <span class="cmt"># log của lần crash trước</span>
+
+<span class="cmt"># ── Exec vào pod để debug ──</span>
+kubectl exec -it &lt;pod-name&gt; -n production -- /bin/sh
+<span class="cmt"># Trong pod:</span>
+env | grep SPRING                          <span class="cmt"># kiểm tra env vars</span>
+curl localhost:8080/actuator/health        <span class="cmt"># test health endpoint</span>
+wget -qO- http://rds-host:5432            <span class="cmt"># test connectivity đến DB</span>
+nslookup payment-service                   <span class="cmt"># test DNS trong cluster</span>
+
+<span class="cmt"># ── Resource usage ──</span>
+kubectl top pods -n production             <span class="cmt"># CPU và Memory usage</span>
+kubectl top nodes                          <span class="cmt"># node-level metrics</span>
+
+<span class="cmt"># ── Events — xem lịch sử events ──</span>
+kubectl get events -n production --sort-by='.lastTimestamp'
+
+<span class="cmt"># ── Network debug ──</span>
+kubectl run debug-pod --rm -it --image=busybox -- /bin/sh
+<span class="cmt"># Từ debug pod:</span>
+wget -qO- http://order-service.production:80/api/orders/health
+nslookup order-service.production.svc.cluster.local</pre>
+  </div>
+</div>
+
+<!-- ════ LENS EXTENSIONS ════ -->
+<div class="section" id="lens-extensions">
+  <div class="section-tag">Lens · Tips</div>
+  <h2>🧩 Extensions &amp; Tips hữu ích</h2>
+
+  <h3>Extensions nên cài cho EKS</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Extension</th><th>Chức năng</th><th>Cài</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Lens Resource Map</strong></td><td>Vẽ sơ đồ quan hệ giữa Deployment, Service, Ingress, Pod</td><td><span class="tag-new">Lens Catalog</span></td></tr>
+        <tr><td><strong>Helm Charts</strong></td><td>Quản lý Helm releases từ trong Lens</td><td><span class="tag-core">Built-in</span></td></tr>
+        <tr><td><strong>RBAC Lens</strong></td><td>Visualize RBAC permissions, tìm user có quyền gì</td><td><span class="tag-new">Lens Catalog</span></td></tr>
+        <tr><td><strong>Kubectl AI</strong></td><td>Dùng AI để giải thích errors, suggest fixes</td><td><span class="tag-pro">Lens Pro</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Tips Lens cho EKS</h3>
+  <ul class="feat-list">
+    <li><strong>Namespace filter:</strong> Dropdown ở trên chọn namespace — không cần <code>-n production</code> mỗi lần</li>
+    <li><strong>Multi-cluster view:</strong> Mở nhiều cluster cùng lúc, switch bằng sidebar trái</li>
+    <li><strong>Built-in kubectl:</strong> Bấm <code>Ctrl+`</code> mở terminal với context đã set sẵn</li>
+    <li><strong>Resource search:</strong> <code>Ctrl+K</code> tìm kiếm resource theo tên trong cả cluster</li>
+    <li><strong>Sync kubeconfig:</strong> Lens tự detect khi <code>aws eks update-kubeconfig</code> — không cần restart</li>
+    <li><strong>Attach ECR credentials:</strong> Nếu pod không pull được image từ ECR, check <code>kubectl get pods -n production</code> — Lens highlights pod đỏ ngay</li>
+  </ul>
+
+  <div class="callout good">
+    <div class="callout-label">✅ Workflow khuyến nghị với Lens</div>
+    1. Sau khi <code>kubectl apply</code> deploy mới → mở Lens xem deployment rollout progress<br>
+    2. Pod màu vàng (Pending/Init) → click → Events tab để biết lý do<br>
+    3. Pod màu đỏ (CrashLoop) → Logs tab → Previous logs → tìm error message<br>
+    4. Debug network → Port Forward service về localhost → test bằng Postman/curl
+  </div>
+</div>
+
+<!-- ════ CHEAT SHEET ════ -->
+<div class="section" id="cheatsheet">
+  <div class="section-tag">Tổng kết</div>
+  <h2>📋 Cheat Sheet</h2>
+
+  <h3>eksctl — Quản lý EKS Cluster</h3>
+  <div class="cheat-grid">
+    <div class="cheat-item"><div class="cheat-key">eksctl create cluster -f cluster.yaml</div><div class="cheat-val">Tạo cluster từ config file (~15-20 phút)</div></div>
+    <div class="cheat-item"><div class="cheat-key">eksctl get cluster --region ap-southeast-1</div><div class="cheat-val">Liệt kê tất cả clusters</div></div>
+    <div class="cheat-item"><div class="cheat-key">eksctl scale nodegroup --cluster prod --name ng-prod --nodes 5</div><div class="cheat-val">Scale node group lên 5 nodes</div></div>
+    <div class="cheat-item"><div class="cheat-key">eksctl upgrade cluster --name prod-cluster --approve</div><div class="cheat-val">Upgrade Kubernetes version</div></div>
+    <div class="cheat-item"><div class="cheat-key">eksctl create iamserviceaccount ...</div><div class="cheat-val">Tạo IRSA cho pod truy cập AWS</div></div>
+    <div class="cheat-item"><div class="cheat-key">eksctl delete cluster --name prod-cluster</div><div class="cheat-val">Xóa toàn bộ cluster (cẩn thận!)</div></div>
+  </div>
+
+  <h3>kubectl — Commands thường dùng</h3>
+  <div class="cheat-grid">
+    <div class="cheat-item"><div class="cheat-key">kubectl get pods -n production -w</div><div class="cheat-val">Watch pods real-time</div></div>
+    <div class="cheat-item"><div class="cheat-key">kubectl rollout status deploy/app -n production</div><div class="cheat-val">Chờ deployment hoàn thành</div></div>
+    <div class="cheat-item"><div class="cheat-key">kubectl rollout undo deploy/app -n production</div><div class="cheat-val">Rollback về version trước</div></div>
+    <div class="cheat-item"><div class="cheat-key">kubectl set image deploy/app app=ecr.../app:v2 -n production</div><div class="cheat-val">Update image không cần apply yaml</div></div>
+    <div class="cheat-item"><div class="cheat-key">kubectl logs -l app=order-service -n production --tail=100</div><div class="cheat-val">Logs từ tất cả pods cùng label</div></div>
+    <div class="cheat-item"><div class="cheat-key">kubectl get events -n production --sort-by='.lastTimestamp' | tail -20</div><div class="cheat-val">20 events gần nhất</div></div>
+  </div>
+
+  <h3>AWS CLI — ECR &amp; EKS</h3>
+  <div class="cheat-grid">
+    <div class="cheat-item"><div class="cheat-key">aws eks update-kubeconfig --name prod-cluster --region ap-southeast-1</div><div class="cheat-val">Cập nhật kubeconfig</div></div>
+    <div class="cheat-item"><div class="cheat-key">aws ecr get-login-password | docker login ...</div><div class="cheat-val">Login ECR từ máy local</div></div>
+    <div class="cheat-item"><div class="cheat-key">aws ecr list-images --repository-name order-service</div><div class="cheat-val">Liệt kê images trong ECR repo</div></div>
+    <div class="cheat-item"><div class="cheat-key">aws codepipeline start-pipeline-execution --name order-service-pipeline</div><div class="cheat-val">Trigger CodePipeline thủ công</div></div>
+  </div>
+
+  <div class="callout" style="margin-top:32px">
+    <div class="callout-label">🗺️ Checklist Production Readiness</div>
+    <ul class="feat-list" style="margin-top:8px">
+      <li><strong>EKS:</strong> Node group trải đều 3 AZs — cluster vẫn hoạt động khi 1 AZ xuống</li>
+      <li><strong>EKS:</strong> IRSA cho mọi service cần AWS — không hardcode credentials trong code hoặc ConfigMap</li>
+      <li><strong>EKS:</strong> Resource requests/limits cho mọi container — tránh 1 pod ăn hết RAM node</li>
+      <li><strong>EKS:</strong> readinessProbe và livenessProbe đúng — rolling update không gây downtime</li>
+      <li><strong>EKS:</strong> HPA cấu hình đúng — scale up trước khi bị quá tải, scale down chậm để tránh oscillation</li>
+      <li><strong>CI/CD:</strong> OIDC auth cho GitHub Actions — không lưu AWS credentials trong Secrets</li>
+      <li><strong>CI/CD:</strong> ECR lifecycle policy — giữ 30 images, tự xóa cũ tránh tốn tiền storage</li>
+      <li><strong>CI/CD:</strong> Rollback plan — ArgoCD one-click rollback hoặc kubectl rollout undo</li>
+      <li><strong>Lens:</strong> Cài Metrics (Prometheus) ngay để có charts CPU/RAM real-time</li>
+      <li><strong>Lens:</strong> Bookmark thường xuyên xem pod status production sau mỗi deploy</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = Math.round(d.scrollTop / (d.scrollHeight - d.clientHeight) * 100);
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+});
+
+// Active nav
+const sections = document.querySelectorAll('.section[id]');
+const links = document.querySelectorAll('.sb-link[href^="#"]');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+sections.forEach(s => io.observe(s));
+
+// Copy buttons
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
