@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD · Spring Boot + ReactJS — Hướng dẫn chi tiết</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08090d; --bg2: #0e1018; --surface: #131520; --surface2: #1a1d2e; --surface3: #21253a;
+      --border: #252840; --border2: #2f3350;
+      --accent: #7c6af8; --accent-lt: #a99dfa;
+      --amber: #f5a623; --green: #3ecf8e; --red: #f06b6b; --blue: #7dd3fc; --pink: #f0abfc;
+      --text: #dde1f5; --muted: #6b7094; --muted2: #8b90b8;
+      --nav-w: 276px; --radius: 10px;
+      --font-body: 'Instrument Sans', sans-serif;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.75; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* ═══ SIDEBAR ═══ */
+    #sidebar {
+      width: var(--nav-w); min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0;
+      overflow-y: auto; z-index: 200; display: flex; flex-direction: column; transition: transform .3s ease;
+    }
+    .sb-header { padding: 22px 20px 16px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(124,106,248,.07) 0%, transparent 100%); }
+    .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .sb-orb { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--accent) 0%, #a55af4 100%); display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 4px 18px rgba(124,106,248,.35); flex-shrink: 0; }
+    .sb-title { font-family: var(--font-head); font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -.02em; line-height: 1.2; }
+    .sb-ver { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-family: var(--font-mono); background: var(--surface2); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border); }
+    .sb-ver .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .sb-progress { padding: 12px 20px 10px; border-bottom: 1px solid var(--border); }
+    .sb-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .sb-progress-bar { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .sb-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a55af4); border-radius: 99px; width: 0%; transition: width .4s ease; }
+
+    .sb-section { padding: 16px 12px 4px; }
+    .sb-section-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 0 8px; margin-bottom: 4px; }
+    .sb-link { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; text-decoration: none; color: var(--muted2); font-size: 12.5px; transition: all .18s; cursor: pointer; margin-bottom: 1px; position: relative; }
+    .sb-link:hover { background: var(--surface); color: var(--text); }
+    .sb-link.active { background: rgba(124,106,248,.12); color: var(--accent-lt); }
+    .sb-link.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 2px; background: var(--accent); border-radius: 1px; }
+    .sb-icon { font-size: 13px; width: 16px; text-align: center; flex-shrink: 0; }
+    .sb-badge { margin-left: auto; font-size: 9.5px; background: rgba(124,106,248,.18); color: var(--accent-lt); padding: 1px 6px; border-radius: 99px; font-family: var(--font-mono); white-space: nowrap; }
+    .sb-badge.green { background: rgba(62,207,142,.18); color: var(--green); }
+    .sb-badge.amber { background: rgba(245,166,35,.18); color: var(--amber); }
+    .sb-badge.red { background: rgba(240,107,107,.18); color: var(--red); }
+    .sb-footer { margin-top: auto; padding: 12px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+    /* ═══ MAIN ═══ */
+    main { margin-left: var(--nav-w); flex: 1; max-width: 960px; }
+    .section { padding: 58px 62px; border-bottom: 1px solid var(--border); scroll-margin-top: 20px; animation: fadeUp .5s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    .section-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-lt); font-weight: 600; font-family: var(--font-mono); margin-bottom: 14px; }
+    .section-tag::before { content: ''; width: 22px; height: 1px; background: currentColor; }
+
+    h1 { font-family: var(--font-head); font-size: 46px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 18px; }
+    h1 .grad { background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 55%, #a55af4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    h2 { font-family: var(--font-head); font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: var(--text); }
+    h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 26px 0 10px; display: flex; align-items: center; gap: 8px; }
+    h3 .h3-sub { font-size: 11px; font-weight: 400; color: var(--muted); font-family: var(--font-mono); }
+    p { color: #9fa3c4; margin-bottom: 12px; }
+    a { color: var(--accent-lt); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── CALLOUTS ── */
+    .callout { border-left: 3px solid var(--accent); padding: 13px 18px; background: rgba(124,106,248,.07); border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 13.5px; color: #bfc3e0; }
+    .callout-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .callout.warn { border-color: var(--amber); background: rgba(245,166,35,.07); }
+    .callout.warn .callout-label { color: var(--amber); }
+    .callout.good { border-color: var(--green); background: rgba(62,207,142,.07); }
+    .callout.good .callout-label { color: var(--green); }
+    .callout.err { border-color: var(--red); background: rgba(240,107,107,.07); }
+    .callout.err .callout-label { color: var(--red); }
+    .callout.info { border-color: var(--blue); background: rgba(125,211,252,.07); }
+    .callout.info .callout-label { color: var(--blue); }
+
+    /* ── CARDS ── */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin: 18px 0; }
+    .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
+    .cards.col4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color .2s, transform .2s, box-shadow .2s; }
+    .card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    .card.accent { border-color: rgba(124,106,248,.3); }
+    .card.accent:hover { border-color: var(--accent); box-shadow: 0 8px 28px rgba(124,106,248,.15); }
+    .card-ico { font-size: 20px; margin-bottom: 9px; }
+    .card-title { font-weight: 600; font-size: 13.5px; margin-bottom: 5px; color: var(--text); }
+    .card-desc { font-size: 12.5px; color: var(--muted2); line-height: 1.55; }
+
+    /* ── TABS ── */
+    .tabs { margin: 20px 0; }
+    .tab-header { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 0; gap: 2px; }
+    .tab-btn { padding: 9px 18px; font-size: 13px; font-weight: 600; color: var(--muted2); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .18s; font-family: var(--font-body); display: flex; align-items: center; gap: 6px; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent-lt); border-bottom-color: var(--accent); }
+    .tab-pane { display: none; padding-top: 4px; }
+    .tab-pane.active { display: block; }
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x: auto; margin: 14px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 15px; background: var(--surface2); color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 11px 15px; border-bottom: 1px solid var(--border); color: #bbbdd6; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    td strong { color: var(--text); }
+
+    .tag { padding: 2px 7px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono); }
+    .tag-green { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-amber { background: rgba(245,166,35,.15); color: var(--amber); }
+    .tag-red { background: rgba(240,107,107,.15); color: var(--red); }
+    .tag-accent { background: rgba(124,106,248,.15); color: var(--accent-lt); }
+    .tag-blue { background: rgba(125,211,252,.15); color: var(--blue); }
+
+    /* ── STEPS ── */
+    .steps { margin: 18px 0; }
+    .step { display: flex; gap: 16px; margin-bottom: 22px; align-items: flex-start; }
+    .step-num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a55af4); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; font-family: var(--font-mono); box-shadow: 0 4px 14px rgba(124,106,248,.28); }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 4px; font-size: 14px; }
+    .step-desc { font-size: 13.5px; color: var(--muted2); }
+
+    /* ── FEAT LIST ── */
+    .feat-list { list-style: none; margin: 8px 0; }
+    .feat-list li { padding: 8px 0 8px 20px; position: relative; font-size: 13.5px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.6); }
+    .feat-list li:last-child { border: none; }
+    .feat-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+    .feat-list li strong { color: var(--text); }
+
+    /* ── CODE BLOCKS ── */
+    .code-wrap { background: #07080d; border: 1px solid var(--border); border-radius: var(--radius); margin: 14px 0; overflow: hidden; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 15px; background: var(--surface); border-bottom: 1px solid var(--border); gap: 12px; }
+    .code-left { display: flex; align-items: center; gap: 10px; }
+    .code-dots { display: flex; gap: 5px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot:nth-child(1) { background: #ff5f57; }
+    .code-dot:nth-child(2) { background: #febc2e; }
+    .code-dot:nth-child(3) { background: #28c840; }
+    .code-lang { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+    .copy-btn { font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 5px; cursor: pointer; transition: all .18s; white-space: nowrap; flex-shrink: 0; }
+    .copy-btn:hover { color: var(--text); border-color: var(--border2); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    pre { padding: 18px 20px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.8; overflow-x: auto; color: #9fa3c4; }
+    pre .ln { color: rgba(107,112,148,.4); user-select: none; display: inline-block; width: 24px; text-align: right; margin-right: 14px; font-size: 11px; }
+
+    /* Syntax */
+    .kw { color: var(--accent-lt); } .str { color: var(--green); } .cmt { color: #4a5070; font-style: italic; }
+    .num { color: var(--amber); } .fn { color: var(--blue); } .cls { color: var(--pink); }
+    .prop { color: #93c5fd; } .tag-xml { color: var(--red); } .attr { color: var(--amber); }
+    .val { color: var(--green); } .op { color: var(--muted2); }
+
+    /* ── PIPELINE VIS ── */
+    .pipeline-flow { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin: 18px 0; }
+    .pipe-title { font-size: 10px; color: var(--muted); font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 20px; text-align: center; }
+    .pipe-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .pipe-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 100px; transition: all .2s; }
+    .pipe-box:hover { border-color: var(--accent); box-shadow: 0 4px 14px rgba(124,106,248,.12); }
+    .pipe-box .pb-ico { font-size: 16px; margin-bottom: 4px; }
+    .pipe-box .pb-label { font-size: 11.5px; font-weight: 600; color: var(--text); }
+    .pipe-box .pb-sub { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+    .pipe-box.be { border-color: rgba(125,211,252,.3); }
+    .pipe-box.fe { border-color: rgba(240,171,252,.3); }
+    .pipe-box.ok { border-color: rgba(62,207,142,.3); }
+    .pipe-arrow { color: var(--muted); font-size: 14px; flex-shrink: 0; }
+    .pipe-down { text-align: center; color: var(--muted); font-size: 16px; margin: 2px 0; }
+    .pipe-label-be { display: inline-block; font-size: 10px; color: var(--blue); font-family: var(--font-mono); background: rgba(125,211,252,.08); border: 1px solid rgba(125,211,252,.2); border-radius: 4px; padding: 1px 7px; margin-bottom: 6px; }
+    .pipe-label-fe { display: inline-block; font-size: 10px; color: var(--pink); font-family: var(--font-mono); background: rgba(240,171,252,.08); border: 1px solid rgba(240,171,252,.2); border-radius: 4px; padding: 1px 7px; margin-bottom: 6px; }
+
+    /* ── STRUCT TREE ── */
+    .tree { background: #07080d; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin: 14px 0; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: #9fa3c4; }
+    .tree .dir { color: var(--blue); font-weight: 500; }
+    .tree .file { color: #c4c7e0; }
+    .tree .file.imp { color: var(--green); }
+    .tree .file.cfg { color: var(--amber); }
+    .tree .cmt-tree { color: #3a3f60; font-style: italic; margin-left: 6px; }
+
+    /* ── HERO ── */
+    .hero-banner { background: linear-gradient(135deg, rgba(124,106,248,.09) 0%, rgba(165,90,244,.05) 100%); border: 1px solid rgba(124,106,248,.2); border-radius: 14px; padding: 32px 36px; margin-bottom: 30px; position: relative; overflow: hidden; }
+    .hero-banner::before { content: ''; position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(124,106,248,.1) 0%, transparent 70%); pointer-events: none; }
+    .hb-tag { font-size: 11px; color: var(--accent-lt); font-family: var(--font-mono); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+    .hb-stack { display: flex; align-items: center; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+    .hb-pill { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 5px 14px; font-size: 12.5px; font-weight: 600; color: var(--text); }
+
+    /* ── INLINE CODE ── */
+    code { font-family: var(--font-mono); font-size: 12px; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; color: var(--accent-lt); white-space: nowrap; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+    /* ── CHECKLIST ── */
+    .checklist { list-style: none; margin: 10px 0; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; font-size: 13.5px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.5); }
+    .checklist li:last-child { border: none; }
+    .ck { width: 18px; height: 18px; border-radius: 5px; background: rgba(62,207,142,.12); border: 1px solid rgba(62,207,142,.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; color: var(--green); margin-top: 2px; }
+
+    /* ── MOBILE ── */
+    .hamburger { display: none; position: fixed; top: 14px; left: 14px; z-index: 300; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 38px; height: 38px; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+    @media (max-width: 860px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      main { margin-left: 0; }
+      .section { padding: 40px 22px; }
+      h1 { font-size: 30px; }
+      h2 { font-size: 22px; }
+      .cards, .cards.col3, .cards.col4 { grid-template-columns: 1fr; }
+      .hamburger { display: flex; }
+    }
+  </style>
+</head>
+<body>
+<div class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">🚀</div>
+      <div class="sb-title">CI/CD Full-Stack</div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span> Spring Boot + React</div>
+  </div>
+
+  <div class="sb-progress">
+    <div class="sb-progress-label"><span>Tiến độ đọc</span><span id="prog-pct">0%</span></div>
+    <div class="sb-progress-bar"><div class="sb-progress-fill" id="prog-fill"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">📚 Series DevOps</div>
+    <a class="sb-link" href="terminal-macbook.html"><span class="sb-icon">💻</span>Terminal macOS</a>
+    <a class="sb-link" href="linux-guide.html"><span class="sb-icon">🐧</span>Linux</a>
+    <a class="sb-link" href="docker-guide.html"><span class="sb-icon">🐳</span>Docker</a>
+    <a class="sb-link" href="aws-guide.html"><span class="sb-icon">☁️</span>AWS</a>
+    <a class="sb-link" href="gcp-guide.html"><span class="sb-icon">🌐</span>GCP</a>
+    <a class="sb-link" href="azure-guide.html"><span class="sb-icon">🔷</span>Azure</a>
+    <a class="sb-link" href="teraform-guide.html"><span class="sb-icon">🏗️</span>Terraform</a>
+    <a class="sb-link" href="kubernate-guide.html"><span class="sb-icon">☸️</span>Kubernetes</a>
+    <a class="sb-link" href="gitlab-cicd-guide.html"><span class="sb-icon">🦊</span>GitLab CI/CD</a>
+    <a class="sb-link" href="jenkins-guide.html"><span class="sb-icon">👴</span>Jenkins</a>
+    <a class="sb-link" href="cicd-local-guide.html"><span class="sb-icon">🏠</span>CI/CD Local</a>
+    <a class="sb-link" href="gitlab-cicd-k8s.html"><span class="sb-icon">🦊</span>GitLab CI/CD K8s</a>
+    <a class="sb-link" href="jenkins-cicd-k8s.html"><span class="sb-icon">👴</span>Jenkins CI/CD K8s</a>
+    <a class="sb-link" href="eks-cicd-guide.html"><span class="sb-icon">🚀</span>EKS · CI/CD · Lens</a>
+    <a class="sb-link active" href="cicd-springboot-react.html"><span class="sb-icon">⚛️</span>CI/CD Springboot React</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Tổng quan</div>
+    <a class="sb-link active" href="#intro"><span class="sb-icon">🏠</span> Giới thiệu</a>
+    <a class="sb-link" href="#architecture"><span class="sb-icon">🏗</span> Kiến trúc hệ thống</a>
+    <a class="sb-link" href="#prerequisites"><span class="sb-icon">📋</span> Chuẩn bị môi trường</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">🔵 Backend · Spring Boot</div>
+    <a class="sb-link" href="#be-structure"><span class="sb-icon">📁</span> Cấu trúc project</a>
+    <a class="sb-link" href="#be-dockerfile"><span class="sb-icon">🐳</span> Dockerfile tối ưu</a>
+    <a class="sb-link" href="#be-tests"><span class="sb-icon">🧪</span> Testing strategy</a>
+    <a class="sb-link" href="#be-pipeline"><span class="sb-icon">⚙</span> Pipeline CI<span class="sb-badge">yaml</span></a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">🟣 Frontend · ReactJS</div>
+    <a class="sb-link" href="#fe-structure"><span class="sb-icon">📁</span> Cấu trúc project</a>
+    <a class="sb-link" href="#fe-dockerfile"><span class="sb-icon">🐳</span> Dockerfile + Nginx</a>
+    <a class="sb-link" href="#fe-tests"><span class="sb-icon">🧪</span> Testing strategy</a>
+    <a class="sb-link" href="#fe-pipeline"><span class="sb-icon">⚙</span> Pipeline CI<span class="sb-badge">yaml</span></a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">🔗 Tích hợp & Deploy</div>
+    <a class="sb-link" href="#compose"><span class="sb-icon">🧩</span> Docker Compose stack</a>
+    <a class="sb-link" href="#gitlab-full"><span class="sb-icon">🦊</span> GitLab CI toàn bộ<span class="sb-badge green">full</span></a>
+    <a class="sb-link" href="#github-actions"><span class="sb-icon">🐙</span> GitHub Actions</a>
+    <a class="sb-link" href="#deploy-strategy"><span class="sb-icon">🚀</span> Chiến lược deploy</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Nâng cao</div>
+    <a class="sb-link" href="#env-config"><span class="sb-icon">🔐</span> Env & Secrets</a>
+    <a class="sb-link" href="#monitoring"><span class="sb-icon">📊</span> Monitoring stack</a>
+    <a class="sb-link" href="#troubleshoot"><span class="sb-icon">🐛</span> Troubleshooting<span class="sb-badge amber">tips</span></a>
+  </div>
+
+  <div class="sb-footer">cicd-fullstack · 2025</div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main>
+
+<!-- ══════════════════════════════════════
+     SECTION: INTRO
+══════════════════════════════════════ -->
+<section class="section" id="intro">
+  <div class="hero-banner">
+    <div class="hb-tag">// ci/cd full-stack guide · 2025</div>
+    <h1><span class="grad">CI/CD</span> cho<br>Spring Boot & React</h1>
+    <p>Hướng dẫn toàn diện xây dựng pipeline CI/CD production-ready cho dự án full-stack: backend Java Spring Boot và frontend ReactJS — từ cấu trúc project, Dockerfile, testing cho đến deploy tự động.</p>
+    <div class="hb-stack">
+      <div class="hb-pill">☕ Java 17 + Spring Boot 3</div>
+      <div class="hb-pill">⚛️ React 18 + Vite</div>
+      <div class="hb-pill">🐳 Docker + Compose</div>
+      <div class="hb-pill">🦊 GitLab CI / 🐙 GitHub Actions</div>
+    </div>
+  </div>
+
+  <div class="section-tag">Tại sao cần CI/CD?</div>
+  <p>Không có CI/CD, mỗi lần deploy là một chuỗi thao tác thủ công dễ sai: build tay, copy file, restart server... CI/CD tự động hóa toàn bộ, giảm rủi ro và giúp team deploy nhiều lần một ngày một cách tự tin.</p>
+
+  <div class="cards col3">
+    <div class="card accent">
+      <div class="card-ico">⚡</div>
+      <div class="card-title">Detect lỗi sớm</div>
+      <div class="card-desc">Auto test sau mỗi commit. Lỗi bị phát hiện ngay, không phải lúc demo với khách.</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">🔁</div>
+      <div class="card-title">Deploy nhất quán</div>
+      <div class="card-desc">Cùng một process mỗi lần. Loại bỏ "nó chạy trên máy tôi" vĩnh viễn.</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">📦</div>
+      <div class="card-title">Artifact versioned</div>
+      <div class="card-desc">Mỗi build ra Docker image có tag riêng. Rollback trong 30 giây nếu cần.</div>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-label">✅ Kết quả sau khi hoàn thành guide này</div>
+    Bạn có một pipeline tự động: khi push code lên <code>main</code> → test chạy → Docker image được build → deploy lên staging → smoke test → notify kết quả. Không cần làm gì thủ công.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: ARCHITECTURE
+══════════════════════════════════════ -->
+<section class="section" id="architecture">
+  <div class="section-tag">Kiến trúc</div>
+  <h2>🏗 Kiến trúc hệ thống tổng thể</h2>
+  <p>Toàn bộ stack gồm: Git server → CI server → Docker Registry → môi trường chạy. Mỗi component đều containerized.</p>
+
+  <div class="pipeline-flow">
+    <div class="pipe-title">// CICD FLOW · FULL-STACK</div>
+
+    <div class="pipe-row">
+      <div class="pipe-box">
+        <div class="pb-ico">👨‍💻</div>
+        <div class="pb-label">Developer</div>
+        <div class="pb-sub">git push</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box">
+        <div class="pb-ico">🦊</div>
+        <div class="pb-label">Git Server</div>
+        <div class="pb-sub">GitLab / GitHub</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box">
+        <div class="pb-ico">⚡</div>
+        <div class="pb-label">Webhook</div>
+        <div class="pb-sub">trigger pipeline</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box">
+        <div class="pb-ico">🤖</div>
+        <div class="pb-label">CI Runner</div>
+        <div class="pb-sub">execute jobs</div>
+      </div>
+    </div>
+
+    <div class="pipe-down">↓</div>
+
+    <div class="pipe-row" style="align-items:flex-start; gap:20px">
+      <div style="flex:1; text-align:center">
+        <div class="pipe-label-be">BACKEND PIPELINE</div>
+        <div class="pipe-row" style="flex-direction:column; gap:6px">
+          <div class="pipe-box be"><div class="pb-ico">🏗</div><div class="pb-label">mvn build</div><div class="pb-sub">compile + package</div></div>
+          <div class="pipe-down" style="font-size:12px">↓</div>
+          <div class="pipe-box be"><div class="pb-ico">🧪</div><div class="pb-label">mvn test</div><div class="pb-sub">unit + integration</div></div>
+          <div class="pipe-down" style="font-size:12px">↓</div>
+          <div class="pipe-box be"><div class="pb-ico">🔍</div><div class="pb-label">SonarQube</div><div class="pb-sub">code quality</div></div>
+          <div class="pipe-down" style="font-size:12px">↓</div>
+          <div class="pipe-box be"><div class="pb-ico">🐳</div><div class="pb-label">Docker build</div><div class="pb-sub">push to registry</div></div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; padding-top:60px; color:var(--muted)">‖</div>
+      <div style="flex:1; text-align:center">
+        <div class="pipe-label-fe">FRONTEND PIPELINE</div>
+        <div class="pipe-row" style="flex-direction:column; gap:6px">
+          <div class="pipe-box fe"><div class="pb-ico">📦</div><div class="pb-label">npm install</div><div class="pb-sub">restore deps</div></div>
+          <div class="pipe-down" style="font-size:12px">↓</div>
+          <div class="pipe-box fe"><div class="pb-ico">🧪</div><div class="pb-label">jest / vitest</div><div class="pb-sub">unit + e2e</div></div>
+          <div class="pipe-down" style="font-size:12px">↓</div>
+          <div class="pipe-box fe"><div class="pb-ico">🏗</div><div class="pb-label">vite build</div><div class="pb-sub">production bundle</div></div>
+          <div class="pipe-down" style="font-size:12px">↓</div>
+          <div class="pipe-box fe"><div class="pb-ico">🐳</div><div class="pb-label">Docker + Nginx</div><div class="pb-sub">push to registry</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipe-down">↓</div>
+
+    <div class="pipe-row">
+      <div class="pipe-box ok"><div class="pb-ico">🗄</div><div class="pb-label">Registry</div><div class="pb-sub">store images</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box ok"><div class="pb-ico">🚀</div><div class="pb-label">Deploy Staging</div><div class="pb-sub">docker-compose up</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box ok"><div class="pb-ico">🏥</div><div class="pb-label">Health Check</div><div class="pb-sub">/actuator/health</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box ok"><div class="pb-ico">🔔</div><div class="pb-label">Notify</div><div class="pb-sub">Slack / email</div></div>
+    </div>
+  </div>
+
+  <h3>📁 Cấu trúc monorepo khuyến nghị</h3>
+  <div class="tree">
+<span class="dir">my-project/</span>
+├── <span class="dir">backend/</span>                    <span class="cmt-tree"># Spring Boot application</span>
+│   ├── <span class="dir">src/</span>
+│   ├── <span class="file cfg">pom.xml</span>
+│   ├── <span class="file imp">Dockerfile</span>
+│   └── <span class="file imp">.dockerignore</span>
+├── <span class="dir">frontend/</span>                   <span class="cmt-tree"># React application</span>
+│   ├── <span class="dir">src/</span>
+│   ├── <span class="file cfg">package.json</span>
+│   ├── <span class="file cfg">vite.config.ts</span>
+│   ├── <span class="file imp">Dockerfile</span>
+│   ├── <span class="file imp">nginx.conf</span>
+│   └── <span class="file imp">.dockerignore</span>
+├── <span class="dir">.gitlab/</span>                    <span class="cmt-tree"># GitLab CI config</span>
+│   └── <span class="dir">pipelines/</span>
+│       ├── <span class="file imp">backend.yml</span>
+│       └── <span class="file imp">frontend.yml</span>
+├── <span class="dir">.github/workflows/</span>          <span class="cmt-tree"># GitHub Actions</span>
+│   ├── <span class="file imp">backend.yml</span>
+│   └── <span class="file imp">frontend.yml</span>
+├── <span class="file cfg">docker-compose.yml</span>          <span class="cmt-tree"># Local development</span>
+├── <span class="file cfg">docker-compose.staging.yml</span>  <span class="cmt-tree"># Staging deploy</span>
+├── <span class="file imp">.gitlab-ci.yml</span>              <span class="cmt-tree"># Main CI entry</span>
+└── <span class="file">.gitignore</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: PREREQUISITES
+══════════════════════════════════════ -->
+<section class="section" id="prerequisites">
+  <div class="section-tag">Chuẩn bị</div>
+  <h2>📋 Chuẩn bị môi trường</h2>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>Version tối thiểu</th><th>Dùng để</th><th>Cài đặt</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Java JDK</strong></td><td>17 LTS</td><td>Build Spring Boot</td><td><code>sdk install java 17-tem</code></td></tr>
+        <tr><td><strong>Maven</strong></td><td>3.9+</td><td>Build & dependency</td><td><code>sdk install maven</code></td></tr>
+        <tr><td><strong>Node.js</strong></td><td>20 LTS</td><td>Build React</td><td><code>nvm install 20</code></td></tr>
+        <tr><td><strong>Docker</strong></td><td>24+</td><td>Containerize & run</td><td>Docker Desktop</td></tr>
+        <tr><td><strong>Docker Compose</strong></td><td>v2+</td><td>Multi-container</td><td>Đi kèm Docker Desktop</td></tr>
+        <tr><td><strong>Git</strong></td><td>2.x</td><td>Version control</td><td>Package manager</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>⚡ Kiểm tra môi trường</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · verify environment</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Kiểm tra tất cả tools cần thiết</span>
+java -version     <span class="cmt"># openjdk version "17.x.x"</span>
+mvn -version      <span class="cmt"># Apache Maven 3.9.x</span>
+node -v           <span class="cmt"># v20.x.x</span>
+npm -v            <span class="cmt"># 10.x.x</span>
+docker version    <span class="cmt"># Client + Server đều hiện</span>
+docker compose version  <span class="cmt"># Docker Compose version v2.x.x</span>
+git --version     <span class="cmt"># git version 2.x.x</span></pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-label">💡 Khuyến nghị dùng SDKMAN</div>
+    <code>curl -s "https://get.sdkman.io" | bash</code> — Quản lý nhiều version Java/Maven dễ dàng, switch giữa projects không bị conflict.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: BE STRUCTURE
+══════════════════════════════════════ -->
+<section class="section" id="be-structure">
+  <div class="section-tag">Backend · Spring Boot</div>
+  <h2>📁 Cấu trúc Backend project</h2>
+  <p>Cấu trúc chuẩn cho Spring Boot project sẵn sàng cho CI/CD:</p>
+
+  <div class="tree">
+<span class="dir">backend/</span>
+├── <span class="dir">src/</span>
+│   ├── <span class="dir">main/</span>
+│   │   ├── <span class="dir">java/com/company/app/</span>
+│   │   │   ├── <span class="dir">config/</span>          <span class="cmt-tree"># Spring configs</span>
+│   │   │   ├── <span class="dir">controller/</span>      <span class="cmt-tree"># REST controllers</span>
+│   │   │   ├── <span class="dir">service/</span>         <span class="cmt-tree"># Business logic</span>
+│   │   │   ├── <span class="dir">repository/</span>      <span class="cmt-tree"># JPA repositories</span>
+│   │   │   ├── <span class="dir">model/</span>           <span class="cmt-tree"># Entities + DTOs</span>
+│   │   │   └── <span class="file imp">Application.java</span>
+│   │   └── <span class="dir">resources/</span>
+│   │       ├── <span class="file imp">application.yml</span>          <span class="cmt-tree"># Base config</span>
+│   │       ├── <span class="file cfg">application-dev.yml</span>     <span class="cmt-tree"># Dev overrides</span>
+│   │       ├── <span class="file cfg">application-staging.yml</span>
+│   │       └── <span class="file cfg">application-prod.yml</span>
+│   └── <span class="dir">test/</span>
+│       ├── <span class="dir">java/com/company/app/</span>
+│       │   ├── <span class="dir">unit/</span>            <span class="cmt-tree"># Unit tests (no Spring ctx)</span>
+│       │   ├── <span class="dir">integration/</span>     <span class="cmt-tree"># @SpringBootTest</span>
+│       │   └── <span class="dir">contract/</span>        <span class="cmt-tree"># Spring Cloud Contract</span>
+│       └── <span class="dir">resources/</span>
+│           └── <span class="file cfg">application-test.yml</span>
+├── <span class="file imp">Dockerfile</span>
+├── <span class="file">.dockerignore</span>
+├── <span class="file cfg">pom.xml</span>
+└── <span class="file cfg">checkstyle.xml</span>
+  </div>
+
+  <h3>⚙ pom.xml — Cấu hình quan trọng cho CI/CD <span class="h3-sub">// plugins cần có</span></h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">xml · pom.xml (phần plugins)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="tag-xml">&lt;properties&gt;</span>
+    <span class="tag-xml">&lt;java.version&gt;</span><span class="num">17</span><span class="tag-xml">&lt;/java.version&gt;</span>
+    <span class="tag-xml">&lt;jacoco.version&gt;</span><span class="num">0.8.11</span><span class="tag-xml">&lt;/jacoco.version&gt;</span>
+    <span class="tag-xml">&lt;sonar.projectKey&gt;</span>my-app-backend<span class="tag-xml">&lt;/sonar.projectKey&gt;</span>
+    <span class="tag-xml">&lt;sonar.coverage.jacoco.xmlReportPaths&gt;</span>
+        ${project.build.directory}/site/jacoco/jacoco.xml
+    <span class="tag-xml">&lt;/sonar.coverage.jacoco.xmlReportPaths&gt;</span>
+<span class="tag-xml">&lt;/properties&gt;</span>
+
+<span class="tag-xml">&lt;build&gt;</span>
+    <span class="tag-xml">&lt;plugins&gt;</span>
+        <span class="cmt">&lt;!-- Spring Boot Maven Plugin --&gt;</span>
+        <span class="tag-xml">&lt;plugin&gt;</span>
+            <span class="tag-xml">&lt;groupId&gt;</span>org.springframework.boot<span class="tag-xml">&lt;/groupId&gt;</span>
+            <span class="tag-xml">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="tag-xml">&lt;/artifactId&gt;</span>
+            <span class="tag-xml">&lt;configuration&gt;</span>
+                <span class="cmt">&lt;!-- Bỏ qua devtools trong production build --&gt;</span>
+                <span class="tag-xml">&lt;excludeDevtools&gt;</span>true<span class="tag-xml">&lt;/excludeDevtools&gt;</span>
+                <span class="cmt">&lt;!-- Layered JAR cho Docker build nhanh hơn --&gt;</span>
+                <span class="tag-xml">&lt;layers&gt;&lt;enabled&gt;</span>true<span class="tag-xml">&lt;/enabled&gt;&lt;/layers&gt;</span>
+            <span class="tag-xml">&lt;/configuration&gt;</span>
+        <span class="tag-xml">&lt;/plugin&gt;</span>
+
+        <span class="cmt">&lt;!-- JaCoCo: code coverage --&gt;</span>
+        <span class="tag-xml">&lt;plugin&gt;</span>
+            <span class="tag-xml">&lt;groupId&gt;</span>org.jacoco<span class="tag-xml">&lt;/groupId&gt;</span>
+            <span class="tag-xml">&lt;artifactId&gt;</span>jacoco-maven-plugin<span class="tag-xml">&lt;/artifactId&gt;</span>
+            <span class="tag-xml">&lt;version&gt;</span>${jacoco.version}<span class="tag-xml">&lt;/version&gt;</span>
+            <span class="tag-xml">&lt;executions&gt;</span>
+                <span class="tag-xml">&lt;execution&gt;</span>
+                    <span class="tag-xml">&lt;goals&gt;&lt;goal&gt;</span>prepare-agent<span class="tag-xml">&lt;/goal&gt;&lt;/goals&gt;</span>
+                <span class="tag-xml">&lt;/execution&gt;</span>
+                <span class="tag-xml">&lt;execution&gt;</span>
+                    <span class="tag-xml">&lt;id&gt;</span>report<span class="tag-xml">&lt;/id&gt;</span>
+                    <span class="tag-xml">&lt;phase&gt;</span>test<span class="tag-xml">&lt;/phase&gt;</span>
+                    <span class="tag-xml">&lt;goals&gt;&lt;goal&gt;</span>report<span class="tag-xml">&lt;/goal&gt;&lt;/goals&gt;</span>
+                <span class="tag-xml">&lt;/execution&gt;</span>
+                <span class="cmt">&lt;!-- Fail build nếu coverage &lt; 70% --&gt;</span>
+                <span class="tag-xml">&lt;execution&gt;</span>
+                    <span class="tag-xml">&lt;id&gt;</span>check<span class="tag-xml">&lt;/id&gt;</span>
+                    <span class="tag-xml">&lt;goals&gt;&lt;goal&gt;</span>check<span class="tag-xml">&lt;/goal&gt;&lt;/goals&gt;</span>
+                    <span class="tag-xml">&lt;configuration&gt;</span>
+                        <span class="tag-xml">&lt;rules&gt;&lt;rule&gt;</span>
+                            <span class="tag-xml">&lt;limits&gt;&lt;limit&gt;</span>
+                                <span class="tag-xml">&lt;counter&gt;</span>LINE<span class="tag-xml">&lt;/counter&gt;</span>
+                                <span class="tag-xml">&lt;minimum&gt;</span>0.70<span class="tag-xml">&lt;/minimum&gt;</span>
+                            <span class="tag-xml">&lt;/limit&gt;&lt;/limits&gt;</span>
+                        <span class="tag-xml">&lt;/rule&gt;&lt;/rules&gt;</span>
+                    <span class="tag-xml">&lt;/configuration&gt;</span>
+                <span class="tag-xml">&lt;/execution&gt;</span>
+            <span class="tag-xml">&lt;/executions&gt;</span>
+        <span class="tag-xml">&lt;/plugin&gt;</span>
+    <span class="tag-xml">&lt;/plugins&gt;</span>
+<span class="tag-xml">&lt;/build&gt;</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: BE DOCKERFILE
+══════════════════════════════════════ -->
+<section class="section" id="be-dockerfile">
+  <div class="section-tag">Backend · Docker</div>
+  <h2>🐳 Dockerfile Spring Boot — Tối ưu cho CI/CD</h2>
+  <p>Sử dụng <strong>multi-stage build</strong> và <strong>layered JAR</strong> để giảm image size và tận dụng Docker layer cache.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">dockerfile · backend/Dockerfile</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># ══════════════════════════════════════════
+# Stage 1: BUILD
+# ══════════════════════════════════════════</span>
+<span class="kw">FROM</span> maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>-alpine <span class="kw">AS</span> builder
+
+<span class="kw">WORKDIR</span> /build
+
+<span class="cmt"># Bước 1: Copy pom.xml và download dependencies
+# Layer này được cache lại nếu pom.xml không thay đổi
+# → Build lần sau nhanh hơn rất nhiều</span>
+<span class="kw">COPY</span> pom.xml .
+<span class="kw">RUN</span> mvn dependency:go-offline -q
+
+<span class="cmt"># Bước 2: Copy source và build</span>
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> mvn clean package -DskipTests -q
+
+<span class="cmt"># Bước 3: Extract layered JAR (Spring Boot 2.3+)
+# Dependencies / Spring libs / App code ở layer riêng</span>
+<span class="kw">RUN</span> java -Djarmode=layertools -jar target/*.jar extract --destination /build/extracted
+
+<span class="cmt"># ══════════════════════════════════════════
+# Stage 2: RUNTIME — Image cuối cùng nhỏ gọn
+# ══════════════════════════════════════════</span>
+<span class="kw">FROM</span> eclipse-temurin:<span class="num">17</span>-jre-alpine
+
+<span class="cmt"># Security: chạy với non-root user</span>
+<span class="kw">RUN</span> addgroup -S appgroup && adduser -S appuser -G appgroup
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy từng layer riêng — Docker cache hiệu quả nhất
+# Layer ít thay đổi nhất → copy trước</span>
+<span class="kw">COPY</span> --from=builder --chown=appuser:appgroup /build/extracted/dependencies/ ./
+<span class="kw">COPY</span> --from=builder --chown=appuser:appgroup /build/extracted/spring-boot-loader/ ./
+<span class="kw">COPY</span> --from=builder --chown=appuser:appgroup /build/extracted/snapshot-dependencies/ ./
+<span class="kw">COPY</span> --from=builder --chown=appuser:appgroup /build/extracted/application/ ./
+
+<span class="kw">USER</span> appuser
+<span class="kw">EXPOSE</span> <span class="num">8080</span>
+
+<span class="cmt"># Health check built-in</span>
+<span class="kw">HEALTHCHECK</span> --interval=<span class="num">30s</span> --timeout=<span class="num">10s</span> --retries=<span class="num">3</span> \
+    <span class="kw">CMD</span> wget -qO- http://localhost:<span class="num">8080</span>/actuator/health || exit <span class="num">1</span>
+
+<span class="kw">ENTRYPOINT</span> [<span class="str">"java"</span>, \
+    <span class="str">"-XX:+UseContainerSupport"</span>, \
+    <span class="str">"-XX:MaxRAMPercentage=75.0"</span>, \
+    <span class="str">"-Djava.security.egd=file:/dev/./urandom"</span>, \
+    <span class="str">"org.springframework.boot.loader.launch.JarLauncher"</span>]</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">text · backend/.dockerignore</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>target/
+.git/
+.gitignore
+*.md
+.mvn/
+<span class="cmt"># Không bao giờ copy file env vào image</span>
+.env
+.env.*
+application-prod.yml</pre>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-label">✅ Lợi ích của Layered JAR</div>
+    Khi chỉ thay đổi code ứng dụng (không đổi dependencies), Docker chỉ cần rebuild layer cuối cùng (~vài KB). Các layer Spring libs và dependencies (~150MB) được cache → <strong>push lên registry chỉ mất vài giây</strong>.
+  </div>
+
+  <h3>📋 application.yml — Cấu hình CI/CD friendly</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · src/main/resources/application.yml</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">spring</span>:
+  <span class="prop">application</span>:
+    <span class="kw">name</span>: <span class="str">my-app</span>
+  <span class="prop">profiles</span>:
+    <span class="kw">active</span>: <span class="str">${SPRING_PROFILES_ACTIVE:dev}</span>
+  <span class="prop">datasource</span>:
+    <span class="cmt"># Đọc từ environment variables — không hardcode</span>
+    <span class="kw">url</span>: <span class="str">${DB_URL:jdbc:postgresql://localhost:5432/mydb}</span>
+    <span class="kw">username</span>: <span class="str">${DB_USER:postgres}</span>
+    <span class="kw">password</span>: <span class="str">${DB_PASS:postgres}</span>
+    <span class="kw">hikari</span>:
+      <span class="kw">maximum-pool-size</span>: <span class="str">${DB_POOL_SIZE:10}</span>
+  <span class="prop">jpa</span>:
+    <span class="kw">hibernate</span>:
+      <span class="kw">ddl-auto</span>: <span class="str">${JPA_DDL_AUTO:validate}</span>
+
+<span class="kw">server</span>:
+  <span class="prop">port</span>: <span class="str">${SERVER_PORT:8080}</span>
+  <span class="prop">error</span>:
+    <span class="kw">include-message</span>: <span class="str">never</span>   <span class="cmt"># Ẩn stack trace trong response</span>
+
+<span class="kw">management</span>:
+  <span class="prop">endpoints</span>:
+    <span class="kw">web</span>:
+      <span class="kw">exposure</span>:
+        <span class="kw">include</span>: <span class="str">health,info,metrics,prometheus</span>
+  <span class="prop">endpoint</span>:
+    <span class="kw">health</span>:
+      <span class="kw">show-details</span>: <span class="str">when-authorized</span>
+
+<span class="kw">logging</span>:
+  <span class="prop">level</span>:
+    <span class="kw">root</span>: <span class="str">INFO</span>
+    <span class="kw">com.company.app</span>: <span class="str">${LOG_LEVEL:DEBUG}</span>
+  <span class="prop">pattern</span>:
+    <span class="cmt"># JSON format để dễ parse trong log aggregation</span>
+    <span class="kw">console</span>: <span class="str">'{"time":"%d","level":"%level","app":"${spring.application.name}","msg":"%msg"}%n'</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: BE TESTS
+══════════════════════════════════════ -->
+<section class="section" id="be-tests">
+  <div class="section-tag">Backend · Testing</div>
+  <h2>🧪 Testing Strategy — Spring Boot</h2>
+
+  <div class="cards col3">
+    <div class="card">
+      <div class="card-ico">⚡</div>
+      <div class="card-title">Unit Tests</div>
+      <div class="card-desc">Test service/util class đơn lẻ. Dùng Mockito mock dependencies. Chạy &lt;10 giây.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔗</div>
+      <div class="card-title">Integration Tests</div>
+      <div class="card-desc">@SpringBootTest + Testcontainers spin up real PostgreSQL/Redis. Test toàn bộ flow.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🌐</div>
+      <div class="card-title">Slice Tests</div>
+      <div class="card-desc">@WebMvcTest cho controller. @DataJpaTest cho repository. Nhanh hơn full context.</div>
+    </div>
+  </div>
+
+  <h3>Unit Test mẫu — Service layer</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">java · UserServiceTest.java</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">@ExtendWith</span>(MockitoExtension.class)
+<span class="kw">class</span> <span class="cls">UserServiceTest</span> {
+
+    <span class="kw">@Mock</span>
+    <span class="kw">private</span> <span class="cls">UserRepository</span> userRepository;
+
+    <span class="kw">@Mock</span>
+    <span class="kw">private</span> <span class="cls">EmailService</span> emailService;
+
+    <span class="kw">@InjectMocks</span>
+    <span class="kw">private</span> <span class="cls">UserService</span> userService;
+
+    <span class="kw">@Test</span>
+    <span class="kw">@DisplayName</span>(<span class="str">"createUser: should save user and send welcome email"</span>)
+    <span class="kw">void</span> <span class="fn">createUser_success</span>() {
+        <span class="cmt">// Given</span>
+        <span class="kw">var</span> request = <span class="kw">new</span> <span class="cls">CreateUserRequest</span>(<span class="str">"john@example.com"</span>, <span class="str">"John"</span>);
+        <span class="kw">var</span> savedUser = <span class="cls">User</span>.builder()
+            .id(<span class="num">1L</span>).email(<span class="str">"john@example.com"</span>).name(<span class="str">"John"</span>)
+            .build();
+
+        Mockito.<span class="fn">when</span>(userRepository.<span class="fn">save</span>(Mockito.<span class="fn">any</span>()))
+            .<span class="fn">thenReturn</span>(savedUser);
+
+        <span class="cmt">// When</span>
+        <span class="kw">var</span> result = userService.<span class="fn">createUser</span>(request);
+
+        <span class="cmt">// Then</span>
+        <span class="fn">assertThat</span>(result.getId()).<span class="fn">isEqualTo</span>(<span class="num">1L</span>);
+        <span class="fn">assertThat</span>(result.getEmail()).<span class="fn">isEqualTo</span>(<span class="str">"john@example.com"</span>);
+        Mockito.<span class="fn">verify</span>(emailService).<span class="fn">sendWelcome</span>(savedUser);
+    }
+
+    <span class="kw">@Test</span>
+    <span class="kw">@DisplayName</span>(<span class="str">"createUser: should throw when email already exists"</span>)
+    <span class="kw">void</span> <span class="fn">createUser_emailDuplicate_throws</span>() {
+        Mockito.<span class="fn">when</span>(userRepository.<span class="fn">existsByEmail</span>(<span class="fn">any</span>())).<span class="fn">thenReturn</span>(<span class="kw">true</span>);
+
+        <span class="fn">assertThatThrownBy</span>(() ->
+            userService.<span class="fn">createUser</span>(<span class="kw">new</span> <span class="cls">CreateUserRequest</span>(<span class="str">"dup@x.com"</span>, <span class="str">"Dup"</span>))
+        ).<span class="fn">isInstanceOf</span>(<span class="cls">DuplicateEmailException</span>.class);
+    }
+}</pre>
+  </div>
+
+  <h3>Integration Test với Testcontainers</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">java · UserControllerIT.java (Integration Test)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">@SpringBootTest</span>(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+<span class="kw">@Testcontainers</span>
+<span class="kw">@ActiveProfiles</span>(<span class="str">"test"</span>)
+<span class="kw">class</span> <span class="cls">UserControllerIT</span> {
+
+    <span class="cmt">// Testcontainers tự start/stop PostgreSQL real instance</span>
+    <span class="kw">@Container</span>
+    <span class="kw">static</span> <span class="cls">PostgreSQLContainer</span>&lt;?&gt; postgres =
+        <span class="kw">new</span> <span class="cls">PostgreSQLContainer</span>&lt;&gt;(<span class="str">"postgres:16-alpine"</span>)
+            .<span class="fn">withDatabaseName</span>(<span class="str">"testdb"</span>)
+            .<span class="fn">withUsername</span>(<span class="str">"test"</span>)
+            .<span class="fn">withPassword</span>(<span class="str">"test"</span>);
+
+    <span class="kw">@DynamicPropertySource</span>
+    <span class="kw">static void</span> <span class="fn">configureProperties</span>(<span class="cls">DynamicPropertyRegistry</span> registry) {
+        registry.<span class="fn">add</span>(<span class="str">"spring.datasource.url"</span>, postgres::<span class="fn">getJdbcUrl</span>);
+        registry.<span class="fn">add</span>(<span class="str">"spring.datasource.username"</span>, postgres::<span class="fn">getUsername</span>);
+        registry.<span class="fn">add</span>(<span class="str">"spring.datasource.password"</span>, postgres::<span class="fn">getPassword</span>);
+    }
+
+    <span class="kw">@Autowired</span>
+    <span class="kw">private</span> <span class="cls">TestRestTemplate</span> restTemplate;
+
+    <span class="kw">@Test</span>
+    <span class="kw">void</span> <span class="fn">createUser_returnsCreated</span>() {
+        <span class="kw">var</span> request = Map.<span class="fn">of</span>(<span class="str">"email"</span>, <span class="str">"john@test.com"</span>, <span class="str">"name"</span>, <span class="str">"John"</span>);
+
+        <span class="kw">var</span> response = restTemplate.<span class="fn">postForEntity</span>(
+            <span class="str">"/api/v1/users"</span>, request, <span class="cls">UserResponse</span>.class);
+
+        <span class="fn">assertThat</span>(response.getStatusCode()).<span class="fn">isEqualTo</span>(<span class="cls">HttpStatus</span>.CREATED);
+        <span class="fn">assertThat</span>(response.getBody().getEmail()).<span class="fn">isEqualTo</span>(<span class="str">"john@test.com"</span>);
+    }
+}</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-label">💡 Thêm vào pom.xml</div>
+    <code>&lt;dependency&gt;</code> <code>org.testcontainers:postgresql</code> + <code>org.testcontainers:junit-jupiter</code> với scope <code>test</code>. Testcontainers cần Docker đang chạy — sẽ hoạt động bình thường trong CI runner có Docker socket.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: BE PIPELINE
+══════════════════════════════════════ -->
+<section class="section" id="be-pipeline">
+  <div class="section-tag">Backend · CI Pipeline</div>
+  <h2>⚙ Pipeline CI cho Spring Boot</h2>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button class="tab-btn active" onclick="switchTab(this,'be-gitlab')">🦊 GitLab CI</button>
+      <button class="tab-btn" onclick="switchTab(this,'be-github')">🐙 GitHub Actions</button>
+    </div>
+
+    <div class="tab-pane active" id="be-gitlab">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · .gitlab/pipelines/backend.yml</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># ─────────────────────────────────────────────
+# Backend CI Pipeline · Spring Boot
+# Được include bởi .gitlab-ci.yml chính
+# ─────────────────────────────────────────────</span>
+
+<span class="prop">be:build</span>:
+  <span class="kw">stage</span>: build
+  <span class="kw">image</span>: maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>-alpine
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">backend/pom.xml</span>]
+    <span class="kw">paths</span>: [<span class="str">backend/.m2/repository</span>]
+    <span class="kw">policy</span>: pull-push
+  <span class="kw">variables</span>:
+    <span class="prop">MAVEN_OPTS</span>: <span class="str">"-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"</span>
+  <span class="kw">script</span>:
+    - cd backend
+    - mvn clean package -DskipTests -q
+    - <span class="fn">echo</span> <span class="str">"Build size: $(du -sh target/*.jar)"</span>
+  <span class="kw">artifacts</span>:
+    <span class="prop">paths</span>: [<span class="str">backend/target/*.jar</span>]
+    <span class="prop">expire_in</span>: <span class="str">2 hours</span>
+    <span class="prop">name</span>: <span class="str">"backend-$CI_COMMIT_SHORT_SHA"</span>
+  <span class="kw">rules</span>:
+    - <span class="prop">changes</span>: [<span class="str">backend/**/*</span>]
+
+<span class="prop">be:unit-test</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>-alpine
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">backend/pom.xml</span>]
+    <span class="kw">paths</span>: [<span class="str">backend/.m2/repository</span>]
+    <span class="kw">policy</span>: pull
+  <span class="kw">variables</span>:
+    <span class="prop">MAVEN_OPTS</span>: <span class="str">"-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"</span>
+  <span class="kw">script</span>:
+    - cd backend
+    - mvn test -Dgroups=<span class="str">"unit"</span> -q
+  <span class="kw">coverage</span>: <span class="str">'/Total.*?([0-9]{1,3})%/'</span>
+  <span class="kw">artifacts</span>:
+    <span class="prop">when</span>: always
+    <span class="prop">reports</span>:
+      <span class="prop">junit</span>: <span class="str">backend/target/surefire-reports/**/*.xml</span>
+      <span class="prop">coverage_report</span>:
+        <span class="kw">coverage_format</span>: jacoco
+        <span class="kw">path</span>: <span class="str">backend/target/site/jacoco/jacoco.xml</span>
+  <span class="kw">needs</span>: [<span class="str">be:build</span>]
+
+<span class="prop">be:integration-test</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>-alpine
+  <span class="kw">services</span>:
+    - name: docker:dind
+      alias: docker
+  <span class="kw">variables</span>:
+    <span class="prop">DOCKER_HOST</span>: <span class="str">tcp://docker:2376</span>
+    <span class="prop">DOCKER_TLS_CERTDIR</span>: <span class="str">"/certs"</span>
+    <span class="prop">MAVEN_OPTS</span>: <span class="str">"-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"</span>
+  <span class="kw">script</span>:
+    - cd backend
+    - mvn verify -Dgroups=<span class="str">"integration"</span> -q
+  <span class="kw">artifacts</span>:
+    <span class="prop">when</span>: always
+    <span class="prop">reports</span>:
+      <span class="prop">junit</span>: <span class="str">backend/target/failsafe-reports/**/*.xml</span>
+  <span class="kw">needs</span>: [<span class="str">be:build</span>]
+
+<span class="prop">be:code-quality</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>-alpine
+  <span class="kw">variables</span>:
+    <span class="prop">SONAR_HOST_URL</span>: <span class="str">"$SONAR_URL"</span>
+    <span class="prop">SONAR_TOKEN</span>: <span class="str">"$SONAR_AUTH_TOKEN"</span>
+    <span class="prop">MAVEN_OPTS</span>: <span class="str">"-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"</span>
+  <span class="kw">script</span>:
+    - cd backend
+    - mvn sonar:sonar -Dsonar.qualitygate.wait=<span class="kw">true</span>
+  <span class="kw">allow_failure</span>: <span class="kw">true</span>  <span class="cmt"># Không block deploy nếu Sonar chưa setup</span>
+  <span class="kw">needs</span>: [<span class="str">be:unit-test</span>]
+
+<span class="prop">be:docker-build</span>:
+  <span class="kw">stage</span>: package
+  <span class="kw">image</span>: docker:<span class="num">24</span>-dind
+  <span class="kw">services</span>:
+    - docker:dind
+  <span class="kw">variables</span>:
+    <span class="prop">IMAGE</span>: <span class="str">"$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"</span>
+    <span class="prop">IMAGE_LATEST</span>: <span class="str">"$CI_REGISTRY_IMAGE/backend:latest"</span>
+  <span class="kw">before_script</span>:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  <span class="kw">script</span>:
+    - <span class="cmt"># Build sử dụng cache từ latest image</span>
+    - docker pull $IMAGE_LATEST || <span class="kw">true</span>
+    - docker build
+        --cache-from $IMAGE_LATEST
+        --build-arg BUILDKIT_INLINE_CACHE=<span class="num">1</span>
+        -t $IMAGE -t $IMAGE_LATEST
+        backend/
+    - docker push $IMAGE
+    - docker push $IMAGE_LATEST
+    - <span class="fn">echo</span> <span class="str">"IMAGE=$IMAGE"</span> >> build.env
+  <span class="kw">artifacts</span>:
+    <span class="prop">reports</span>:
+      <span class="prop">dotenv</span>: <span class="str">build.env</span>
+  <span class="kw">needs</span>: [<span class="str">be:unit-test</span>, <span class="str">be:integration-test</span>]
+  <span class="kw">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'</span></pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="be-github">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · .github/workflows/backend.yml</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">name</span>: <span class="str">Backend CI · Spring Boot</span>
+
+<span class="kw">on</span>:
+  <span class="prop">push</span>:
+    <span class="kw">branches</span>: [main, develop]
+    <span class="kw">paths</span>: [<span class="str">'backend/**'</span>]
+  <span class="prop">pull_request</span>:
+    <span class="kw">branches</span>: [main]
+    <span class="kw">paths</span>: [<span class="str">'backend/**'</span>]
+
+<span class="kw">env</span>:
+  <span class="prop">REGISTRY</span>: ghcr.io
+  <span class="prop">IMAGE_NAME</span>: <span class="str">${{ github.repository }}/backend</span>
+
+<span class="kw">jobs</span>:
+  <span class="prop">build-and-test</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">defaults</span>:
+      <span class="prop">run</span>:
+        <span class="kw">working-directory</span>: backend
+
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+
+      - <span class="kw">name</span>: <span class="str">Setup Java 17</span>
+        <span class="kw">uses</span>: actions/setup-java@v4
+        <span class="kw">with</span>:
+          <span class="prop">java-version</span>: <span class="str">'17'</span>
+          <span class="prop">distribution</span>: temurin
+          <span class="prop">cache</span>: maven
+
+      - <span class="kw">name</span>: <span class="str">Build (skip tests)</span>
+        <span class="kw">run</span>: mvn clean package -DskipTests -q
+
+      - <span class="kw">name</span>: <span class="str">Run unit tests</span>
+        <span class="kw">run</span>: mvn test -Dgroups=unit
+
+      - <span class="kw">name</span>: <span class="str">Run integration tests</span>
+        <span class="kw">run</span>: mvn verify -Dgroups=integration
+
+      - <span class="kw">name</span>: <span class="str">Upload test reports</span>
+        <span class="kw">if</span>: always()
+        <span class="kw">uses</span>: actions/upload-artifact@v4
+        <span class="kw">with</span>:
+          <span class="prop">name</span>: test-reports
+          <span class="prop">path</span>: backend/target/surefire-reports/
+
+      - <span class="kw">name</span>: <span class="str">Code Coverage Report</span>
+        <span class="kw">uses</span>: codecov/codecov-action@v4
+        <span class="kw">with</span>:
+          <span class="prop">files</span>: backend/target/site/jacoco/jacoco.xml
+          <span class="prop">flags</span>: backend
+
+  <span class="prop">docker-build-push</span>:
+    <span class="kw">needs</span>: build-and-test
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">if</span>: github.ref == 'refs/heads/main'
+    <span class="kw">permissions</span>:
+      <span class="prop">contents</span>: read
+      <span class="prop">packages</span>: write
+
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+
+      - <span class="kw">name</span>: <span class="str">Setup Docker Buildx</span>
+        <span class="kw">uses</span>: docker/setup-buildx-action@v3
+
+      - <span class="kw">name</span>: <span class="str">Login to GHCR</span>
+        <span class="kw">uses</span>: docker/login-action@v3
+        <span class="kw">with</span>:
+          <span class="prop">registry</span>: <span class="str">${{ env.REGISTRY }}</span>
+          <span class="prop">username</span>: <span class="str">${{ github.actor }}</span>
+          <span class="prop">password</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+
+      - <span class="kw">name</span>: <span class="str">Build and push Docker image</span>
+        <span class="kw">uses</span>: docker/build-push-action@v5
+        <span class="kw">with</span>:
+          <span class="prop">context</span>: backend
+          <span class="prop">push</span>: <span class="kw">true</span>
+          <span class="prop">cache-from</span>: type=registry,ref=<span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache</span>
+          <span class="prop">cache-to</span>: type=registry,ref=<span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache</span>,mode=max
+          <span class="prop">tags</span>: |
+            <span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}</span>
+            <span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: FE STRUCTURE
+══════════════════════════════════════ -->
+<section class="section" id="fe-structure">
+  <div class="section-tag">Frontend · ReactJS</div>
+  <h2>📁 Cấu trúc Frontend project</h2>
+
+  <div class="tree">
+<span class="dir">frontend/</span>
+├── <span class="dir">src/</span>
+│   ├── <span class="dir">assets/</span>              <span class="cmt-tree"># Static files</span>
+│   ├── <span class="dir">components/</span>          <span class="cmt-tree"># Shared UI components</span>
+│   │   └── <span class="dir">__tests__/</span>       <span class="cmt-tree"># Component tests (colocated)</span>
+│   ├── <span class="dir">pages/</span>               <span class="cmt-tree"># Route-level components</span>
+│   ├── <span class="dir">hooks/</span>               <span class="cmt-tree"># Custom hooks</span>
+│   ├── <span class="dir">services/</span>            <span class="cmt-tree"># API call layer</span>
+│   ├── <span class="dir">store/</span>               <span class="cmt-tree"># State management</span>
+│   ├── <span class="dir">utils/</span>               <span class="cmt-tree"># Helpers</span>
+│   │   └── <span class="dir">__tests__/</span>
+│   └── <span class="file imp">main.tsx</span>
+├── <span class="dir">e2e/</span>                     <span class="cmt-tree"># Playwright E2E tests</span>
+│   └── <span class="file imp">*.spec.ts</span>
+├── <span class="file imp">Dockerfile</span>
+├── <span class="file imp">nginx.conf</span>               <span class="cmt-tree"># Nginx config cho production</span>
+├── <span class="file">.dockerignore</span>
+├── <span class="file cfg">vite.config.ts</span>
+├── <span class="file cfg">vitest.config.ts</span>
+├── <span class="file cfg">playwright.config.ts</span>
+├── <span class="file cfg">package.json</span>
+└── <span class="file cfg">.env.example</span>           <span class="cmt-tree"># Template env vars</span>
+  </div>
+
+  <h3>⚙ package.json — Scripts cho CI/CD</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">json · package.json (phần scripts)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>{
+  <span class="prop">"scripts"</span>: {
+    <span class="prop">"dev"</span>: <span class="str">"vite"</span>,
+    <span class="prop">"build"</span>: <span class="str">"tsc && vite build"</span>,
+    <span class="prop">"preview"</span>: <span class="str">"vite preview"</span>,
+
+    <span class="cmt">// CI specific scripts</span>
+    <span class="prop">"test"</span>: <span class="str">"vitest run"</span>,                   <span class="cmt">// Run once (CI)</span>
+    <span class="prop">"test:watch"</span>: <span class="str">"vitest"</span>,                <span class="cmt">// Watch mode (dev)</span>
+    <span class="prop">"test:coverage"</span>: <span class="str">"vitest run --coverage"</span>,
+    <span class="prop">"test:e2e"</span>: <span class="str">"playwright test"</span>,
+    <span class="prop">"test:e2e:ui"</span>: <span class="str">"playwright test --ui"</span>,
+
+    <span class="prop">"lint"</span>: <span class="str">"eslint src --ext .ts,.tsx --max-warnings 0"</span>,
+    <span class="prop">"lint:fix"</span>: <span class="str">"eslint src --ext .ts,.tsx --fix"</span>,
+    <span class="prop">"typecheck"</span>: <span class="str">"tsc --noEmit"</span>,
+
+    <span class="cmt">// Chạy tất cả checks trước khi commit/push</span>
+    <span class="prop">"ci"</span>: <span class="str">"npm run typecheck && npm run lint && npm run test:coverage && npm run build"</span>
+  }
+}</pre>
+  </div>
+
+  <h3>⚙ vite.config.ts — Cấu hình build tối ưu</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">typescript · vite.config.ts</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">import</span> { defineConfig, loadEnv } <span class="kw">from</span> <span class="str">'vite'</span>
+<span class="kw">import</span> react <span class="kw">from</span> <span class="str">'@vitejs/plugin-react'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>(({ mode }) => {
+  <span class="kw">const</span> env = <span class="fn">loadEnv</span>(mode, process.cwd(), <span class="str">''</span>)
+
+  <span class="kw">return</span> {
+    plugins: [<span class="fn">react</span>()],
+
+    build: {
+      outDir: <span class="str">'dist'</span>,
+      sourcemap: mode !== <span class="str">'production'</span>,
+      rollupOptions: {
+        output: {
+          <span class="cmt">// Code splitting cho vendor libs</span>
+          manualChunks: {
+            vendor: [<span class="str">'react'</span>, <span class="str">'react-dom'</span>],
+            router: [<span class="str">'react-router-dom'</span>],
+            query: [<span class="str">'@tanstack/react-query'</span>],
+          }
+        }
+      }
+    },
+
+    server: {
+      port: <span class="num">3000</span>,
+      <span class="cmt">// Proxy API calls đến backend trong dev</span>
+      proxy: {
+        <span class="str">'/api'</span>: {
+          target: env.VITE_API_URL || <span class="str">'http://localhost:8080'</span>,
+          changeOrigin: <span class="kw">true</span>,
+        }
+      }
+    },
+
+    test: {
+      globals: <span class="kw">true</span>,
+      environment: <span class="str">'jsdom'</span>,
+      setupFiles: [<span class="str">'./src/test-setup.ts'</span>],
+      coverage: {
+        provider: <span class="str">'v8'</span>,
+        reporter: [<span class="str">'text'</span>, <span class="str">'lcov'</span>, <span class="str">'html'</span>],
+        thresholds: {
+          lines: <span class="num">70</span>,
+          functions: <span class="num">70</span>,
+        }
+      }
+    }
+  }
+})</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: FE DOCKERFILE
+══════════════════════════════════════ -->
+<section class="section" id="fe-dockerfile">
+  <div class="section-tag">Frontend · Docker</div>
+  <h2>🐳 Dockerfile ReactJS + Nginx</h2>
+  <p>Build React thành static files, serve bằng Nginx — nhẹ, nhanh, production-ready.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">dockerfile · frontend/Dockerfile</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># ══════════════════════════════════════════
+# Stage 1: BUILD
+# ══════════════════════════════════════════</span>
+<span class="kw">FROM</span> node:<span class="num">20</span>-alpine <span class="kw">AS</span> builder
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy package files trước — cache npm install
+# Chỉ re-run khi package-lock.json thay đổi</span>
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci --prefer-offline
+
+<span class="cmt"># Copy source và build</span>
+<span class="kw">COPY</span> . .
+
+<span class="cmt"># Build args để inject env vars lúc build time</span>
+<span class="kw">ARG</span> VITE_API_URL
+<span class="kw">ARG</span> VITE_APP_VERSION
+
+<span class="kw">RUN</span> npm run build
+
+<span class="cmt"># ══════════════════════════════════════════
+# Stage 2: SERVE với Nginx Alpine (~15MB)
+# ══════════════════════════════════════════</span>
+<span class="kw">FROM</span> nginx:<span class="num">1.25</span>-alpine
+
+<span class="cmt"># Xóa default Nginx config</span>
+<span class="kw">RUN</span> rm /etc/nginx/conf.d/default.conf
+
+<span class="cmt"># Copy custom Nginx config</span>
+<span class="kw">COPY</span> nginx.conf /etc/nginx/conf.d/app.conf
+
+<span class="cmt"># Copy built files từ builder stage</span>
+<span class="kw">COPY</span> --from=builder /app/dist /usr/share/nginx/html
+
+<span class="kw">EXPOSE</span> <span class="num">80</span>
+
+<span class="cmt"># Health check</span>
+<span class="kw">HEALTHCHECK</span> --interval=<span class="num">30s</span> --timeout=<span class="num">5s</span> \
+    <span class="kw">CMD</span> wget -qO- http://localhost:80/health || exit <span class="num">1</span>
+
+<span class="kw">CMD</span> [<span class="str">"nginx"</span>, <span class="str">"-g"</span>, <span class="str">"daemon off;"</span>]</pre>
+  </div>
+
+  <h3>🌐 nginx.conf — Production ready</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">nginx · frontend/nginx.conf</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>server {
+    listen <span class="num">80</span>;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    <span class="cmt"># Gzip compression</span>
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript
+               text/xml application/xml application/xml+rss text/javascript;
+    gzip_min_length <span class="num">1024</span>;
+
+    <span class="cmt"># Security headers</span>
+    add_header X-Frame-Options <span class="str">"SAMEORIGIN"</span>;
+    add_header X-Content-Type-Options <span class="str">"nosniff"</span>;
+    add_header X-XSS-Protection <span class="str">"1; mode=block"</span>;
+    add_header Referrer-Policy <span class="str">"strict-origin-when-cross-origin"</span>;
+
+    <span class="cmt"># Health check endpoint cho CI/CD</span>
+    location /health {
+        access_log off;
+        return <span class="num">200</span> <span class="str">'{"status":"ok"}'</span>;
+        add_header Content-Type application/json;
+    }
+
+    <span class="cmt"># Static assets: cache dài (có content hash trong tên file)</span>
+    location ~* \.(js|css|png|jpg|gif|ico|woff2?)$ {
+        expires <span class="num">1y</span>;
+        add_header Cache-Control <span class="str">"public, immutable"</span>;
+    }
+
+    <span class="cmt"># API proxy đến backend (optional - dùng khi BE và FE cùng domain)</span>
+    location /api/ {
+        proxy_pass http://backend:<span class="num">8080</span>;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    <span class="cmt"># SPA fallback: mọi route đều trả về index.html</span>
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">text · frontend/.dockerignore</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>node_modules/
+dist/
+.git/
+*.md
+.env
+.env.*
+coverage/
+e2e/
+playwright-report/</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: FE TESTS
+══════════════════════════════════════ -->
+<section class="section" id="fe-tests">
+  <div class="section-tag">Frontend · Testing</div>
+  <h2>🧪 Testing Strategy — ReactJS</h2>
+
+  <div class="cards col3">
+    <div class="card">
+      <div class="card-ico">⚡</div>
+      <div class="card-title">Unit / Component</div>
+      <div class="card-desc">Vitest + React Testing Library. Test component render, user interactions, hooks.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔗</div>
+      <div class="card-title">API Mock Tests</div>
+      <div class="card-desc">MSW (Mock Service Worker) để mock API calls. Test loading/error/success states.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🌐</div>
+      <div class="card-title">E2E · Playwright</div>
+      <div class="card-desc">Test toàn bộ user flow trong browser thật. Chạy sau deploy staging.</div>
+    </div>
+  </div>
+
+  <h3>Component Test mẫu — React Testing Library</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">typescript · LoginForm.test.tsx</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">import</span> { render, screen, userEvent } <span class="kw">from</span> <span class="str">'@testing-library/react'</span>
+<span class="kw">import</span> { describe, it, expect, vi } <span class="kw">from</span> <span class="str">'vitest'</span>
+<span class="kw">import</span> { <span class="cls">LoginForm</span> } <span class="kw">from</span> <span class="str">'../LoginForm'</span>
+
+<span class="fn">describe</span>(<span class="str">'LoginForm'</span>, () => {
+  <span class="fn">it</span>(<span class="str">'submits with correct credentials'</span>, <span class="kw">async</span> () => {
+    <span class="kw">const</span> onSubmit = vi.<span class="fn">fn</span>()
+    <span class="fn">render</span>(<span class="tag-xml">&lt;LoginForm onSubmit={onSubmit} /&gt;</span>)
+
+    <span class="kw">const</span> user = userEvent.<span class="fn">setup</span>()
+
+    <span class="kw">await</span> user.<span class="fn">type</span>(screen.<span class="fn">getByLabelText</span>(<span class="str">/email/i</span>), <span class="str">'user@test.com'</span>)
+    <span class="kw">await</span> user.<span class="fn">type</span>(screen.<span class="fn">getByLabelText</span>(<span class="str">/password/i</span>), <span class="str">'secret123'</span>)
+    <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/login/i</span> }))
+
+    expect(onSubmit).<span class="fn">toHaveBeenCalledWith</span>({
+      email: <span class="str">'user@test.com'</span>,
+      password: <span class="str">'secret123'</span>
+    })
+  })
+
+  <span class="fn">it</span>(<span class="str">'shows validation error for empty email'</span>, <span class="kw">async</span> () => {
+    <span class="fn">render</span>(<span class="tag-xml">&lt;LoginForm onSubmit={vi.fn()} /&gt;</span>)
+    <span class="kw">const</span> user = userEvent.<span class="fn">setup</span>()
+
+    <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/login/i</span> }))
+
+    expect(screen.<span class="fn">getByText</span>(<span class="str">/email is required/i</span>)).<span class="fn">toBeInTheDocument</span>()
+  })
+})</pre>
+  </div>
+
+  <h3>E2E Test mẫu — Playwright</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">typescript · e2e/login.spec.ts</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">import</span> { test, expect } <span class="kw">from</span> <span class="str">'@playwright/test'</span>
+
+test.<span class="fn">describe</span>(<span class="str">'Login flow'</span>, () => {
+  test(<span class="str">'user can login with valid credentials'</span>, <span class="kw">async</span> ({ page }) => {
+    <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/'</span>)
+    <span class="kw">await</span> page.<span class="fn">getByLabel</span>(<span class="str">'Email'</span>).<span class="fn">fill</span>(<span class="str">'admin@example.com'</span>)
+    <span class="kw">await</span> page.<span class="fn">getByLabel</span>(<span class="str">'Password'</span>).<span class="fn">fill</span>(<span class="str">'password123'</span>)
+    <span class="kw">await</span> page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Login'</span> }).<span class="fn">click</span>()
+
+    <span class="cmt">// Sau khi login, redirect đến dashboard</span>
+    <span class="kw">await</span> expect(page).<span class="fn">toHaveURL</span>(<span class="str">'/dashboard'</span>)
+    <span class="kw">await</span> expect(page.<span class="fn">getByText</span>(<span class="str">'Welcome back'</span>)).<span class="fn">toBeVisible</span>()
+  })
+
+  test(<span class="str">'shows error for wrong password'</span>, <span class="kw">async</span> ({ page }) => {
+    <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/'</span>)
+    <span class="kw">await</span> page.<span class="fn">getByLabel</span>(<span class="str">'Email'</span>).<span class="fn">fill</span>(<span class="str">'admin@example.com'</span>)
+    <span class="kw">await</span> page.<span class="fn">getByLabel</span>(<span class="str">'Password'</span>).<span class="fn">fill</span>(<span class="str">'wrong'</span>)
+    <span class="kw">await</span> page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Login'</span> }).<span class="fn">click</span>()
+
+    <span class="kw">await</span> expect(page.<span class="fn">getByText</span>(<span class="str">/invalid credentials/i</span>)).<span class="fn">toBeVisible</span>()
+  })
+})</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: FE PIPELINE
+══════════════════════════════════════ -->
+<section class="section" id="fe-pipeline">
+  <div class="section-tag">Frontend · CI Pipeline</div>
+  <h2>⚙ Pipeline CI cho ReactJS</h2>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button class="tab-btn active" onclick="switchTab(this,'fe-gitlab')">🦊 GitLab CI</button>
+      <button class="tab-btn" onclick="switchTab(this,'fe-github')">🐙 GitHub Actions</button>
+    </div>
+
+    <div class="tab-pane active" id="fe-gitlab">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · .gitlab/pipelines/frontend.yml</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># ─────────────────────────────────────────────
+# Frontend CI Pipeline · ReactJS + Vite
+# ─────────────────────────────────────────────</span>
+
+<span class="prop">fe:install</span>:
+  <span class="kw">stage</span>: build
+  <span class="kw">image</span>: node:<span class="num">20</span>-alpine
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">frontend/package-lock.json</span>]
+    <span class="kw">paths</span>: [<span class="str">frontend/node_modules</span>]
+    <span class="kw">policy</span>: pull-push
+  <span class="kw">script</span>:
+    - cd frontend
+    - npm ci --prefer-offline
+  <span class="kw">rules</span>:
+    - <span class="prop">changes</span>: [<span class="str">frontend/**/*</span>]
+
+<span class="prop">fe:typecheck</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: node:<span class="num">20</span>-alpine
+  <span class="kw">needs</span>: [<span class="str">fe:install</span>]
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">frontend/package-lock.json</span>]
+    <span class="kw">paths</span>: [<span class="str">frontend/node_modules</span>]
+    <span class="kw">policy</span>: pull
+  <span class="kw">script</span>:
+    - cd frontend
+    - npm run typecheck
+  <span class="kw">rules</span>:
+    - <span class="prop">changes</span>: [<span class="str">frontend/**/*</span>]
+
+<span class="prop">fe:lint</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: node:<span class="num">20</span>-alpine
+  <span class="kw">needs</span>: [<span class="str">fe:install</span>]
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">frontend/package-lock.json</span>]
+    <span class="kw">paths</span>: [<span class="str">frontend/node_modules</span>]
+    <span class="kw">policy</span>: pull
+  <span class="kw">script</span>:
+    - cd frontend
+    - npm run lint
+  <span class="kw">rules</span>:
+    - <span class="prop">changes</span>: [<span class="str">frontend/**/*</span>]
+
+<span class="prop">fe:unit-test</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: node:<span class="num">20</span>-alpine
+  <span class="kw">needs</span>: [<span class="str">fe:install</span>]
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">frontend/package-lock.json</span>]
+    <span class="kw">paths</span>: [<span class="str">frontend/node_modules</span>]
+    <span class="kw">policy</span>: pull
+  <span class="kw">script</span>:
+    - cd frontend
+    - npm run test:coverage
+  <span class="kw">coverage</span>: <span class="str">'/Lines\s*:\s*(\d+(?:\.\d+)?)%/'</span>
+  <span class="kw">artifacts</span>:
+    <span class="prop">when</span>: always
+    <span class="prop">paths</span>: [<span class="str">frontend/coverage</span>]
+    <span class="prop">reports</span>:
+      <span class="prop">coverage_report</span>:
+        <span class="kw">coverage_format</span>: cobertura
+        <span class="kw">path</span>: <span class="str">frontend/coverage/cobertura-coverage.xml</span>
+  <span class="kw">rules</span>:
+    - <span class="prop">changes</span>: [<span class="str">frontend/**/*</span>]
+
+<span class="prop">fe:build</span>:
+  <span class="kw">stage</span>: package
+  <span class="kw">image</span>: node:<span class="num">20</span>-alpine
+  <span class="kw">needs</span>: [<span class="str">fe:typecheck</span>, <span class="str">fe:lint</span>, <span class="str">fe:unit-test</span>]
+  <span class="kw">cache</span>:
+    <span class="kw">key</span>:
+      <span class="prop">files</span>: [<span class="str">frontend/package-lock.json</span>]
+    <span class="kw">paths</span>: [<span class="str">frontend/node_modules</span>]
+    <span class="kw">policy</span>: pull
+  <span class="kw">variables</span>:
+    <span class="prop">VITE_API_URL</span>: <span class="str">"$STAGING_API_URL"</span>
+    <span class="prop">VITE_APP_VERSION</span>: <span class="str">"$CI_COMMIT_SHORT_SHA"</span>
+  <span class="kw">script</span>:
+    - cd frontend
+    - npm run build
+    - <span class="fn">echo</span> <span class="str">"Bundle size: $(du -sh dist/)"</span>
+  <span class="kw">artifacts</span>:
+    <span class="prop">paths</span>: [<span class="str">frontend/dist</span>]
+    <span class="prop">expire_in</span>: <span class="str">1 day</span>
+
+<span class="prop">fe:docker-build</span>:
+  <span class="kw">stage</span>: package
+  <span class="kw">image</span>: docker:<span class="num">24</span>-dind
+  <span class="kw">services</span>:
+    - docker:dind
+  <span class="kw">variables</span>:
+    <span class="prop">IMAGE</span>: <span class="str">"$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"</span>
+    <span class="prop">IMAGE_LATEST</span>: <span class="str">"$CI_REGISTRY_IMAGE/frontend:latest"</span>
+  <span class="kw">before_script</span>:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  <span class="kw">script</span>:
+    - docker pull $IMAGE_LATEST || <span class="kw">true</span>
+    - docker build
+        --cache-from $IMAGE_LATEST
+        --build-arg VITE_API_URL=$STAGING_API_URL
+        --build-arg VITE_APP_VERSION=$CI_COMMIT_SHORT_SHA
+        -t $IMAGE -t $IMAGE_LATEST
+        frontend/
+    - docker push $IMAGE
+    - docker push $IMAGE_LATEST
+    - <span class="fn">echo</span> <span class="str">"FE_IMAGE=$IMAGE"</span> >> build.env
+  <span class="kw">artifacts</span>:
+    <span class="prop">reports</span>:
+      <span class="prop">dotenv</span>: <span class="str">build.env</span>
+  <span class="kw">needs</span>: [<span class="str">fe:build</span>]
+  <span class="kw">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'</span></pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="fe-github">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · .github/workflows/frontend.yml</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">name</span>: <span class="str">Frontend CI · ReactJS</span>
+
+<span class="kw">on</span>:
+  <span class="prop">push</span>:
+    <span class="kw">branches</span>: [main, develop]
+    <span class="kw">paths</span>: [<span class="str">'frontend/**'</span>]
+  <span class="prop">pull_request</span>:
+    <span class="kw">branches</span>: [main]
+    <span class="kw">paths</span>: [<span class="str">'frontend/**'</span>]
+
+<span class="kw">env</span>:
+  <span class="prop">NODE_VERSION</span>: <span class="str">'20'</span>
+  <span class="prop">REGISTRY</span>: ghcr.io
+  <span class="prop">IMAGE_NAME</span>: <span class="str">${{ github.repository }}/frontend</span>
+
+<span class="kw">jobs</span>:
+  <span class="prop">quality-and-test</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">defaults</span>:
+      <span class="prop">run</span>:
+        <span class="kw">working-directory</span>: frontend
+
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+
+      - <span class="kw">name</span>: <span class="str">Setup Node.js</span>
+        <span class="kw">uses</span>: actions/setup-node@v4
+        <span class="kw">with</span>:
+          <span class="prop">node-version</span>: <span class="str">${{ env.NODE_VERSION }}</span>
+          <span class="prop">cache</span>: npm
+          <span class="prop">cache-dependency-path</span>: frontend/package-lock.json
+
+      - <span class="kw">name</span>: <span class="str">Install dependencies</span>
+        <span class="kw">run</span>: npm ci
+
+      <span class="cmt"># Chạy song song: typecheck + lint + test</span>
+      - <span class="kw">name</span>: <span class="str">TypeScript check</span>
+        <span class="kw">run</span>: npm run typecheck
+
+      - <span class="kw">name</span>: <span class="str">ESLint</span>
+        <span class="kw">run</span>: npm run lint
+
+      - <span class="kw">name</span>: <span class="str">Unit tests with coverage</span>
+        <span class="kw">run</span>: npm run test:coverage
+
+      - <span class="kw">name</span>: <span class="str">Upload coverage</span>
+        <span class="kw">uses</span>: codecov/codecov-action@v4
+        <span class="kw">with</span>:
+          <span class="prop">files</span>: frontend/coverage/lcov.info
+          <span class="prop">flags</span>: frontend
+
+      - <span class="kw">name</span>: <span class="str">Build production bundle</span>
+        <span class="kw">run</span>: npm run build
+        <span class="kw">env</span>:
+          <span class="prop">VITE_API_URL</span>: <span class="str">${{ vars.STAGING_API_URL }}</span>
+
+      - <span class="kw">name</span>: <span class="str">Upload dist artifact</span>
+        <span class="kw">uses</span>: actions/upload-artifact@v4
+        <span class="kw">with</span>:
+          <span class="prop">name</span>: frontend-dist
+          <span class="prop">path</span>: frontend/dist/
+
+  <span class="prop">docker-build-push</span>:
+    <span class="kw">needs</span>: quality-and-test
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">if</span>: github.ref == 'refs/heads/main'
+    <span class="kw">permissions</span>:
+      <span class="prop">contents</span>: read
+      <span class="prop">packages</span>: write
+
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+      - <span class="kw">uses</span>: docker/setup-buildx-action@v3
+      - <span class="kw">uses</span>: docker/login-action@v3
+        <span class="kw">with</span>:
+          <span class="prop">registry</span>: <span class="str">${{ env.REGISTRY }}</span>
+          <span class="prop">username</span>: <span class="str">${{ github.actor }}</span>
+          <span class="prop">password</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+
+      - <span class="kw">name</span>: <span class="str">Build and push</span>
+        <span class="kw">uses</span>: docker/build-push-action@v5
+        <span class="kw">with</span>:
+          <span class="prop">context</span>: frontend
+          <span class="prop">push</span>: <span class="kw">true</span>
+          <span class="prop">build-args</span>: |
+            VITE_API_URL=<span class="str">${{ vars.STAGING_API_URL }}</span>
+            VITE_APP_VERSION=<span class="str">${{ github.sha }}</span>
+          <span class="prop">cache-from</span>: type=registry,ref=<span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache</span>
+          <span class="prop">cache-to</span>: type=registry,ref=<span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache</span>,mode=max
+          <span class="prop">tags</span>: |
+            <span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}</span>
+            <span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: DOCKER COMPOSE STACK
+══════════════════════════════════════ -->
+<section class="section" id="compose">
+  <div class="section-tag">Tích hợp</div>
+  <h2>🧩 Docker Compose — Full Stack</h2>
+  <p>File Compose để chạy toàn bộ stack (dev & staging). Tất cả services kết nối với nhau qua internal network.</p>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button class="tab-btn active" onclick="switchTab(this,'compose-dev')">💻 Development</button>
+      <button class="tab-btn" onclick="switchTab(this,'compose-staging')">🎯 Staging</button>
+    </div>
+
+    <div class="tab-pane active" id="compose-dev">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · docker-compose.yml (development)</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">networks</span>:
+  <span class="prop">app-net</span>:
+    <span class="kw">driver</span>: bridge
+
+<span class="kw">volumes</span>:
+  <span class="prop">postgres-data</span>:
+  <span class="prop">redis-data</span>:
+
+<span class="kw">services</span>:
+  <span class="cmt"># ── DATABASE ──</span>
+  <span class="prop">postgres</span>:
+    <span class="kw">image</span>: postgres:<span class="num">16</span>-alpine
+    <span class="kw">container_name</span>: app-postgres
+    <span class="kw">restart</span>: unless-stopped
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">ports</span>: [<span class="str">"5432:5432"</span>]
+    <span class="kw">environment</span>:
+      POSTGRES_DB: <span class="str">${DB_NAME:-mydb}</span>
+      POSTGRES_USER: <span class="str">${DB_USER:-postgres}</span>
+      POSTGRES_PASSWORD: <span class="str">${DB_PASS:-postgres}</span>
+    <span class="kw">volumes</span>:
+      - postgres-data:/var/lib/postgresql/data
+      - <span class="str">./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql</span>
+    <span class="kw">healthcheck</span>:
+      <span class="prop">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"pg_isready -U ${DB_USER:-postgres}"</span>]
+      <span class="prop">interval</span>: <span class="str">10s</span>
+      <span class="prop">timeout</span>: <span class="str">5s</span>
+      <span class="prop">retries</span>: <span class="num">5</span>
+
+  <span class="prop">redis</span>:
+    <span class="kw">image</span>: redis:<span class="num">7</span>-alpine
+    <span class="kw">container_name</span>: app-redis
+    <span class="kw">restart</span>: unless-stopped
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">ports</span>: [<span class="str">"6379:6379"</span>]
+    <span class="kw">volumes</span>: [redis-data:/data]
+    <span class="kw">command</span>: redis-server --appendonly yes
+
+  <span class="cmt"># ── BACKEND ──</span>
+  <span class="prop">backend</span>:
+    <span class="kw">build</span>:
+      <span class="prop">context</span>: ./backend
+      <span class="kw">dockerfile</span>: Dockerfile
+    <span class="kw">container_name</span>: app-backend
+    <span class="kw">restart</span>: unless-stopped
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">ports</span>: [<span class="str">"8080:8080"</span>]
+    <span class="kw">environment</span>:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:<span class="num">5432</span>/<span class="str">${DB_NAME:-mydb}</span>
+      DB_USER: <span class="str">${DB_USER:-postgres}</span>
+      DB_PASS: <span class="str">${DB_PASS:-postgres}</span>
+      REDIS_HOST: redis
+      REDIS_PORT: <span class="num">6379</span>
+    <span class="kw">depends_on</span>:
+      <span class="prop">postgres</span>:
+        <span class="kw">condition</span>: service_healthy
+      <span class="prop">redis</span>:
+        <span class="kw">condition</span>: service_started
+    <span class="kw">healthcheck</span>:
+      <span class="prop">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"wget -qO- http://localhost:8080/actuator/health"</span>]
+      <span class="prop">interval</span>: <span class="str">20s</span>
+      <span class="prop">timeout</span>: <span class="str">10s</span>
+      <span class="prop">retries</span>: <span class="num">5</span>
+
+  <span class="cmt"># ── FRONTEND ──</span>
+  <span class="prop">frontend</span>:
+    <span class="kw">build</span>:
+      <span class="prop">context</span>: ./frontend
+      <span class="kw">dockerfile</span>: Dockerfile
+      <span class="kw">args</span>:
+        VITE_API_URL: <span class="str">""</span>  <span class="cmt"># empty = use nginx proxy</span>
+    <span class="kw">container_name</span>: app-frontend
+    <span class="kw">restart</span>: unless-stopped
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">ports</span>: [<span class="str">"3000:80"</span>]
+    <span class="kw">depends_on</span>:
+      <span class="prop">backend</span>:
+        <span class="kw">condition</span>: service_healthy</pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="compose-staging">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · docker-compose.staging.yml (dùng pre-built images)</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Dùng images đã build sẵn từ registry
+# Deploy: docker compose -f docker-compose.staging.yml up -d</span>
+<span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">networks</span>:
+  <span class="prop">app-net</span>:
+
+<span class="kw">volumes</span>:
+  <span class="prop">postgres-data</span>:
+  <span class="prop">redis-data</span>:
+
+<span class="kw">services</span>:
+  <span class="prop">postgres</span>:
+    <span class="kw">image</span>: postgres:<span class="num">16</span>-alpine
+    <span class="kw">restart</span>: always
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">environment</span>:
+      POSTGRES_DB: <span class="str">${DB_NAME}</span>
+      POSTGRES_USER: <span class="str">${DB_USER}</span>
+      POSTGRES_PASSWORD: <span class="str">${DB_PASS}</span>
+    <span class="kw">volumes</span>: [postgres-data:/var/lib/postgresql/data]
+    <span class="kw">healthcheck</span>:
+      <span class="prop">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"pg_isready -U $DB_USER"</span>]
+      <span class="prop">interval</span>: <span class="str">10s</span>
+      <span class="prop">retries</span>: <span class="num">5</span>
+
+  <span class="prop">redis</span>:
+    <span class="kw">image</span>: redis:<span class="num">7</span>-alpine
+    <span class="kw">restart</span>: always
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">volumes</span>: [redis-data:/data]
+
+  <span class="prop">backend</span>:
+    <span class="cmt"># IMAGE được inject từ CI pipeline (dotenv artifact)</span>
+    <span class="kw">image</span>: <span class="str">${IMAGE:-registry.example.com/myapp/backend:latest}</span>
+    <span class="kw">restart</span>: always
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">ports</span>: [<span class="str">"8080:8080"</span>]
+    <span class="kw">env_file</span>: .env.staging
+    <span class="kw">environment</span>:
+      SPRING_PROFILES_ACTIVE: staging
+      DB_URL: jdbc:postgresql://postgres:<span class="num">5432</span>/<span class="str">${DB_NAME}</span>
+      REDIS_HOST: redis
+    <span class="kw">depends_on</span>:
+      <span class="prop">postgres</span>:
+        <span class="kw">condition</span>: service_healthy
+    <span class="kw">healthcheck</span>:
+      <span class="prop">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"wget -qO- http://localhost:8080/actuator/health"</span>]
+      <span class="prop">interval</span>: <span class="str">20s</span>
+      <span class="prop">retries</span>: <span class="num">5</span>
+
+  <span class="prop">frontend</span>:
+    <span class="kw">image</span>: <span class="str">${FE_IMAGE:-registry.example.com/myapp/frontend:latest}</span>
+    <span class="kw">restart</span>: always
+    <span class="kw">networks</span>: [app-net]
+    <span class="kw">ports</span>: [<span class="str">"80:80"</span>]
+    <span class="kw">depends_on</span>:
+      <span class="prop">backend</span>:
+        <span class="kw">condition</span>: service_healthy</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: GITLAB FULL PIPELINE
+══════════════════════════════════════ -->
+<section class="section" id="gitlab-full">
+  <div class="section-tag">Pipeline · Toàn bộ</div>
+  <h2>🦊 .gitlab-ci.yml — Master Pipeline</h2>
+  <p>File CI chính include cả backend và frontend pipelines, điều phối deploy và smoke test.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · .gitlab-ci.yml (root)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># ═══════════════════════════════════════════════
+# MASTER CI/CD PIPELINE · Full Stack
+# ═══════════════════════════════════════════════</span>
+
+<span class="kw">stages</span>:
+  - build       <span class="cmt"># Compile + install deps</span>
+  - test        <span class="cmt"># Unit + integration tests</span>
+  - quality     <span class="cmt"># Lint, typecheck, coverage</span>
+  - package     <span class="cmt"># Docker build + push</span>
+  - deploy      <span class="cmt"># Deploy to environment</span>
+  - verify      <span class="cmt"># Smoke tests + E2E</span>
+  - notify      <span class="cmt"># Slack / email notifications</span>
+
+<span class="kw">variables</span>:
+  <span class="prop">DOCKER_TLS_CERTDIR</span>: <span class="str">"/certs"</span>
+  <span class="prop">DOCKER_DRIVER</span>: overlay2
+  <span class="cmt"># GitLab Container Registry (miễn phí, built-in)</span>
+  <span class="prop">BE_IMAGE</span>: <span class="str">"$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"</span>
+  <span class="prop">FE_IMAGE</span>: <span class="str">"$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"</span>
+
+<span class="cmt"># Include sub-pipelines</span>
+<span class="kw">include</span>:
+  - <span class="prop">local</span>: <span class="str">'.gitlab/pipelines/backend.yml'</span>
+  - <span class="prop">local</span>: <span class="str">'.gitlab/pipelines/frontend.yml'</span>
+
+<span class="cmt"># ────────────────────────────────
+# DEPLOY STAGE
+# ────────────────────────────────</span>
+<span class="prop">deploy:staging</span>:
+  <span class="kw">stage</span>: deploy
+  <span class="kw">image</span>: alpine:<span class="num">3.18</span>
+  <span class="kw">before_script</span>:
+    - apk add --no-cache openssh-client curl docker-compose
+    - eval $(ssh-agent -s)
+    - <span class="fn">echo</span> <span class="str">"$STAGING_SSH_KEY"</span> | tr -d <span class="str">'\r'</span> | ssh-add -
+    - mkdir -p ~/.ssh && <span class="fn">echo</span> <span class="str">"StrictHostKeyChecking no"</span> > ~/.ssh/config
+  <span class="kw">script</span>:
+    - |
+      ssh $STAGING_USER@$STAGING_HOST "
+        set -e
+        cd /app
+
+        <span class="cmt"># Pull mới nhất từ CI</span>
+        export IMAGE=$BE_IMAGE
+        export FE_IMAGE=$FE_IMAGE
+        docker compose -f docker-compose.staging.yml pull
+        docker compose -f docker-compose.staging.yml up -d --remove-orphans
+
+        <span class="cmt"># Xóa images cũ để tiết kiệm disk</span>
+        docker image prune -f
+      "
+  <span class="kw">environment</span>:
+    <span class="prop">name</span>: staging
+    <span class="prop">url</span>: <span class="str">https://staging.myapp.com</span>
+  <span class="kw">needs</span>:
+    - <span class="prop">job</span>: be:docker-build
+      <span class="kw">artifacts</span>: <span class="kw">true</span>
+    - <span class="prop">job</span>: fe:docker-build
+      <span class="kw">artifacts</span>: <span class="kw">true</span>
+  <span class="kw">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span>
+
+<span class="cmt"># ────────────────────────────────
+# SMOKE TESTS sau deploy
+# ────────────────────────────────</span>
+<span class="prop">verify:smoke-test</span>:
+  <span class="kw">stage</span>: verify
+  <span class="kw">image</span>: alpine:<span class="num">3.18</span>
+  <span class="kw">before_script</span>:
+    - apk add --no-cache curl
+  <span class="kw">script</span>:
+    - |
+      <span class="fn">echo</span> <span class="str">"⏳ Waiting for services to be ready..."</span>
+      sleep <span class="num">30</span>
+
+      <span class="cmt"># Backend health check</span>
+      BE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+        https://staging.myapp.com/api/actuator/health)
+      <span class="kw">if</span> [ "$BE_STATUS" != "200" ]; then
+        <span class="fn">echo</span> <span class="str">"❌ Backend health check failed: $BE_STATUS"</span>
+        exit <span class="num">1</span>
+      <span class="kw">fi</span>
+      <span class="fn">echo</span> <span class="str">"✅ Backend OK ($BE_STATUS)"</span>
+
+      <span class="cmt"># Frontend health check</span>
+      FE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+        https://staging.myapp.com/health)
+      <span class="kw">if</span> [ "$FE_STATUS" != "200" ]; then
+        <span class="fn">echo</span> <span class="str">"❌ Frontend health check failed: $FE_STATUS"</span>
+        exit <span class="num">1</span>
+      <span class="kw">fi</span>
+      <span class="fn">echo</span> <span class="str">"✅ Frontend OK ($FE_STATUS)"</span>
+
+      <span class="cmt"># API endpoint test</span>
+      API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+        https://staging.myapp.com/api/v1/health)
+      <span class="fn">echo</span> <span class="str">"✅ API status: $API_STATUS"</span>
+  <span class="kw">needs</span>: [<span class="str">deploy:staging</span>]
+
+<span class="prop">verify:e2e</span>:
+  <span class="kw">stage</span>: verify
+  <span class="kw">image</span>: mcr.microsoft.com/playwright:v1.45.0-jammy
+  <span class="kw">variables</span>:
+    <span class="prop">PLAYWRIGHT_BASE_URL</span>: <span class="str">"https://staging.myapp.com"</span>
+  <span class="kw">script</span>:
+    - cd frontend
+    - npm ci
+    - npx playwright test --reporter=html
+  <span class="kw">artifacts</span>:
+    <span class="prop">when</span>: always
+    <span class="prop">paths</span>: [<span class="str">frontend/playwright-report/</span>]
+    <span class="prop">expire_in</span>: <span class="str">3 days</span>
+  <span class="kw">needs</span>: [<span class="str">verify:smoke-test</span>]
+
+<span class="cmt"># ────────────────────────────────
+# NOTIFY
+# ────────────────────────────────</span>
+<span class="prop">notify:success</span>:
+  <span class="kw">stage</span>: notify
+  <span class="kw">image</span>: alpine:<span class="num">3.18</span>
+  <span class="kw">before_script</span>:
+    - apk add --no-cache curl
+  <span class="kw">script</span>:
+    - |
+      curl -X POST $SLACK_WEBHOOK -H <span class="str">'Content-type: application/json'</span> -d "{
+        \"text\": \"✅ *Deploy Staging thành công!*\",
+        \"attachments\": [{
+          \"color\": \"good\",
+          \"fields\": [
+            {\"title\":\"Branch\",\"value\":\"$CI_COMMIT_BRANCH\",\"short\":true},
+            {\"title\":\"Commit\",\"value\":\"$CI_COMMIT_SHORT_SHA\",\"short\":true},
+            {\"title\":\"Author\",\"value\":\"$CI_COMMIT_AUTHOR\",\"short\":true},
+            {\"title\":\"URL\",\"value\":\"https://staging.myapp.com\",\"short\":true}
+          ]
+        }]
+      }"
+  <span class="kw">when</span>: on_success
+  <span class="kw">needs</span>: [<span class="str">verify:e2e</span>]
+
+<span class="prop">notify:failure</span>:
+  <span class="kw">stage</span>: notify
+  <span class="kw">image</span>: alpine:<span class="num">3.18</span>
+  <span class="kw">before_script</span>:
+    - apk add --no-cache curl
+  <span class="kw">script</span>:
+    - |
+      curl -X POST $SLACK_WEBHOOK -H <span class="str">'Content-type: application/json'</span> -d "{
+        \"text\": \"❌ *Pipeline FAILED!* @channel\",
+        \"attachments\": [{
+          \"color\": \"danger\",
+          \"fields\": [
+            {\"title\":\"Branch\",\"value\":\"$CI_COMMIT_BRANCH\",\"short\":true},
+            {\"title\":\"Pipeline\",\"value\":\"$CI_PIPELINE_URL\",\"short\":false}
+          ]
+        }]
+      }"
+  <span class="kw">when</span>: on_failure</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: GITHUB ACTIONS FULL
+══════════════════════════════════════ -->
+<section class="section" id="github-actions">
+  <div class="section-tag">GitHub Actions</div>
+  <h2>🐙 GitHub Actions — Deploy workflow</h2>
+  <p>Workflow deploy cho GitHub Actions, chạy sau khi cả backend và frontend CI đã pass.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · .github/workflows/deploy.yml</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">name</span>: <span class="str">Deploy · Staging</span>
+
+<span class="kw">on</span>:
+  <span class="prop">workflow_run</span>:
+    <span class="kw">workflows</span>: [<span class="str">"Backend CI · Spring Boot"</span>, <span class="str">"Frontend CI · ReactJS"</span>]
+    <span class="kw">types</span>: [completed]
+    <span class="kw">branches</span>: [main]
+
+<span class="kw">jobs</span>:
+  <span class="prop">deploy-staging</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">if</span>: github.event.workflow_run.conclusion == 'success'
+    <span class="kw">environment</span>:
+      <span class="prop">name</span>: staging
+      <span class="prop">url</span>: https://staging.myapp.com
+
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+
+      - <span class="kw">name</span>: <span class="str">Deploy to staging server</span>
+        <span class="kw">uses</span>: appleboy/ssh-action@v1.0.3
+        <span class="kw">with</span>:
+          <span class="prop">host</span>: <span class="str">${{ secrets.STAGING_HOST }}</span>
+          <span class="prop">username</span>: <span class="str">${{ secrets.STAGING_USER }}</span>
+          <span class="prop">key</span>: <span class="str">${{ secrets.STAGING_SSH_KEY }}</span>
+          <span class="prop">script</span>: |
+            cd /app
+            export IMAGE=ghcr.io/<span class="str">${{ github.repository }}</span>/backend:<span class="str">${{ github.sha }}</span>
+            export FE_IMAGE=ghcr.io/<span class="str">${{ github.repository }}</span>/frontend:<span class="str">${{ github.sha }}</span>
+
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d
+            docker image prune -f
+
+      - <span class="kw">name</span>: <span class="str">Wait for services</span>
+        <span class="kw">run</span>: sleep 30
+
+      - <span class="kw">name</span>: <span class="str">Smoke test Backend</span>
+        <span class="kw">run</span>: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://staging.myapp.com/api/actuator/health)
+          [ "$status" = "200" ] && echo "✅ BE OK" || exit 1
+
+      - <span class="kw">name</span>: <span class="str">Smoke test Frontend</span>
+        <span class="kw">run</span>: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" https://staging.myapp.com)
+          [ "$status" = "200" ] && echo "✅ FE OK" || exit 1
+
+      - <span class="kw">name</span>: <span class="str">Notify on failure</span>
+        <span class="kw">if</span>: failure()
+        <span class="kw">uses</span>: slackapi/slack-github-action@v1.26.0
+        <span class="kw">with</span>:
+          <span class="prop">payload</span>: |
+            {"text":"❌ Deploy staging thất bại! <span class="str">${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}</span>"}
+        <span class="kw">env</span>:
+          <span class="prop">SLACK_WEBHOOK_URL</span>: <span class="str">${{ secrets.SLACK_WEBHOOK }}</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: DEPLOY STRATEGY
+══════════════════════════════════════ -->
+<section class="section" id="deploy-strategy">
+  <div class="section-tag">Deploy</div>
+  <h2>🚀 Chiến lược Deploy Production</h2>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Strategy</th><th>Downtime</th><th>Rollback</th><th>Phù hợp</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Recreate</strong></td><td><span class="tag tag-red">Có (~30s)</span></td><td>Nhanh</td><td>Dev/Staging</td></tr>
+        <tr><td><strong>Rolling Update</strong></td><td><span class="tag tag-green">Không</span></td><td>Trung bình</td><td>Stateless apps</td></tr>
+        <tr><td><strong>Blue/Green</strong></td><td><span class="tag tag-green">Không</span></td><td>Tức thì</td><td>Production quan trọng</td></tr>
+        <tr><td><strong>Canary</strong></td><td><span class="tag tag-green">Không</span></td><td>Từng phần</td><td>Feature validation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>🔵🟢 Blue/Green Deploy script cho Docker Compose</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · scripts/deploy-bluegreen.sh</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">#!/bin/bash
+# Blue/Green deploy cho full-stack app
+# Usage: ./deploy-bluegreen.sh BE_IMAGE FE_IMAGE</span>
+<span class="kw">set</span> -euo pipefail
+
+BE_IMAGE=<span class="str">"$1"</span>
+FE_IMAGE=<span class="str">"$2"</span>
+COMPOSE_FILE=<span class="str">"docker-compose.prod.yml"</span>
+
+<span class="fn">log</span>() { <span class="fn">echo</span> <span class="str">"[$(date +'%H:%M:%S')] $*"</span>; }
+
+<span class="cmt"># Xác định slot hiện tại (blue hoặc green)</span>
+CURRENT_SLOT=$(cat /tmp/current-slot <span class="num">2</span>>/dev/null || <span class="fn">echo</span> <span class="str">"blue"</span>)
+<span class="kw">if</span> [ <span class="str">"$CURRENT_SLOT"</span> = <span class="str">"blue"</span> ]; then
+  NEXT_SLOT=<span class="str">"green"</span>; NEXT_BE_PORT=<span class="num">8081</span>; NEXT_FE_PORT=<span class="num">3001</span>
+<span class="kw">else</span>
+  NEXT_SLOT=<span class="str">"blue"</span>;  NEXT_BE_PORT=<span class="num">8080</span>; NEXT_FE_PORT=<span class="num">3000</span>
+<span class="kw">fi</span>
+
+<span class="fn">log</span> <span class="str">"🚀 Deploying to slot: $NEXT_SLOT"</span>
+<span class="fn">log</span> <span class="str">"   Backend  : $BE_IMAGE"</span>
+<span class="fn">log</span> <span class="str">"   Frontend : $FE_IMAGE"</span>
+
+<span class="cmt"># Start new slot containers</span>
+IMAGE=<span class="str">$BE_IMAGE</span> FE_IMAGE=<span class="str">$FE_IMAGE</span> \
+  docker compose -f <span class="str">$COMPOSE_FILE</span> \
+  -p app-<span class="str">$NEXT_SLOT</span> up -d
+
+<span class="cmt"># Health check với retry</span>
+<span class="fn">log</span> <span class="str">"⏳ Health checking $NEXT_SLOT..."</span>
+<span class="kw">for</span> i in <span class="kw">$(</span>seq <span class="num">1 12</span><span class="kw">)</span>; do
+  BE_H=$(curl -sf http://localhost:<span class="str">$NEXT_BE_PORT</span>/actuator/health | grep -c <span class="str">"UP"</span> || <span class="fn">echo</span> <span class="num">0</span>)
+  FE_H=$(curl -so /dev/null -w <span class="str">"%{http_code}"</span> http://localhost:<span class="str">$NEXT_FE_PORT</span>/health)
+  <span class="kw">if</span> [ <span class="str">"$BE_H"</span> -gt <span class="num">0</span> ] && [ <span class="str">"$FE_H"</span> = <span class="str">"200"</span> ]; then
+    <span class="fn">log</span> <span class="str">"✅ Health check passed on attempt $i"</span>
+    <span class="kw">break</span>
+  <span class="kw">fi</span>
+  <span class="kw">if</span> [ <span class="str">"$i"</span> = <span class="str">"12"</span> ]; then <span class="fn">log</span> <span class="str">"❌ Health check failed"</span>; exit <span class="num">1</span>; <span class="kw">fi</span>
+  sleep <span class="num">10</span>
+<span class="kw">done</span>
+
+<span class="cmt"># Switch Nginx upstream đến slot mới</span>
+<span class="fn">log</span> <span class="str">"🔄 Switching traffic to $NEXT_SLOT..."</span>
+<span class="fn">echo</span> <span class="str">"upstream backend { server localhost:${NEXT_BE_PORT}; }"</span> > /etc/nginx/conf.d/upstream.conf
+<span class="fn">echo</span> <span class="str">"upstream frontend { server localhost:${NEXT_FE_PORT}; }"</span> >> /etc/nginx/conf.d/upstream.conf
+nginx -s reload
+
+<span class="cmt"># Stop slot cũ</span>
+<span class="fn">log</span> <span class="str">"🛑 Stopping old slot: $CURRENT_SLOT"</span>
+docker compose -f <span class="str">$COMPOSE_FILE</span> -p app-<span class="str">$CURRENT_SLOT</span> down || <span class="kw">true</span>
+
+<span class="fn">echo</span> <span class="str">"$NEXT_SLOT"</span> > /tmp/current-slot
+<span class="fn">log</span> <span class="str">"🎉 Deploy completed! Active slot: $NEXT_SLOT"</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: ENV & SECRETS
+══════════════════════════════════════ -->
+<section class="section" id="env-config">
+  <div class="section-tag">Security</div>
+  <h2>🔐 Env Variables & Secrets</h2>
+
+  <div class="callout err">
+    <div class="callout-label">🚨 Không bao giờ làm điều này</div>
+    Không commit file <code>.env</code>, không hardcode password trong <code>application.yml</code>, không bake secrets vào Docker image, không log secrets trong CI pipeline.
+  </div>
+
+  <h3>Cách quản lý đúng theo từng level</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Level</th><th>Dùng ở đâu</th><th>Cách lưu secrets</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Local dev</strong></td><td>Máy developer</td><td>File <code>.env</code> (gitignored), Docker secrets</td></tr>
+        <tr><td><strong>CI Pipeline</strong></td><td>Runner jobs</td><td>GitLab CI Variables / GitHub Secrets</td></tr>
+        <tr><td><strong>Staging/Prod</strong></td><td>Server chạy app</td><td>Docker secrets, HashiCorp Vault, <code>.env</code> trên server</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">text · .env.example (commit file này, không commit .env)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># ── Database ──</span>
+<span class="prop">DB_NAME</span>=mydb
+<span class="prop">DB_USER</span>=CHANGE_ME
+<span class="prop">DB_PASS</span>=CHANGE_ME
+
+<span class="cmt"># ── Spring Boot ──</span>
+<span class="prop">SPRING_PROFILES_ACTIVE</span>=dev
+<span class="prop">JWT_SECRET</span>=CHANGE_ME_MINIMUM_32_CHARS
+<span class="prop">LOG_LEVEL</span>=DEBUG
+
+<span class="cmt"># ── Frontend ──</span>
+<span class="prop">VITE_API_URL</span>=http://localhost:8080
+
+<span class="cmt"># ── External APIs ──</span>
+<span class="prop">SMTP_HOST</span>=smtp.gmail.com
+<span class="prop">SMTP_USER</span>=CHANGE_ME
+<span class="prop">SMTP_PASS</span>=CHANGE_ME</pre>
+  </div>
+
+  <h3>📋 GitLab CI Variables cần thiết</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Variable</th><th>Type</th><th>Mô tả</th></tr></thead>
+      <tbody>
+        <tr><td><code>CI_REGISTRY_*</code></td><td><span class="tag tag-accent">Auto</span></td><td>GitLab tự inject, dùng để login registry</td></tr>
+        <tr><td><code>STAGING_HOST</code></td><td><span class="tag tag-blue">Variable</span></td><td>IP hoặc hostname server staging</td></tr>
+        <tr><td><code>STAGING_USER</code></td><td><span class="tag tag-blue">Variable</span></td><td>SSH username</td></tr>
+        <tr><td><code>STAGING_SSH_KEY</code></td><td><span class="tag tag-amber">Protected</span></td><td>Private SSH key (masked)</td></tr>
+        <tr><td><code>STAGING_API_URL</code></td><td><span class="tag tag-blue">Variable</span></td><td>URL backend cho frontend build</td></tr>
+        <tr><td><code>SONAR_URL</code></td><td><span class="tag tag-blue">Variable</span></td><td>SonarQube server URL</td></tr>
+        <tr><td><code>SONAR_AUTH_TOKEN</code></td><td><span class="tag tag-amber">Protected</span></td><td>SonarQube token (masked)</td></tr>
+        <tr><td><code>SLACK_WEBHOOK</code></td><td><span class="tag tag-amber">Protected</span></td><td>Slack incoming webhook URL</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: MONITORING
+══════════════════════════════════════ -->
+<section class="section" id="monitoring">
+  <div class="section-tag">Observability</div>
+  <h2>📊 Monitoring Stack</h2>
+  <p>Thêm monitoring để quan sát performance của pipeline và application:</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · docker-compose.monitoring.yml</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">services</span>:
+  <span class="prop">prometheus</span>:
+    <span class="kw">image</span>: prom/prometheus:latest
+    <span class="kw">ports</span>: [<span class="str">"9090:9090"</span>]
+    <span class="kw">volumes</span>:
+      - <span class="str">./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml</span>
+    <span class="kw">networks</span>: [app-net]
+
+  <span class="prop">grafana</span>:
+    <span class="kw">image</span>: grafana/grafana:latest
+    <span class="kw">ports</span>: [<span class="str">"3001:3000"</span>]
+    <span class="kw">environment</span>:
+      - GF_SECURITY_ADMIN_PASSWORD=<span class="str">${GRAFANA_PASS:-admin}</span>
+    <span class="kw">volumes</span>:
+      - grafana-data:/var/lib/grafana
+      - <span class="str">./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards</span>
+    <span class="kw">networks</span>: [app-net]
+
+  <span class="prop">loki</span>:
+    <span class="kw">image</span>: grafana/loki:latest
+    <span class="kw">ports</span>: [<span class="str">"3100:3100"</span>]
+    <span class="kw">networks</span>: [app-net]
+
+  <span class="prop">promtail</span>:
+    <span class="kw">image</span>: grafana/promtail:latest
+    <span class="kw">volumes</span>:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - <span class="str">./monitoring/promtail.yml:/etc/promtail/config.yml</span>
+    <span class="kw">networks</span>: [app-net]</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · monitoring/prometheus.yml</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">global</span>:
+  <span class="prop">scrape_interval</span>: 15s
+
+<span class="kw">scrape_configs</span>:
+  <span class="cmt"># Spring Boot Actuator metrics (Micrometer)</span>
+  - <span class="prop">job_name</span>: <span class="str">'spring-boot'</span>
+    <span class="kw">metrics_path</span>: <span class="str">'/actuator/prometheus'</span>
+    <span class="kw">static_configs</span>:
+      - <span class="prop">targets</span>: [<span class="str">'backend:8080'</span>]
+    <span class="kw">relabel_configs</span>:
+      - <span class="prop">source_labels</span>: [__address__]
+        <span class="kw">target_label</span>: instance
+
+  <span class="cmt"># Nginx metrics (frontend)</span>
+  - <span class="prop">job_name</span>: <span class="str">'nginx'</span>
+    <span class="kw">static_configs</span>:
+      - <span class="prop">targets</span>: [<span class="str">'nginx-exporter:9113'</span>]</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-label">💡 Spring Boot metrics</div>
+    Thêm dependency <code>micrometer-registry-prometheus</code> vào pom.xml. Endpoint <code>/actuator/prometheus</code> sẽ expose metrics cho Prometheus. Dùng Grafana dashboard ID <strong>12900</strong> (JVM Micrometer) để có dashboard đẹp ngay.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: TROUBLESHOOTING
+══════════════════════════════════════ -->
+<section class="section" id="troubleshoot">
+  <div class="section-tag">Debug</div>
+  <h2>🐛 Troubleshooting thường gặp</h2>
+
+  <h3>❌ Maven build thất bại trong CI nhưng chạy OK local</h3>
+  <div class="callout warn">
+    <div class="callout-label">⚠ Nguyên nhân phổ biến</div>
+    CI runner dùng JDK version khác. CI không có <code>~/.m2/settings.xml</code>. Test cần database nhưng không có service.
+  </div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Debug trong CI</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Thêm vào pipeline script để debug</span>
+java -version
+mvn -version
+<span class="fn">echo</span> <span class="str">"JAVA_HOME=$JAVA_HOME"</span>
+<span class="fn">echo</span> <span class="str">"PATH=$PATH"</span>
+
+<span class="cmt"># Chạy với verbose output</span>
+mvn test -X 2>&1 | tail -<span class="num">100</span></pre>
+  </div>
+
+  <h3>❌ React build thành công nhưng app blank trên browser</h3>
+  <ul class="feat-list">
+    <li><strong>Base path sai:</strong> Nếu deploy vào subdirectory, cần set <code>base</code> trong <code>vite.config.ts</code> và <code>homepage</code> trong package.json.</li>
+    <li><strong>API URL hardcode:</strong> Kiểm tra <code>VITE_API_URL</code> có được inject đúng lúc build không. Các biến <code>VITE_*</code> được bake vào bundle lúc build.</li>
+    <li><strong>Nginx không có SPA fallback:</strong> Đảm bảo <code>try_files $uri $uri/ /index.html</code> có trong nginx.conf.</li>
+    <li><strong>CORS:</strong> Kiểm tra Spring Boot đã config <code>@CrossOrigin</code> hoặc <code>CorsConfiguration</code> cho đúng origin của frontend.</li>
+  </ul>
+
+  <h3>❌ Docker image quá lớn</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Phân tích layer image</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Xem kích thước từng layer</span>
+docker history my-app:latest --format <span class="str">"table {{.CreatedBy}}\t{{.Size}}"</span>
+
+<span class="cmt"># Dùng dive để phân tích chi tiết</span>
+docker run --rm -it \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  wagoodman/dive my-app:latest
+
+<span class="cmt"># Kiểm tra nếu quên .dockerignore</span>
+docker build --no-cache -t test . 2>&1 | grep <span class="str">"Sending build context"</span></pre>
+  </div>
+
+  <h3>❌ Container backend không kết nối được database</h3>
+  <div class="callout info">
+    <div class="callout-label">💡 Networking trong Docker Compose</div>
+    Containers trong cùng Compose network gọi nhau qua <strong>service name</strong>, không phải <code>localhost</code>. Backend connect đến Postgres bằng URL <code>jdbc:postgresql://postgres:5432/mydb</code> — trong đó <code>postgres</code> là tên service trong compose.
+  </div>
+
+  <h3>❌ Pipeline mất quá nhiều thời gian</h3>
+  <ul class="feat-list">
+    <li><strong>Cache miss thường xuyên:</strong> Kiểm tra <code>cache key</code> — nên dựa trên <code>pom.xml</code> hoặc <code>package-lock.json</code>, không phải branch.</li>
+    <li><strong>Integration test chậm:</strong> Testcontainers startup lâu. Dùng <code>@DirtiesContext(classMode = NEVER)</code> để reuse Spring context.</li>
+    <li><strong>Docker build không dùng cache:</strong> Đảm bảo <code>--cache-from</code> pull được image trước khi build. Dùng BuildKit: <code>DOCKER_BUILDKIT=1</code>.</li>
+    <li><strong>npm install chậm:</strong> Dùng <code>npm ci</code> thay <code>npm install</code>. Cache <code>node_modules</code> bằng CI cache keyed theo <code>package-lock.json</code>.</li>
+  </ul>
+
+  <div class="callout good" style="margin-top: 32px">
+    <div class="callout-label">🎉 Hoàn thành!</div>
+    Bạn đã có đầy đủ blueprint cho CI/CD pipeline production-ready của dự án full-stack Spring Boot + ReactJS. Pipeline này tự động: build → test → code quality check → Docker build → deploy staging → smoke test → notify. Bắt đầu với GitLab CI nếu chưa có gì, và mở rộng dần từng phần.
+  </div>
+
+  <h3>📝 Checklist cuối cùng</h3>
+  <ul class="checklist">
+    <li><div class="ck">✓</div> <code>Dockerfile</code> backend dùng multi-stage build với layered JAR</li>
+    <li><div class="ck">✓</div> <code>Dockerfile</code> frontend dùng multi-stage build + Nginx Alpine</li>
+    <li><div class="ck">✓</div> <code>.dockerignore</code> có đủ ở cả backend và frontend</li>
+    <li><div class="ck">✓</div> <code>application.yml</code> đọc từ environment variables, không hardcode</li>
+    <li><div class="ck">✓</div> Unit tests và integration tests pass trên CI</li>
+    <li><div class="ck">✓</div> Code coverage ≥ 70%</li>
+    <li><div class="ck">✓</div> CI cache cho Maven deps và node_modules đã setup</li>
+    <li><div class="ck">✓</div> Secrets lưu trong CI variables, không trong code</li>
+    <li><div class="ck">✓</div> Health check endpoint tồn tại (<code>/actuator/health</code> và <code>/health</code>)</li>
+    <li><div class="ck">✓</div> Smoke tests pass sau mỗi deploy</li>
+    <li><div class="ck">✓</div> Slack/email notification khi pipeline fail</li>
+    <li><div class="ck">✓</div> Docker images được tag bằng commit SHA</li>
+  </ul>
+</section>
+
+</main>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const pct = Math.round((el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+  });
+
+  // Active sidebar
+  function setActive(el) {
+    document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Intersection observer
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sb-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.sb-link[href="#${entry.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.25 });
+  sections.forEach(s => observer.observe(s));
+
+  // Copy button
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Tabs
+  function switchTab(btn, paneId) {
+    const container = btn.closest('.tabs');
+    container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(paneId).classList.add('active');
+  }
+</script>
+</body>
+</html>

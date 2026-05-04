@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD Local — Hướng dẫn setup chi tiết</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════════ */
+    :root {
+      --bg: #08090d;
+      --bg2: #0e1018;
+      --surface: #131520;
+      --surface2: #1a1d2e;
+      --surface3: #21253a;
+      --border: #252840;
+      --border2: #2f3350;
+      --accent: #7c6af8;
+      --accent-lt: #a99dfa;
+      --amber: #f5a623;
+      --green: #3ecf8e;
+      --red: #f06b6b;
+      --blue: #7dd3fc;
+      --text: #dde1f5;
+      --muted: #6b7094;
+      --muted2: #8b90b8;
+      --nav-w: 272px;
+      --radius: 10px;
+      --font-body: 'Instrument Sans', sans-serif;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.75; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: var(--nav-w);
+      min-height: 100vh;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transition: transform .3s ease;
+    }
+
+    .sb-header {
+      padding: 24px 20px 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(124,106,248,.06) 0%, transparent 100%);
+    }
+
+    .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+
+    .sb-orb {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent) 0%, #a55af4 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      box-shadow: 0 4px 18px rgba(124,106,248,.35);
+    }
+
+    .sb-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+
+    .sb-ver {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--muted); font-family: var(--font-mono);
+      background: var(--surface2); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);
+    }
+
+    .sb-ver .dot {
+      width: 6px; height: 6px;
+      background: var(--green); border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .sb-progress { padding: 14px 20px 10px; border-bottom: 1px solid var(--border); }
+    .sb-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .sb-progress-bar { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .sb-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a55af4); border-radius: 99px; width: 0%; transition: width .4s ease; }
+
+    .sb-section { padding: 18px 14px 6px; }
+    .sb-section-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 0 6px; margin-bottom: 5px; }
+
+    .sb-link {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 10px; border-radius: 8px; text-decoration: none;
+      color: var(--muted2); font-size: 13px; transition: all .18s;
+      cursor: pointer; margin-bottom: 1px; position: relative;
+    }
+    .sb-link:hover { background: var(--surface); color: var(--text); }
+    .sb-link.active { background: rgba(124,106,248,.12); color: var(--accent-lt); }
+    .sb-link.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 2px; background: var(--accent); border-radius: 1px;
+    }
+    .sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+    .sb-badge {
+      margin-left: auto; font-size: 10px;
+      background: rgba(124,106,248,.18); color: var(--accent-lt);
+      padding: 1px 7px; border-radius: 99px; font-family: var(--font-mono);
+    }
+    .sb-badge.green { background: rgba(62,207,142,.18); color: var(--green); }
+    .sb-badge.amber { background: rgba(245,166,35,.18); color: var(--amber); }
+
+    .sb-footer { margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+    /* ── MAIN ── */
+    main { margin-left: var(--nav-w); flex: 1; padding: 0; max-width: 900px; }
+
+    .section {
+      padding: 60px 64px; border-bottom: 1px solid var(--border);
+      scroll-margin-top: 20px; animation: fadeUp .5s ease both;
+    }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent-lt); font-weight: 600; font-family: var(--font-mono); margin-bottom: 14px;
+    }
+    .section-tag::before { content: ''; width: 22px; height: 1px; background: currentColor; }
+
+    h1 { font-family: var(--font-head); font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 20px; }
+    h1 .grad { background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 60%, #a55af4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h2 { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; color: var(--text); }
+    h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
+    p { color: #9fa3c4; margin-bottom: 14px; }
+
+    /* ── CALLOUTS ── */
+    .callout { border-left: 3px solid var(--accent); padding: 14px 18px; background: rgba(124,106,248,.07); border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 13.5px; color: #bfc3e0; }
+    .callout-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .callout.warn { border-color: var(--amber); background: rgba(245,166,35,.07); }
+    .callout.warn .callout-label { color: var(--amber); }
+    .callout.good { border-color: var(--green); background: rgba(62,207,142,.07); }
+    .callout.good .callout-label { color: var(--green); }
+    .callout.err { border-color: var(--red); background: rgba(240,107,107,.07); }
+    .callout.err .callout-label { color: var(--red); }
+    .callout.info { border-color: var(--blue); background: rgba(125,211,252,.07); }
+    .callout.info .callout-label { color: var(--blue); }
+
+    /* ── CARDS ── */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+    .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: border-color .2s, transform .2s, box-shadow .2s; cursor: default; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,248,.12); }
+    .card-ico { font-size: 22px; margin-bottom: 10px; }
+    .card-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: var(--text); }
+    .card-desc { font-size: 13px; color: var(--muted2); line-height: 1.55; }
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th { text-align: left; padding: 11px 16px; background: var(--surface2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #bbbdd6; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    td strong { color: var(--text); }
+
+    .tag { padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono); }
+    .tag-new { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-api { background: rgba(124,106,248,.15); color: var(--accent-lt); }
+    .tag-pro { background: rgba(245,166,35,.15); color: var(--amber); }
+    .tag-red { background: rgba(240,107,107,.15); color: var(--red); }
+
+    /* ── STEPS ── */
+    .steps { margin: 20px 0; }
+    .step { display: flex; gap: 18px; margin-bottom: 24px; align-items: flex-start; }
+    .step-num { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a55af4); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; color: #fff; font-family: var(--font-mono); box-shadow: 0 4px 14px rgba(124,106,248,.3); }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .step-desc { font-size: 13.5px; color: var(--muted2); }
+
+    /* ── FEAT LIST ── */
+    .feat-list { list-style: none; margin: 10px 0; }
+    .feat-list li { padding: 9px 0 9px 22px; position: relative; font-size: 14px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.6); }
+    .feat-list li:last-child { border: none; }
+    .feat-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+    .feat-list li strong { color: var(--text); }
+
+    /* ── CODE BLOCKS ── */
+    .code-wrap { background: #07080d; border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; overflow: hidden; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot:nth-child(1) { background: #ff5f57; }
+    .code-dot:nth-child(2) { background: #febc2e; }
+    .code-dot:nth-child(3) { background: #28c840; }
+    .code-lang { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .05em; }
+    .copy-btn { font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 5px; cursor: pointer; transition: all .18s; }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    pre { padding: 20px 22px; font-family: var(--font-mono); font-size: 13px; line-height: 1.75; overflow-x: auto; color: #9fa3c4; }
+    .kw { color: var(--accent-lt); }
+    .str { color: var(--green); }
+    .cmt { color: var(--muted); font-style: italic; }
+    .num { color: var(--amber); }
+    .fn { color: var(--blue); }
+    .cls { color: #f0abfc; }
+    .prop { color: #93c5fd; }
+
+    /* ── PIPELINE FLOW ── */
+    .pipeline { display: flex; align-items: center; gap: 0; margin: 24px 0; flex-wrap: wrap; }
+    .pipe-stage {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 16px;
+      font-size: 12px; font-weight: 600; color: var(--text);
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      min-width: 90px; transition: all .2s;
+    }
+    .pipe-stage:hover { border-color: var(--accent); box-shadow: 0 4px 14px rgba(124,106,248,.15); }
+    .pipe-stage .ico { font-size: 18px; }
+    .pipe-stage .lbl { font-size: 11px; color: var(--muted2); text-align: center; }
+    .pipe-arrow { color: var(--muted); font-size: 16px; padding: 0 6px; }
+    .pipe-stage.success { border-color: var(--green); }
+    .pipe-stage.success .ico { filter: none; }
+
+    /* ── TOOL CARD ── */
+    .tool-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: all .2s; }
+    .tool-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+    .tool-card .tc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .tool-card .tc-ico { font-size: 18px; }
+    .tool-card .tc-name { font-weight: 700; font-size: 13px; color: var(--text); }
+    .tool-card .tc-ver { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+    .tool-card p { font-size: 12.5px; margin: 0; }
+
+    /* ── HERO BANNER ── */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(124,106,248,.08) 0%, rgba(165,90,244,.05) 100%);
+      border: 1px solid rgba(124,106,248,.2);
+      border-radius: 14px; padding: 32px 36px; margin-bottom: 32px;
+      position: relative; overflow: hidden;
+    }
+    .hero-banner::before {
+      content: ''; position: absolute; top: -40px; right: -40px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,106,248,.12) 0%, transparent 70%);
+    }
+    .hero-banner .hb-tag { font-size: 11px; color: var(--accent-lt); font-family: var(--font-mono); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+    .hero-banner h1 { font-size: 36px; margin-bottom: 12px; }
+    .hero-banner p { font-size: 15px; max-width: 560px; margin: 0; }
+
+    /* ── ARCH DIAGRAM ── */
+    .arch { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin: 20px 0; }
+    .arch-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+    .arch-box {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 12px; font-weight: 600; color: var(--text);
+      text-align: center; min-width: 100px;
+    }
+    .arch-box.accent { border-color: var(--accent); background: rgba(124,106,248,.1); color: var(--accent-lt); }
+    .arch-box.green { border-color: var(--green); background: rgba(62,207,142,.08); color: var(--green); }
+    .arch-box.amber { border-color: var(--amber); background: rgba(245,166,35,.08); color: var(--amber); }
+    .arch-box.red { border-color: var(--red); background: rgba(240,107,107,.08); color: var(--red); }
+    .arch-arrow { color: var(--muted); font-size: 14px; }
+
+    /* ── CHECKLIST ── */
+    .checklist { list-style: none; margin: 12px 0; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; font-size: 13.5px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.5); }
+    .checklist li:last-child { border: none; }
+    .checklist li .ck { width: 18px; height: 18px; border-radius: 5px; background: rgba(62,207,142,.15); border: 1px solid var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; color: var(--green); margin-top: 2px; }
+
+    /* ── INLINE CODE ── */
+    code { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; color: var(--accent-lt); }
+
+    /* ── MOBILE TOGGLE ── */
+    .hamburger { display: none; position: fixed; top: 14px; left: 14px; z-index: 300; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 38px; height: 38px; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+
+    @media (max-width: 800px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      main { margin-left: 0; }
+      .section { padding: 40px 24px; }
+      h1 { font-size: 32px; }
+      .cards { grid-template-columns: 1fr; }
+      .cards.col3 { grid-template-columns: 1fr; }
+      .tool-grid { grid-template-columns: 1fr 1fr; }
+      .pipeline { gap: 4px; }
+      .hamburger { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mobile toggle -->
+<div class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">⚙</div>
+      <div class="sb-title">CI/CD Local</div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span> v2025 · Local Setup</div>
+  </div>
+
+  <div class="sb-progress">
+    <div class="sb-progress-label"><span>Tiến độ đọc</span><span id="prog-pct">0%</span></div>
+    <div class="sb-progress-bar"><div class="sb-progress-fill" id="prog-fill"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">📚 Series DevOps</div>
+    <a class="sb-link" href="terminal-macbook.html"><span class="sb-icon">💻</span>Terminal macOS</a>
+    <a class="sb-link" href="linux-guide.html"><span class="sb-icon">🐧</span>Linux</a>
+    <a class="sb-link" href="docker-guide.html"><span class="sb-icon">🐳</span>Docker</a>
+    <a class="sb-link" href="aws-guide.html"><span class="sb-icon">☁️</span>AWS</a>
+    <a class="sb-link" href="gcp-guide.html"><span class="sb-icon">🌐</span>GCP</a>
+    <a class="sb-link" href="azure-guide.html"><span class="sb-icon">🔷</span>Azure</a>
+    <a class="sb-link" href="teraform-guide.html"><span class="sb-icon">🏗️</span>Terraform</a>
+    <a class="sb-link" href="kubernate-guide.html"><span class="sb-icon">☸️</span>Kubernetes</a>
+    <a class="sb-link" href="gitlab-cicd-guide.html"><span class="sb-icon">🦊</span>GitLab CI/CD</a>
+    <a class="sb-link" href="jenkins-guide.html"><span class="sb-icon">👴</span>Jenkins</a>
+    <a class="sb-link active" href="cicd-local-guide.html"><span class="sb-icon">🏠</span>CI/CD Local</a>
+    <a class="sb-link" href="gitlab-cicd-k8s.html"><span class="sb-icon">🦊</span>GitLab CI/CD K8s</a>
+    <a class="sb-link" href="jenkins-cicd-k8s.html"><span class="sb-icon">👴</span>Jenkins CI/CD K8s</a>
+    <a class="sb-link" href="eks-cicd-guide.html"><span class="sb-icon">🚀</span>EKS · CI/CD · Lens</a>
+    <a class="sb-link" href="cicd-springboot-react.html"><span class="sb-icon">⚛️</span>CI/CD Springboot React</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Bắt đầu</div>
+    <a class="sb-link active" href="#intro" onclick="setActive(this)"><span class="sb-icon">🏠</span> Giới thiệu</a>
+    <a class="sb-link" href="#concepts" onclick="setActive(this)"><span class="sb-icon">💡</span> Khái niệm CI/CD<span class="sb-badge">core</span></a>
+    <a class="sb-link" href="#tools" onclick="setActive(this)"><span class="sb-icon">🛠</span> Chọn công cụ</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Setup Local</div>
+    <a class="sb-link" href="#jenkins" onclick="setActive(this)"><span class="sb-icon">🐋</span> Jenkins + Docker</a>
+    <a class="sb-link" href="#gitlab" onclick="setActive(this)"><span class="sb-icon">🦊</span> GitLab Runner<span class="sb-badge green">easy</span></a>
+    <a class="sb-link" href="#gitea" onclick="setActive(this)"><span class="sb-icon">🍵</span> Gitea + Drone</a>
+    <a class="sb-link" href="#github-act" onclick="setActive(this)"><span class="sb-icon">🐙</span> GitHub Actions Local</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Pipeline</div>
+    <a class="sb-link" href="#pipeline-design" onclick="setActive(this)"><span class="sb-icon">🔄</span> Thiết kế pipeline</a>
+    <a class="sb-link" href="#docker-build" onclick="setActive(this)"><span class="sb-icon">📦</span> Build & Registry</a>
+    <a class="sb-link" href="#testing" onclick="setActive(this)"><span class="sb-icon">🧪</span> Auto Testing</a>
+    <a class="sb-link" href="#deploy" onclick="setActive(this)"><span class="sb-icon">🚀</span> Deploy chiến lược</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Nâng cao</div>
+    <a class="sb-link" href="#secrets" onclick="setActive(this)"><span class="sb-icon">🔐</span> Secrets & Config<span class="sb-badge amber">quan trọng</span></a>
+    <a class="sb-link" href="#monitoring" onclick="setActive(this)"><span class="sb-icon">📊</span> Monitoring</a>
+    <a class="sb-link" href="#troubleshoot" onclick="setActive(this)"><span class="sb-icon">🐛</span> Troubleshooting</a>
+  </div>
+
+  <div class="sb-footer">cicd-local-guide · 2025</div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main>
+
+  <!-- ══════════ INTRO ══════════ -->
+  <section class="section" id="intro">
+    <div class="hero-banner">
+      <div class="hb-tag">// local ci/cd setup guide</div>
+      <h1><span class="grad">CI/CD</span> trên máy local</h1>
+      <p>Hướng dẫn setup pipeline CI/CD hoàn chỉnh chạy trực tiếp trên máy tính của bạn — không cần cloud, không cần trả phí, toàn quyền kiểm soát.</p>
+    </div>
+
+    <div class="section-tag">Tổng quan</div>
+
+    <p>CI/CD local giúp bạn có toàn bộ vòng lặp phát triển phần mềm ngay trên máy: từ commit code → build → test → deploy đến môi trường local hoặc staging, mà không phụ thuộc internet hay dịch vụ cloud.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">💸</div>
+        <div class="card-title">Zero cost</div>
+        <div class="card-desc">Không tốn xu nào. Tự host mọi thứ trên máy hoặc server nội bộ.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔒</div>
+        <div class="card-title">Bảo mật tuyệt đối</div>
+        <div class="card-desc">Code không bao giờ rời khỏi network của bạn. Phù hợp dự án nhạy cảm.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">⚡</div>
+        <div class="card-title">Nhanh hơn</div>
+        <div class="card-desc">Không bị giới hạn băng thông upload. Build artifacts trực tiếp local.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🎛</div>
+        <div class="card-title">Full control</div>
+        <div class="card-desc">Tuỳ chỉnh mọi thứ: runner, environment, resource, retention policy.</div>
+      </div>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Yêu cầu tối thiểu</div>
+      RAM 8GB trở lên, Docker Desktop cài sẵn, Git, và một IDE bất kỳ. Nếu có 16GB RAM trở lên thì sẽ chạy rất mượt.
+    </div>
+  </section>
+
+  <!-- ══════════ CONCEPTS ══════════ -->
+  <section class="section" id="concepts">
+    <div class="section-tag">Khái niệm</div>
+    <h2>💡 CI/CD là gì?</h2>
+
+    <p><strong style="color:var(--text)">CI — Continuous Integration</strong>: Mỗi khi developer push code, hệ thống tự động build và chạy test. Phát hiện lỗi sớm, ngay lúc tích hợp.</p>
+    <p><strong style="color:var(--text)">CD — Continuous Delivery/Deployment</strong>: Sau khi CI pass, code được tự động đưa vào môi trường staging hoặc production.</p>
+
+    <div class="arch">
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:20px;font-family:var(--font-mono);letter-spacing:.05em">TYPICAL CI/CD FLOW</div>
+      <div class="arch-row">
+        <div class="arch-box accent">👨‍💻 Dev push<br><span style="font-size:10px;font-weight:400">git commit & push</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box accent">🔗 Trigger<br><span style="font-size:10px;font-weight:400">webhook / poll</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">⚙ CI Server<br><span style="font-size:10px;font-weight:400;color:var(--muted)">Jenkins / GitLab</span></div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:18px;margin:4px 0">↓</div>
+      <div class="arch-row">
+        <div class="arch-box">🏗 Build<br><span style="font-size:10px;font-weight:400;color:var(--muted)">compile / package</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">🧪 Test<br><span style="font-size:10px;font-weight:400;color:var(--muted)">unit / integration</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">🐳 Docker build<br><span style="font-size:10px;font-weight:400;color:var(--muted)">image + push</span></div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:18px;margin:4px 0">↓</div>
+      <div class="arch-row">
+        <div class="arch-box green">✅ Deploy staging<br><span style="font-size:10px;font-weight:400">docker-compose up</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box green">🔬 Smoke test<br><span style="font-size:10px;font-weight:400">health check</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box amber">🚀 Production<br><span style="font-size:10px;font-weight:400">manual / auto</span></div>
+      </div>
+    </div>
+
+    <h3>📌 Thuật ngữ quan trọng</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Thuật ngữ</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Pipeline</strong></td><td>Chuỗi các bước tự động từ code → deployment</td></tr>
+          <tr><td><strong>Stage</strong></td><td>Một giai đoạn trong pipeline (build, test, deploy...)</td></tr>
+          <tr><td><strong>Job</strong></td><td>Một tác vụ cụ thể trong stage</td></tr>
+          <tr><td><strong>Runner / Agent</strong></td><td>Máy thực thi các job</td></tr>
+          <tr><td><strong>Artifact</strong></td><td>File output của build (JAR, Docker image, ZIP...)</td></tr>
+          <tr><td><strong>Webhook</strong></td><td>HTTP request trigger pipeline khi có sự kiện Git</td></tr>
+          <tr><td><strong>Registry</strong></td><td>Kho lưu Docker images (Docker Hub, Harbor, local)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ TOOLS ══════════ -->
+  <section class="section" id="tools">
+    <div class="section-tag">Công cụ</div>
+    <h2>🛠 Chọn công cụ phù hợp</h2>
+    <p>Tùy theo nhu cầu và kinh nghiệm, bạn chọn stack CI/CD local phù hợp:</p>
+
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tc-head"><div class="tc-ico">🐋</div><div><div class="tc-name">Jenkins</div><div class="tc-ver">v2.x LTS</div></div></div>
+        <p>Cổ điển, plugin ecosystem khổng lồ. Phù hợp enterprise. Cần cấu hình nhiều hơn.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tc-head"><div class="tc-ico">🦊</div><div><div class="tc-name">GitLab CE</div><div class="tc-ver">Self-hosted</div></div></div>
+        <p>All-in-one: Git repo + CI/CD + Registry + Issues. Dễ setup nhất cho người mới.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tc-head"><div class="tc-ico">🍵</div><div><div class="tc-name">Gitea + Drone</div><div class="tc-ver">Lightweight</div></div></div>
+        <p>Siêu nhẹ, tiêu thụ ít RAM. Tốt cho máy yếu hoặc Raspberry Pi.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tc-head"><div class="tc-ico">🐙</div><div><div class="tc-name">act (GitHub Actions)</div><div class="tc-ver">Local runner</div></div></div>
+        <p>Chạy GitHub Actions workflow trên máy local. Tốt nếu repo đã dùng GH Actions.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tc-head"><div class="tc-ico">🔁</div><div><div class="tc-name">Tekton</div><div class="tc-ver">Kubernetes native</div></div></div>
+        <p>Cloud-native CI/CD trên Kubernetes. Overkill cho local nhưng tốt để học k8s CI/CD.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tc-head"><div class="tc-ico">🏃</div><div><div class="tc-name">Woodpecker CI</div><div class="tc-ver">Fork of Drone</div></div></div>
+        <p>Community fork của Drone, active development. Tốt thay thế Drone CI.</p>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Tool</th><th>RAM cần thiết</th><th>Độ khó</th><th>Phù hợp</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Jenkins</strong></td><td>~512MB</td><td><span class="tag tag-pro">Trung bình</span></td><td>Enterprise, Java projects</td></tr>
+          <tr><td><strong>GitLab CE</strong></td><td>~4GB</td><td><span class="tag tag-new">Dễ</span></td><td>All-in-one, team nhỏ-vừa</td></tr>
+          <tr><td><strong>Gitea + Drone</strong></td><td>~256MB</td><td><span class="tag tag-new">Dễ</span></td><td>Máy yếu, lightweight</td></tr>
+          <tr><td><strong>act (GitHub)</strong></td><td>~512MB</td><td><span class="tag tag-new">Dễ</span></td><td>Đang dùng GitHub Actions</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ JENKINS ══════════ -->
+  <section class="section" id="jenkins">
+    <div class="section-tag">Setup #1</div>
+    <h2>🐋 Jenkins + Docker</h2>
+    <p>Jenkins là CI server lâu đời nhất, plugin phong phú. Chúng ta sẽ chạy Jenkins trong Docker để dễ quản lý.</p>
+
+    <h3>📁 Bước 1: Tạo thư mục project</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Tạo thư mục làm việc</span>
+mkdir -p ~/cicd-local/jenkins
+cd ~/cicd-local/jenkins
+
+<span class="cmt"># Tạo thư mục data để persist Jenkins data</span>
+mkdir -p jenkins_home</pre>
+    </div>
+
+    <h3>📄 Bước 2: Tạo docker-compose.yml</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · docker-compose.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">services</span>:
+  <span class="prop">jenkins</span>:
+    <span class="kw">image</span>: <span class="str">jenkins/jenkins:lts-jdk21</span>
+    <span class="kw">container_name</span>: <span class="str">jenkins</span>
+    <span class="kw">restart</span>: <span class="str">unless-stopped</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"8080:8080"</span>    <span class="cmt"># Jenkins UI</span>
+      - <span class="str">"50000:50000"</span>  <span class="cmt"># Agent port</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./jenkins_home:/var/jenkins_home</span>
+      - <span class="str">/var/run/docker.sock:/var/run/docker.sock</span>
+    <span class="kw">environment</span>:
+      - <span class="str">JAVA_OPTS=-Djenkins.install.runSetupWizard=false</span>
+    <span class="kw">user</span>: <span class="str">root</span>  <span class="cmt"># cần để dùng Docker socket</span>
+
+  <span class="prop">registry</span>:
+    <span class="kw">image</span>: <span class="str">registry:2</span>
+    <span class="kw">container_name</span>: <span class="str">local-registry</span>
+    <span class="kw">restart</span>: <span class="str">unless-stopped</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"5000:5000"</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./registry_data:/var/lib/registry</span></pre>
+    </div>
+
+    <h3>🚀 Bước 3: Khởi động Jenkins</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Start services</span>
+docker compose up -d
+
+<span class="cmt"># Xem logs Jenkins</span>
+docker logs -f jenkins
+
+<span class="cmt"># Lấy initial admin password</span>
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">ℹ Truy cập Jenkins</div>
+      Mở trình duyệt vào <code>http://localhost:8080</code>. Nhập password ở trên, chọn <strong>"Install suggested plugins"</strong>, tạo admin account.
+    </div>
+
+    <h3>⚙ Bước 4: Cài Docker plugin trong Jenkins</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Vào Manage Jenkins → Plugins</div>
+          <div class="step-desc">Menu trái → Manage Jenkins → Plugins → Available plugins</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Tìm và cài các plugin</div>
+          <div class="step-desc">Tìm: <code>Docker</code>, <code>Docker Pipeline</code>, <code>Git</code>, <code>Pipeline</code>. Tick chọn và click Install.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Restart Jenkins</div>
+          <div class="step-desc">Tick "Restart Jenkins when installation is complete" hoặc chạy <code>docker restart jenkins</code></div>
+        </div>
+      </div>
+    </div>
+
+    <h3>📝 Bước 5: Tạo Jenkinsfile cho project</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">groovy · Jenkinsfile</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">pipeline</span> {
+    <span class="kw">agent</span> { <span class="kw">docker</span> { <span class="prop">image</span> <span class="str">'maven:3.9-eclipse-temurin-17'</span> } }
+
+    <span class="kw">environment</span> {
+        <span class="prop">REGISTRY</span>     = <span class="str">'localhost:5000'</span>
+        <span class="prop">IMAGE_NAME</span>   = <span class="str">'my-app'</span>
+        <span class="prop">IMAGE_TAG</span>    = <span class="str">"${env.BUILD_NUMBER}"</span>
+    }
+
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Checkout'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">checkout</span> scm
+            }
+        }
+
+        <span class="kw">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">sh</span> <span class="str">'mvn clean package -DskipTests'</span>
+            }
+        }
+
+        <span class="kw">stage</span>(<span class="str">'Test'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">sh</span> <span class="str">'mvn test'</span>
+            }
+            <span class="kw">post</span> {
+                <span class="kw">always</span> {
+                    <span class="fn">junit</span> <span class="str">'target/surefire-reports/**/*.xml'</span>
+                }
+            }
+        }
+
+        <span class="kw">stage</span>(<span class="str">'Docker Build & Push'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">script</span> {
+                    <span class="kw">def</span> img = <span class="fn">docker.build</span>(<span class="str">"${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"</span>)
+                    img.<span class="fn">push</span>()
+                    img.<span class="fn">push</span>(<span class="str">'latest'</span>)
+                }
+            }
+        }
+
+        <span class="kw">stage</span>(<span class="str">'Deploy to Local'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">sh</span> <span class="str">"""
+                    docker pull ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker stop my-app-staging || true
+                    docker rm   my-app-staging || true
+                    docker run -d --name my-app-staging \\
+                        -p 8090:8080 \\
+                        ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                """</span>
+            }
+        }
+    }
+
+    <span class="kw">post</span> {
+        <span class="kw">success</span> { <span class="fn">echo</span> <span class="str">'✅ Pipeline thành công!'</span> }
+        <span class="kw">failure</span> { <span class="fn">echo</span> <span class="str">'❌ Pipeline thất bại!'</span> }
+    }
+}</pre>
+    </div>
+
+    <h3>🔗 Bước 6: Tạo Pipeline Job</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">New Item → Pipeline</div>
+          <div class="step-desc">Đặt tên job, chọn loại "Pipeline", click OK.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Cấu hình Pipeline definition</div>
+          <div class="step-desc">Chọn "Pipeline script from SCM" → Git → nhập URL repo local của bạn (ví dụ <code>file:///home/user/my-project</code> hoặc URL Gitea).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Build Now</div>
+          <div class="step-desc">Click "Build Now" để chạy pipeline lần đầu và xem log.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ GITLAB ══════════ -->
+  <section class="section" id="gitlab">
+    <div class="section-tag">Setup #2 · Recommended</div>
+    <h2>🦊 GitLab CE + Runner</h2>
+    <p>GitLab Community Edition là lựa chọn all-in-one tốt nhất: Git hosting + CI/CD + Container Registry + Issues tích hợp sẵn.</p>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠ Yêu cầu RAM</div>
+      GitLab cần tối thiểu <strong>4GB RAM</strong> để chạy ổn định (khuyến nghị 8GB). Nếu máy yếu hơn, hãy xem Gitea + Drone ở phần dưới.
+    </div>
+
+    <h3>📄 docker-compose.yml cho GitLab</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · docker-compose.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">services</span>:
+  <span class="prop">gitlab</span>:
+    <span class="kw">image</span>: <span class="str">gitlab/gitlab-ce:latest</span>
+    <span class="kw">container_name</span>: <span class="str">gitlab</span>
+    <span class="kw">restart</span>: <span class="str">always</span>
+    <span class="kw">hostname</span>: <span class="str">'gitlab.local'</span>
+    <span class="kw">environment</span>:
+      <span class="prop">GITLAB_OMNIBUS_CONFIG</span>: |
+        external_url <span class="str">'http://localhost:8929'</span>
+        gitlab_rails[<span class="str">'gitlab_shell_ssh_port'</span>] = <span class="num">2224</span>
+        <span class="cmt"># Tắt một số service không cần để tiết kiệm RAM</span>
+        prometheus_monitoring[<span class="str">'enable'</span>] = <span class="kw">false</span>
+        grafana[<span class="str">'enable'</span>] = <span class="kw">false</span>
+        alertmanager[<span class="str">'enable'</span>] = <span class="kw">false</span>
+    <span class="kw">ports</span>:
+      - <span class="str">'8929:8929'</span>   <span class="cmt"># HTTP</span>
+      - <span class="str">'2224:22'</span>    <span class="cmt"># SSH</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">'./gitlab/config:/etc/gitlab'</span>
+      - <span class="str">'./gitlab/logs:/var/log/gitlab'</span>
+      - <span class="str">'./gitlab/data:/var/opt/gitlab'</span>
+    <span class="kw">shm_size</span>: <span class="str">'256m'</span>
+
+  <span class="prop">gitlab-runner</span>:
+    <span class="kw">image</span>: <span class="str">gitlab/gitlab-runner:latest</span>
+    <span class="kw">container_name</span>: <span class="str">gitlab-runner</span>
+    <span class="kw">restart</span>: <span class="str">always</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./runner-config:/etc/gitlab-runner</span>
+      - <span class="str">/var/run/docker.sock:/var/run/docker.sock</span>
+    <span class="kw">depends_on</span>:
+      - <span class="str">gitlab</span></pre>
+    </div>
+
+    <h3>🚀 Khởi động và đăng ký Runner</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Start GitLab (lần đầu mất 3-5 phút)</span>
+docker compose up -d
+
+<span class="cmt"># Chờ GitLab ready</span>
+docker logs -f gitlab | grep <span class="str">"gitlab Reconfigured"</span>
+
+<span class="cmt"># Lấy root password</span>
+docker exec gitlab cat /etc/gitlab/initial_root_password
+
+<span class="cmt"># Truy cập: http://localhost:8929</span>
+<span class="cmt"># Login: root / [password trên]</span>
+
+<span class="cmt">## ── Đăng ký Runner ──</span>
+<span class="cmt"># Vào GitLab: Settings → CI/CD → Runners → lấy Registration Token</span>
+
+docker exec -it gitlab-runner gitlab-runner register \
+  --url <span class="str">"http://gitlab:8929"</span> \
+  --token <span class="str">"YOUR_REGISTRATION_TOKEN"</span> \
+  --executor <span class="str">"docker"</span> \
+  --docker-image <span class="str">"alpine:latest"</span> \
+  --description <span class="str">"local-docker-runner"</span> \
+  --docker-volumes <span class="str">"/var/run/docker.sock:/var/run/docker.sock"</span> \
+  --non-interactive</pre>
+    </div>
+
+    <h3>📝 .gitlab-ci.yml — Pipeline mẫu</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · .gitlab-ci.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">stages</span>:
+  - <span class="str">build</span>
+  - <span class="str">test</span>
+  - <span class="str">docker</span>
+  - <span class="str">deploy</span>
+
+<span class="kw">variables</span>:
+  <span class="prop">REGISTRY</span>: <span class="str">"localhost:5000"</span>
+  <span class="prop">IMAGE_NAME</span>: <span class="str">"$CI_PROJECT_NAME"</span>
+  <span class="prop">IMAGE_TAG</span>: <span class="str">"$CI_COMMIT_SHORT_SHA"</span>
+  <span class="prop">MAVEN_OPTS</span>: <span class="str">"-Dmaven.repo.local=.m2/repository"</span>
+
+<span class="cmt"># Cache Maven dependencies để build nhanh hơn</span>
+<span class="kw">cache</span>:
+  <span class="prop">paths</span>:
+    - <span class="str">.m2/repository/</span>
+    - <span class="str">target/</span>
+
+<span class="cmt">## ──── BUILD ────</span>
+<span class="prop">build-job</span>:
+  <span class="kw">stage</span>: build
+  <span class="kw">image</span>: maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>
+  <span class="kw">script</span>:
+    - <span class="str">mvn clean package -DskipTests</span>
+  <span class="kw">artifacts</span>:
+    <span class="prop">paths</span>:
+      - <span class="str">target/*.jar</span>
+    <span class="prop">expire_in</span>: <span class="str">1 hour</span>
+
+<span class="cmt">## ──── TEST ────</span>
+<span class="prop">test-job</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">image</span>: maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span>
+  <span class="kw">script</span>:
+    - <span class="str">mvn test</span>
+  <span class="kw">coverage</span>: <span class="str">'/Total.*?([0-9]{1,3})%/'</span>
+  <span class="kw">artifacts</span>:
+    <span class="prop">reports</span>:
+      <span class="prop">junit</span>: <span class="str">target/surefire-reports/**/*.xml</span>
+
+<span class="cmt">## ──── DOCKER ────</span>
+<span class="prop">docker-build</span>:
+  <span class="kw">stage</span>: docker
+  <span class="kw">image</span>: docker:<span class="num">24</span>-dind
+  <span class="kw">services</span>:
+    - <span class="str">docker:dind</span>
+  <span class="kw">script</span>:
+    - docker build -t <span class="str">$REGISTRY/$IMAGE_NAME:$IMAGE_TAG</span> .
+    - docker push  <span class="str">$REGISTRY/$IMAGE_NAME:$IMAGE_TAG</span>
+    - docker tag   <span class="str">$REGISTRY/$IMAGE_NAME:$IMAGE_TAG</span>
+                   <span class="str">$REGISTRY/$IMAGE_NAME:latest</span>
+    - docker push  <span class="str">$REGISTRY/$IMAGE_NAME:latest</span>
+  <span class="kw">only</span>:
+    - main
+    - develop
+
+<span class="cmt">## ──── DEPLOY ────</span>
+<span class="prop">deploy-staging</span>:
+  <span class="kw">stage</span>: deploy
+  <span class="kw">image</span>: docker:<span class="num">24</span>
+  <span class="kw">script</span>:
+    - docker pull <span class="str">$REGISTRY/$IMAGE_NAME:$IMAGE_TAG</span>
+    - docker stop <span class="str">$IMAGE_NAME-staging</span> || true
+    - docker rm   <span class="str">$IMAGE_NAME-staging</span> || true
+    - docker run -d
+        --name <span class="str">$IMAGE_NAME-staging</span>
+        -p <span class="num">8090</span>:<span class="num">8080</span>
+        --env-file <span class="str">.env.staging</span>
+        <span class="str">$REGISTRY/$IMAGE_NAME:$IMAGE_TAG</span>
+  <span class="kw">environment</span>:
+    <span class="prop">name</span>: staging
+    <span class="prop">url</span>: <span class="str">http://localhost:8090</span>
+  <span class="kw">only</span>:
+    - main</pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Tip: Network issue khi dùng localhost</div>
+      Trong Docker container, <code>localhost</code> trỏ vào chính container đó. Để container gitlab-runner gọi được GitLab, dùng service name <code>gitlab</code> thay vì <code>localhost</code>.
+    </div>
+  </section>
+
+  <!-- ══════════ GITEA ══════════ -->
+  <section class="section" id="gitea">
+    <div class="section-tag">Setup #3 · Lightweight</div>
+    <h2>🍵 Gitea + Drone CI</h2>
+    <p>Stack nhẹ nhất, phù hợp máy có RAM thấp. Gitea ~50MB RAM, Drone ~30MB RAM.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · docker-compose.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">networks</span>:
+  <span class="prop">cicd-net</span>:
+
+<span class="kw">services</span>:
+  <span class="prop">gitea</span>:
+    <span class="kw">image</span>: <span class="str">gitea/gitea:latest</span>
+    <span class="kw">container_name</span>: <span class="str">gitea</span>
+    <span class="kw">environment</span>:
+      - <span class="str">USER_UID=1000</span>
+      - <span class="str">USER_GID=1000</span>
+      - <span class="str">GITEA__server__ROOT_URL=http://localhost:3000/</span>
+    <span class="kw">restart</span>: <span class="str">always</span>
+    <span class="kw">networks</span>:
+      - <span class="str">cicd-net</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"3000:3000"</span>
+      - <span class="str">"2222:22"</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./gitea-data:/data</span>
+
+  <span class="prop">drone</span>:
+    <span class="kw">image</span>: <span class="str">drone/drone:2</span>
+    <span class="kw">container_name</span>: <span class="str">drone</span>
+    <span class="kw">environment</span>:
+      - <span class="str">DRONE_GITEA_SERVER=http://gitea:3000</span>
+      - <span class="str">DRONE_GITEA_CLIENT_ID=YOUR_OAUTH_CLIENT_ID</span>
+      - <span class="str">DRONE_GITEA_CLIENT_SECRET=YOUR_OAUTH_SECRET</span>
+      - <span class="str">DRONE_RPC_SECRET=super-secret-rpc-key</span>
+      - <span class="str">DRONE_SERVER_HOST=localhost:8888</span>
+      - <span class="str">DRONE_SERVER_PROTO=http</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"8888:80"</span>
+    <span class="kw">networks</span>:
+      - <span class="str">cicd-net</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./drone-data:/data</span>
+    <span class="kw">restart</span>: <span class="str">always</span>
+
+  <span class="prop">drone-runner</span>:
+    <span class="kw">image</span>: <span class="str">drone/drone-runner-docker:1</span>
+    <span class="kw">container_name</span>: <span class="str">drone-runner</span>
+    <span class="kw">environment</span>:
+      - <span class="str">DRONE_RPC_PROTO=http</span>
+      - <span class="str">DRONE_RPC_HOST=drone:80</span>
+      - <span class="str">DRONE_RPC_SECRET=super-secret-rpc-key</span>
+      - <span class="str">DRONE_RUNNER_CAPACITY=2</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">/var/run/docker.sock:/var/run/docker.sock</span>
+    <span class="kw">networks</span>:
+      - <span class="str">cicd-net</span>
+    <span class="kw">restart</span>: <span class="str">always</span></pre>
+    </div>
+
+    <h3>🔑 Tạo OAuth app trong Gitea</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Vào Gitea Settings</div>
+          <div class="step-desc">Truy cập <code>http://localhost:3000</code> → Đăng ký admin account → Settings → Applications</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Tạo OAuth2 Application</div>
+          <div class="step-desc">Tên: <code>drone</code>, Redirect URI: <code>http://localhost:8888/login</code>. Copy Client ID và Client Secret.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Cập nhật docker-compose.yml</div>
+          <div class="step-desc">Điền Client ID và Secret vào environment của service <code>drone</code>, rồi <code>docker compose up -d</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>📝 .drone.yml — Pipeline mẫu</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · .drone.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">kind</span>: <span class="str">pipeline</span>
+<span class="kw">type</span>: <span class="str">docker</span>
+<span class="kw">name</span>: <span class="str">default</span>
+
+<span class="kw">steps</span>:
+  - <span class="prop">name</span>: <span class="str">build</span>
+    <span class="kw">image</span>: <span class="str">maven:3.9-eclipse-temurin-17</span>
+    <span class="kw">volumes</span>:
+      - <span class="prop">name</span>: <span class="str">cache</span>
+        <span class="prop">path</span>: <span class="str">/root/.m2</span>
+    <span class="kw">commands</span>:
+      - mvn clean package -DskipTests
+
+  - <span class="prop">name</span>: <span class="str">test</span>
+    <span class="kw">image</span>: <span class="str">maven:3.9-eclipse-temurin-17</span>
+    <span class="kw">volumes</span>:
+      - <span class="prop">name</span>: <span class="str">cache</span>
+        <span class="prop">path</span>: <span class="str">/root/.m2</span>
+    <span class="kw">commands</span>:
+      - mvn test
+
+  - <span class="prop">name</span>: <span class="str">docker-build</span>
+    <span class="kw">image</span>: <span class="str">plugins/docker</span>
+    <span class="kw">settings</span>:
+      <span class="prop">registry</span>: <span class="str">localhost:5000</span>
+      <span class="prop">repo</span>: <span class="str">localhost:5000/my-app</span>
+      <span class="prop">tags</span>:
+        - <span class="str">latest</span>
+        - <span class="str">${DRONE_COMMIT_SHA:0:8}</span>
+      <span class="prop">insecure</span>: <span class="kw">true</span>  <span class="cmt"># vì dùng HTTP registry local</span>
+
+<span class="kw">volumes</span>:
+  - <span class="prop">name</span>: <span class="str">cache</span>
+    <span class="kw">host</span>:
+      <span class="prop">path</span>: <span class="str">/tmp/drone-cache</span></pre>
+    </div>
+  </section>
+
+  <!-- ══════════ GITHUB ACTIONS LOCAL ══════════ -->
+  <section class="section" id="github-act">
+    <div class="section-tag">Setup #4</div>
+    <h2>🐙 GitHub Actions — Chạy local với act</h2>
+    <p><code>act</code> là tool cho phép chạy GitHub Actions workflow trực tiếp trên máy local mà không cần push lên GitHub.</p>
+
+    <h3>📦 Cài đặt act</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt">## macOS</span>
+brew install act
+
+<span class="cmt">## Linux (script)</span>
+curl --proto <span class="str">'=https'</span> --tlsv1.2 -sSf \
+  https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+<span class="cmt">## Windows (scoop)</span>
+scoop install act
+
+<span class="cmt">## Kiểm tra version</span>
+act --version</pre>
+    </div>
+
+    <h3>📝 GitHub Actions workflow mẫu</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · .github/workflows/ci.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">name</span>: <span class="str">CI Pipeline</span>
+
+<span class="kw">on</span>:
+  <span class="prop">push</span>:
+    <span class="kw">branches</span>: [ main, develop ]
+  <span class="prop">pull_request</span>:
+    <span class="kw">branches</span>: [ main ]
+
+<span class="kw">jobs</span>:
+  <span class="prop">build-and-test</span>:
+    <span class="kw">runs-on</span>: <span class="str">ubuntu-latest</span>
+
+    <span class="kw">steps</span>:
+      - <span class="prop">name</span>: <span class="str">Checkout code</span>
+        <span class="kw">uses</span>: <span class="str">actions/checkout@v4</span>
+
+      - <span class="prop">name</span>: <span class="str">Setup Java</span>
+        <span class="kw">uses</span>: <span class="str">actions/setup-java@v4</span>
+        <span class="kw">with</span>:
+          <span class="prop">java-version</span>: <span class="str">'17'</span>
+          <span class="prop">distribution</span>: <span class="str">'temurin'</span>
+          <span class="prop">cache</span>: <span class="str">maven</span>
+
+      - <span class="prop">name</span>: <span class="str">Build with Maven</span>
+        <span class="kw">run</span>: mvn clean package -DskipTests
+
+      - <span class="prop">name</span>: <span class="str">Run tests</span>
+        <span class="kw">run</span>: mvn test
+
+      - <span class="prop">name</span>: <span class="str">Build Docker image</span>
+        <span class="kw">run</span>: |
+          docker build -t my-app:<span class="str">${{ github.sha }}</span> .
+          docker tag my-app:<span class="str">${{ github.sha }}</span> my-app:latest
+
+      - <span class="prop">name</span>: <span class="str">Upload artifacts</span>
+        <span class="kw">uses</span>: <span class="str">actions/upload-artifact@v4</span>
+        <span class="kw">with</span>:
+          <span class="prop">name</span>: <span class="str">app-jar</span>
+          <span class="prop">path</span>: <span class="str">target/*.jar</span></pre>
+    </div>
+
+    <h3>▶ Chạy với act</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Chạy tất cả workflows (lần đầu sẽ pull Docker images)</span>
+act
+
+<span class="cmt"># Chạy event push</span>
+act push
+
+<span class="cmt"># Chạy job cụ thể</span>
+act -j build-and-test
+
+<span class="cmt"># Dùng medium image (nhỏ hơn, tiết kiệm disk)</span>
+act -P ubuntu-latest=catthehacker/ubuntu:act-22.04
+
+<span class="cmt"># Pass secrets</span>
+act push --secret-file .secrets
+
+<span class="cmt"># Dry run (xem sẽ làm gì, không thực thi)</span>
+act -n</pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">💡 Tip: .actrc file</div>
+      Tạo file <code>.actrc</code> ở root project để lưu cấu hình mặc định:<br><br>
+      <code>-P ubuntu-latest=catthehacker/ubuntu:act-22.04<br>--secret-file .secrets</code>
+    </div>
+  </section>
+
+  <!-- ══════════ PIPELINE DESIGN ══════════ -->
+  <section class="section" id="pipeline-design">
+    <div class="section-tag">Pipeline</div>
+    <h2>🔄 Thiết kế pipeline hiệu quả</h2>
+
+    <p>Pipeline tốt cần nhanh, rõ ràng, và fail-fast. Dưới đây là cấu trúc khuyến nghị:</p>
+
+    <div class="pipeline">
+      <div class="pipe-stage"><div class="ico">📥</div><div style="font-size:12px">Checkout</div><div class="lbl">git clone</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ico">🏗</div><div style="font-size:12px">Build</div><div class="lbl">compile</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ico">⚡</div><div style="font-size:12px">Unit Test</div><div class="lbl">fast tests</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ico">🔍</div><div style="font-size:12px">Code Quality</div><div class="lbl">lint/sonar</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ico">🐳</div><div style="font-size:12px">Docker Build</div><div class="lbl">image push</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ico">🧪</div><div style="font-size:12px">Integration</div><div class="lbl">e2e tests</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage success"><div class="ico">🚀</div><div style="font-size:12px">Deploy</div><div class="lbl">staging</div></div>
+    </div>
+
+    <h3>📏 Nguyên tắc thiết kế</h3>
+    <ul class="feat-list">
+      <li><strong>Fail fast:</strong> Đặt các bước kiểm tra nhanh (lint, unit test) lên trước. Không tốn thời gian build Docker nếu code còn lỗi cú pháp.</li>
+      <li><strong>Cache aggressively:</strong> Cache Maven/npm/pip dependencies để lần build sau nhanh hơn nhiều lần.</li>
+      <li><strong>Parallel stages:</strong> Chạy các test không phụ thuộc nhau song song (unit test + lint + security scan).</li>
+      <li><strong>Artifacts:</strong> Lưu lại build output giữa stages, đừng build lại từ đầu ở mỗi stage.</li>
+      <li><strong>Environment isolation:</strong> Mỗi job chạy trong container sạch, không để state từ job trước ảnh hưởng.</li>
+    </ul>
+
+    <h3>⚡ Tối ưu tốc độ build</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">dockerfile · Dockerfile tối ưu</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># ── Stage 1: Build ──</span>
+<span class="kw">FROM</span> maven:<span class="num">3.9</span>-eclipse-temurin-<span class="num">17</span> <span class="kw">AS</span> builder
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy pom.xml trước → cache Maven deps khi chưa thay đổi pom</span>
+<span class="kw">COPY</span> pom.xml .
+<span class="kw">RUN</span> mvn dependency:go-offline -q
+
+<span class="cmt"># Sau đó mới copy source → chỉ rebuild khi code thay đổi</span>
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> mvn clean package -DskipTests
+
+<span class="cmt"># ── Stage 2: Runtime ──</span>
+<span class="kw">FROM</span> eclipse-temurin:<span class="num">17</span>-jre-alpine
+
+<span class="kw">WORKDIR</span> /app
+<span class="kw">RUN</span> addgroup -S appgroup && adduser -S appuser -G appgroup
+
+<span class="kw">COPY</span> --from=builder /app/target/*.jar app.jar
+
+<span class="kw">USER</span> appuser
+<span class="kw">EXPOSE</span> <span class="num">8080</span>
+<span class="kw">ENTRYPOINT</span> [<span class="str">"java"</span>, <span class="str">"-jar"</span>, <span class="str">"app.jar"</span>]</pre>
+    </div>
+  </section>
+
+  <!-- ══════════ DOCKER BUILD & REGISTRY ══════════ -->
+  <section class="section" id="docker-build">
+    <div class="section-tag">Docker</div>
+    <h2>📦 Build & Local Registry</h2>
+
+    <h3>🗄 Setup Local Registry với UI</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · docker-compose.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">services</span>:
+  <span class="prop">registry</span>:
+    <span class="kw">image</span>: <span class="str">registry:2</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"5000:5000"</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./registry-data:/var/lib/registry</span>
+    <span class="kw">environment</span>:
+      - <span class="str">REGISTRY_STORAGE_DELETE_ENABLED=true</span>
+
+  <span class="prop">registry-ui</span>:
+    <span class="kw">image</span>: <span class="str">joxit/docker-registry-ui:latest</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"8086:80"</span>
+    <span class="kw">environment</span>:
+      - <span class="str">SINGLE_REGISTRY=true</span>
+      - <span class="str">REGISTRY_TITLE=Local Registry</span>
+      - <span class="str">NGINX_PROXY_PASS_URL=http://registry:5000</span>
+    <span class="kw">depends_on</span>:
+      - <span class="str">registry</span></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠ Insecure Registry</div>
+      Docker mặc định chỉ cho phép HTTPS registry. Để dùng HTTP localhost:5000, thêm vào Docker daemon config:
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">json · /etc/docker/daemon.json (Linux) hoặc Docker Desktop Settings</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre>{
+  <span class="prop">"insecure-registries"</span>: [<span class="str">"localhost:5000"</span>, <span class="str">"192.168.1.x:5000"</span>]
+}</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash · Workflow thao tác với registry</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Build và push image</span>
+docker build -t localhost:5000/my-app:1.0.0 .
+docker push localhost:5000/my-app:1.0.0
+docker push localhost:5000/my-app:latest
+
+<span class="cmt"># List tất cả images trong registry</span>
+curl http://localhost:5000/v2/_catalog
+
+<span class="cmt"># List tags của image</span>
+curl http://localhost:5000/v2/my-app/tags/list
+
+<span class="cmt"># Pull image về</span>
+docker pull localhost:5000/my-app:latest
+
+<span class="cmt"># Xem UI tại http://localhost:8086</span></pre>
+    </div>
+  </section>
+
+  <!-- ══════════ TESTING ══════════ -->
+  <section class="section" id="testing">
+    <div class="section-tag">Quality</div>
+    <h2>🧪 Auto Testing trong Pipeline</h2>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">⚡</div>
+        <div class="card-title">Unit Tests</div>
+        <div class="card-desc">Chạy sớm nhất, nhanh nhất. Không cần DB hay network. Mục tiêu &lt;30s.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔗</div>
+        <div class="card-title">Integration Tests</div>
+        <div class="card-desc">Cần Docker Compose để spin up DB, Redis. Dùng Testcontainers nếu dùng Java.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🌐</div>
+        <div class="card-title">E2E / API Tests</div>
+        <div class="card-desc">Chạy sau deploy staging. Dùng Postman/Newman, Playwright, hoặc RestAssured.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🛡</div>
+        <div class="card-title">Security Scan</div>
+        <div class="card-desc">Trivy scan Docker image, OWASP dependency check. Fail pipeline nếu tìm thấy CVE critical.</div>
+      </div>
+    </div>
+
+    <h3>🐳 Integration test với Docker Compose</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · docker-compose.test.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+<span class="kw">services</span>:
+  <span class="prop">postgres-test</span>:
+    <span class="kw">image</span>: <span class="str">postgres:16-alpine</span>
+    <span class="kw">environment</span>:
+      - <span class="str">POSTGRES_DB=testdb</span>
+      - <span class="str">POSTGRES_USER=test</span>
+      - <span class="str">POSTGRES_PASSWORD=test</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"5433:5432"</span>
+    <span class="kw">healthcheck</span>:
+      <span class="prop">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"pg_isready -U test"</span>]
+      <span class="prop">interval</span>: <span class="str">5s</span>
+      <span class="prop">timeout</span>: <span class="str">5s</span>
+      <span class="prop">retries</span>: <span class="num">5</span>
+
+  <span class="prop">redis-test</span>:
+    <span class="kw">image</span>: <span class="str">redis:7-alpine</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"6380:6379"</span></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash · Script chạy integration test</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt">#!/bin/bash</span>
+<span class="kw">set</span> -e
+
+<span class="fn">echo</span> <span class="str">"🚀 Starting test dependencies..."</span>
+docker compose -f docker-compose.test.yml up -d
+
+<span class="cmt"># Chờ DB sẵn sàng</span>
+<span class="fn">echo</span> <span class="str">"⏳ Waiting for services to be healthy..."</span>
+docker compose -f docker-compose.test.yml wait
+
+<span class="fn">echo</span> <span class="str">"🧪 Running integration tests..."</span>
+mvn test -Pintegration-tests \
+  -Dspring.datasource.url=<span class="str">jdbc:postgresql://localhost:5433/testdb</span> \
+  -Dspring.redis.port=<span class="str">6380</span>
+
+<span class="cmt"># Cleanup dù test pass hay fail</span>
+<span class="kw">trap</span> <span class="str">'docker compose -f docker-compose.test.yml down -v'</span> EXIT</pre>
+    </div>
+
+    <h3>🛡 Security scan với Trivy</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Cài Trivy</span>
+docker pull aquasec/trivy:latest
+
+<span class="cmt"># Scan image, fail nếu có CRITICAL CVE</span>
+docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasec/trivy image \
+  --exit-code <span class="num">1</span> \
+  --severity CRITICAL \
+  localhost:<span class="num">5000</span>/my-app:latest</pre>
+    </div>
+  </section>
+
+  <!-- ══════════ DEPLOY ══════════ -->
+  <section class="section" id="deploy">
+    <div class="section-tag">Deployment</div>
+    <h2>🚀 Chiến lược Deploy</h2>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Chiến lược</th><th>Mô tả</th><th>Downtime</th><th>Phù hợp</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Recreate</strong></td><td>Stop old → Start new</td><td><span class="tag tag-red">Có</span></td><td>Dev/local</td></tr>
+          <tr><td><strong>Rolling</strong></td><td>Thay thế dần từng instance</td><td><span class="tag tag-new">Không</span></td><td>Staging</td></tr>
+          <tr><td><strong>Blue/Green</strong></td><td>Chạy song song, switch traffic</td><td><span class="tag tag-new">Không</span></td><td>Production</td></tr>
+          <tr><td><strong>Canary</strong></td><td>Route một phần traffic vào new version</td><td><span class="tag tag-new">Không</span></td><td>Production</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>🔵🟢 Blue/Green Deploy với Docker</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash · deploy.sh</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt">#!/bin/bash</span>
+IMAGE=<span class="str">"localhost:5000/my-app:$1"</span>  <span class="cmt"># $1 = IMAGE_TAG</span>
+
+<span class="cmt"># Xác định màu hiện tại</span>
+CURRENT=$(docker ps --filter <span class="str">"name=my-app-blue"</span> --format <span class="str">"{{.Names}}"</span>)
+
+<span class="kw">if</span> [ -n <span class="str">"$CURRENT"</span> ]; then
+  NEXT_COLOR=<span class="str">"green"</span>; NEXT_PORT=<span class="num">8091</span>; CURRENT_COLOR=<span class="str">"blue"</span>
+<span class="kw">else</span>
+  NEXT_COLOR=<span class="str">"blue"</span>; NEXT_PORT=<span class="num">8090</span>; CURRENT_COLOR=<span class="str">"green"</span>
+<span class="kw">fi</span>
+
+<span class="fn">echo</span> <span class="str">"🚀 Deploying $IMAGE as $NEXT_COLOR on port $NEXT_PORT"</span>
+
+<span class="cmt"># Start new container</span>
+docker run -d \
+  --name my-app-<span class="str">$NEXT_COLOR</span> \
+  -p <span class="str">${NEXT_PORT}</span>:<span class="num">8080</span> \
+  <span class="str">$IMAGE</span>
+
+<span class="cmt"># Health check</span>
+<span class="fn">echo</span> <span class="str">"⏳ Health checking..."</span>
+<span class="kw">for</span> i in <span class="num">1 2 3 4 5 6 7 8 9 10</span>; do
+  STATUS=$(curl -s -o /dev/null -w <span class="str">"%{http_code}"</span> http://localhost:<span class="str">$NEXT_PORT</span>/actuator/health)
+  <span class="kw">if</span> [ <span class="str">"$STATUS"</span> = <span class="str">"200"</span> ]; then
+    <span class="fn">echo</span> <span class="str">"✅ Health check passed!"</span>
+    <span class="kw">break</span>
+  <span class="kw">fi</span>
+  sleep <span class="num">3</span>
+<span class="kw">done</span>
+
+<span class="cmt"># Update Nginx upstream (switch traffic)</span>
+<span class="fn">echo</span> <span class="str">"upstream app { server localhost:${NEXT_PORT}; }"</span> \
+  > /etc/nginx/conf.d/upstream.conf
+nginx -s reload
+
+<span class="cmt"># Dừng container cũ</span>
+docker stop my-app-<span class="str">$CURRENT_COLOR</span> && \
+docker rm   my-app-<span class="str">$CURRENT_COLOR</span>
+
+<span class="fn">echo</span> <span class="str">"🎉 Deploy completed! App running at http://localhost"</span></pre>
+    </div>
+  </section>
+
+  <!-- ══════════ SECRETS ══════════ -->
+  <section class="section" id="secrets">
+    <div class="section-tag">Security</div>
+    <h2>🔐 Secrets & Configuration</h2>
+
+    <div class="callout err">
+      <div class="callout-label">🚨 Không bao giờ làm</div>
+      Không commit file <code>.env</code>, credentials, API keys, passwords vào Git. Dù là private repo. Dù chỉ là local.
+    </div>
+
+    <h3>Cách đúng: Quản lý secrets</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Thêm vào .gitignore</div>
+          <div class="step-desc"><code>.env</code>, <code>.env.*</code>, <code>*.secret</code>, <code>*-credentials.yml</code></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Dùng CI/CD secret variables</div>
+          <div class="step-desc">GitLab: Settings → CI/CD → Variables. Jenkins: Manage Jenkins → Credentials. Drone: Settings → Secrets.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Inject vào container lúc run</div>
+          <div class="step-desc">Dùng <code>--env-file .env</code> hoặc <code>-e KEY=VALUE</code> khi chạy Docker. Không bake secrets vào Docker image.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Cân nhắc HashiCorp Vault</div>
+          <div class="step-desc">Với project nghiêm túc hơn, setup Vault local để centralize secrets management.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>📄 .env.example — Template mẫu</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">.env.example (commit cái này, không commit .env)</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Database</span>
+<span class="prop">DB_HOST</span>=localhost
+<span class="prop">DB_PORT</span>=5432
+<span class="prop">DB_NAME</span>=mydb
+<span class="prop">DB_USER</span>=<span class="str">CHANGE_ME</span>
+<span class="prop">DB_PASS</span>=<span class="str">CHANGE_ME</span>
+
+<span class="cmt"># App</span>
+<span class="prop">APP_SECRET_KEY</span>=<span class="str">CHANGE_ME</span>
+<span class="prop">JWT_SECRET</span>=<span class="str">CHANGE_ME</span>
+
+<span class="cmt"># External APIs</span>
+<span class="prop">PAYMENT_API_KEY</span>=<span class="str">CHANGE_ME</span>
+<span class="prop">SMTP_PASSWORD</span>=<span class="str">CHANGE_ME</span></pre>
+    </div>
+  </section>
+
+  <!-- ══════════ MONITORING ══════════ -->
+  <section class="section" id="monitoring">
+    <div class="section-tag">Observability</div>
+    <h2>📊 Monitoring Pipeline</h2>
+
+    <p>Thêm Prometheus + Grafana để theo dõi pipeline metrics và application health:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · monitoring stack</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">services</span>:
+  <span class="prop">prometheus</span>:
+    <span class="kw">image</span>: <span class="str">prom/prometheus:latest</span>
+    <span class="kw">ports</span>: [<span class="str">"9090:9090"</span>]
+    <span class="kw">volumes</span>:
+      - <span class="str">./prometheus.yml:/etc/prometheus/prometheus.yml</span>
+
+  <span class="prop">grafana</span>:
+    <span class="kw">image</span>: <span class="str">grafana/grafana:latest</span>
+    <span class="kw">ports</span>: [<span class="str">"3001:3000"</span>]
+    <span class="kw">environment</span>:
+      - <span class="str">GF_SECURITY_ADMIN_PASSWORD=admin123</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">./grafana-data:/var/lib/grafana</span>
+
+  <span class="prop">cadvisor</span>:
+    <span class="kw">image</span>: <span class="str">gcr.io/cadvisor/cadvisor:latest</span>
+    <span class="kw">ports</span>: [<span class="str">"8087:8080"</span>]
+    <span class="kw">volumes</span>:
+      - <span class="str">/:/rootfs:ro</span>
+      - <span class="str">/var/run:/var/run:ro</span>
+      - <span class="str">/sys:/sys:ro</span>
+      - <span class="str">/var/lib/docker/:/var/lib/docker:ro</span></pre>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">📈</div>
+        <div class="card-title">Prometheus :9090</div>
+        <div class="card-desc">Thu thập metrics từ app, Docker containers, và CI server.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📊</div>
+        <div class="card-title">Grafana :3001</div>
+        <div class="card-desc">Dashboard đẹp cho build times, success rate, container CPU/RAM.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🐳</div>
+        <div class="card-title">cAdvisor :8087</div>
+        <div class="card-desc">Theo dõi resource usage của từng Docker container theo thời gian thực.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TROUBLESHOOT ══════════ -->
+  <section class="section" id="troubleshoot">
+    <div class="section-tag">Debug</div>
+    <h2>🐛 Troubleshooting thường gặp</h2>
+
+    <h3>❌ Docker socket permission denied</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Lỗi: permission denied while trying to connect to Docker</span>
+<span class="cmt"># Fix: thêm user vào group docker</span>
+sudo usermod -aG docker $USER
+newgrp docker
+
+<span class="cmt"># Hoặc chạy Jenkins/Runner với user root (không khuyến nghị production)</span>
+<span class="cmt"># user: root trong docker-compose.yml</span></pre>
+    </div>
+
+    <h3>❌ Container không gọi được localhost</h3>
+    <div class="callout warn">
+      <div class="callout-label">⚠ Hiểu đúng về networking</div>
+      Trong container, <code>localhost</code> = chính container đó, không phải host machine. Dùng:
+      <ul class="feat-list" style="margin-top:8px">
+        <li><strong>host.docker.internal</strong> — trên Mac/Windows để gọi vào host machine</li>
+        <li><strong>Tên service</strong> — <code>postgres</code>, <code>redis</code>... để gọi container khác cùng network</li>
+        <li><strong>172.17.0.1</strong> — Docker bridge gateway trên Linux</li>
+      </ul>
+    </div>
+
+    <h3>❌ Build chậm do không cache Maven/npm</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">yaml · GitLab CI cache config</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="kw">cache</span>:
+  <span class="prop">key</span>:
+    <span class="prop">files</span>:
+      - <span class="str">pom.xml</span>  <span class="cmt"># Cache key thay đổi khi pom.xml thay đổi</span>
+  <span class="prop">paths</span>:
+    - <span class="str">.m2/repository</span>
+
+<span class="cmt"># Cho npm:</span>
+<span class="kw">cache</span>:
+  <span class="prop">key</span>:
+    <span class="prop">files</span>:
+      - <span class="str">package-lock.json</span>
+  <span class="prop">paths</span>:
+    - <span class="str">node_modules/</span></pre>
+    </div>
+
+    <h3>❌ GitLab chiếm quá nhiều RAM</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">ruby · Thêm vào GITLAB_OMNIBUS_CONFIG</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Giảm worker processes</span>
+puma[<span class="str">'worker_processes'</span>] = <span class="num">0</span>  <span class="cmt"># single mode</span>
+
+<span class="cmt"># Tắt services không dùng</span>
+sidekiq[<span class="str">'concurrency'</span>] = <span class="num">5</span>
+prometheus_monitoring[<span class="str">'enable'</span>] = <span class="kw">false</span>
+grafana[<span class="str">'enable'</span>] = <span class="kw">false</span>
+alertmanager[<span class="str">'enable'</span>] = <span class="kw">false</span>
+node_exporter[<span class="str">'enable'</span>] = <span class="kw">false</span>
+redis_exporter[<span class="str">'enable'</span>] = <span class="kw">false</span>
+postgres_exporter[<span class="str">'enable'</span>] = <span class="kw">false</span></pre>
+    </div>
+
+    <h3>✅ Checklist trước khi bắt đầu</h3>
+    <ul class="checklist">
+      <li><div class="ck">✓</div> Docker Desktop đang chạy và có đủ RAM allocation</li>
+      <li><div class="ck">✓</div> Các port cần thiết (8080, 8929, 3000, 5000) chưa bị chiếm</li>
+      <li><div class="ck">✓</div> File <code>.env</code> đã được tạo từ <code>.env.example</code></li>
+      <li><div class="ck">✓</div> Docker daemon config đã có <code>insecure-registries</code> cho local registry</li>
+      <li><div class="ck">✓</div> <code>/etc/hosts</code> đã có entry nếu dùng custom hostname</li>
+      <li><div class="ck">✓</div> Git config đã setup <code>user.email</code> và <code>user.name</code></li>
+      <li><div class="ck">✓</div> Dockerfile đã tồn tại ở root project</li>
+    </ul>
+
+    <div class="callout good" style="margin-top:32px">
+      <div class="callout-label">🎉 Bạn đã sẵn sàng!</div>
+      Với hướng dẫn này, bạn có thể setup một CI/CD pipeline hoàn chỉnh chạy hoàn toàn local. Bắt đầu với <strong>GitLab CE + Runner</strong> nếu đây là lần đầu — dễ nhất và all-in-one. Khi quen rồi, có thể chuyển sang Jenkins hoặc tích hợp Kubernetes.
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ── PROGRESS BAR ──
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const pct = Math.round((el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+  });
+
+  // ── ACTIVE SIDEBAR LINK ──
+  function setActive(el) {
+    document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── COPY BUTTON ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── INTERSECTION OBSERVER for sidebar highlight ──
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sb-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sb-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

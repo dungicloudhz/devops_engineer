@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jenkins — Hướng dẫn chi tiết từ A đến Z</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#08090d; --bg2:#0e1018; --surface:#131520; --surface2:#1a1d2e; --surface3:#21253a;
+      --border:#252840; --border2:#2f3350;
+      --accent:#7c6af8; --accent-lt:#a99dfa;
+      --amber:#f5a623; --green:#3ecf8e; --red:#f06b6b; --blue:#7dd3fc; --pink:#f0abfc;
+      --text:#dde1f5; --muted:#6b7094; --muted2:#8b90b8;
+      --nav-w:276px; --radius:10px;
+      --font-body:'Instrument Sans',sans-serif;
+      --font-head:'Syne',sans-serif;
+      --font-mono:'JetBrains Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;font-size:15px}
+    body{font-family:var(--font-body);background:var(--bg);color:var(--text);display:flex;min-height:100vh;line-height:1.75}
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+    /* ═══ SIDEBAR ═══ */
+    #sidebar{width:var(--nav-w);min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:200;display:flex;flex-direction:column;transition:transform .3s ease}
+    .sb-header{padding:22px 20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(124,106,248,.07) 0%,transparent 100%)}
+    .sb-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .sb-orb{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent) 0%,#a55af4 100%);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 18px rgba(124,106,248,.35);flex-shrink:0}
+    .sb-title{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.02em;line-height:1.2}
+    .sb-ver{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-family:var(--font-mono);background:var(--surface2);padding:3px 8px;border-radius:5px;border:1px solid var(--border)}
+    .sb-ver .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .sb-progress{padding:12px 20px 10px;border-bottom:1px solid var(--border)}
+    .sb-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px}
+    .sb-progress-bar{height:3px;background:var(--border);border-radius:99px;overflow:hidden}
+    .sb-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#a55af4);border-radius:99px;width:0%;transition:width .4s ease}
+    .sb-section{padding:16px 12px 4px}
+    .sb-section-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:0 8px;margin-bottom:4px}
+    .sb-link{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;text-decoration:none;color:var(--muted2);font-size:12.5px;transition:all .18s;cursor:pointer;margin-bottom:1px;position:relative}
+    .sb-link:hover{background:var(--surface);color:var(--text)}
+    .sb-link.active{background:rgba(124,106,248,.12);color:var(--accent-lt)}
+    .sb-link.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:2px;background:var(--accent);border-radius:1px}
+    .sb-icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .sb-badge{margin-left:auto;font-size:9.5px;background:rgba(124,106,248,.18);color:var(--accent-lt);padding:1px 6px;border-radius:99px;font-family:var(--font-mono);white-space:nowrap}
+    .sb-badge.green{background:rgba(62,207,142,.18);color:var(--green)}
+    .sb-badge.amber{background:rgba(245,166,35,.18);color:var(--amber)}
+    .sb-badge.red{background:rgba(240,107,107,.18);color:var(--red)}
+    .sb-footer{margin-top:auto;padding:12px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+
+    /* ═══ MAIN ═══ */
+    main{margin-left:var(--nav-w);flex:1;max-width:960px}
+    .section{padding:58px 62px;border-bottom:1px solid var(--border);scroll-margin-top:20px;animation:fadeUp .5s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .section-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-lt);font-weight:600;font-family:var(--font-mono);margin-bottom:14px}
+    .section-tag::before{content:'';width:22px;height:1px;background:currentColor}
+    h1{font-family:var(--font-head);font-size:46px;font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:18px}
+    h1 .grad{background:linear-gradient(135deg,#fff 0%,var(--accent-lt) 55%,#a55af4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    h2{font-family:var(--font-head);font-size:28px;font-weight:700;letter-spacing:-.02em;margin-bottom:12px;display:flex;align-items:center;gap:10px;color:var(--text)}
+    h3{font-size:15px;font-weight:600;color:var(--text);margin:26px 0 10px;display:flex;align-items:center;gap:8px}
+    h3 .sub{font-size:11px;font-weight:400;color:var(--muted);font-family:var(--font-mono)}
+    p{color:#9fa3c4;margin-bottom:12px}
+    a{color:var(--accent-lt);text-decoration:none}
+
+    /* ── CALLOUTS ── */
+    .callout{border-left:3px solid var(--accent);padding:13px 18px;background:rgba(124,106,248,.07);border-radius:0 8px 8px 0;margin:16px 0;font-size:13.5px;color:#bfc3e0}
+    .callout-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-lt);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+    .callout.warn{border-color:var(--amber);background:rgba(245,166,35,.07)}
+    .callout.warn .callout-label{color:var(--amber)}
+    .callout.good{border-color:var(--green);background:rgba(62,207,142,.07)}
+    .callout.good .callout-label{color:var(--green)}
+    .callout.err{border-color:var(--red);background:rgba(240,107,107,.07)}
+    .callout.err .callout-label{color:var(--red)}
+    .callout.info{border-color:var(--blue);background:rgba(125,211,252,.07)}
+    .callout.info .callout-label{color:var(--blue)}
+
+    /* ── CARDS ── */
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:18px 0}
+    .cards.col3{grid-template-columns:1fr 1fr 1fr}
+    .cards.col4{grid-template-columns:1fr 1fr 1fr 1fr}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .2s,transform .2s,box-shadow .2s}
+    .card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    .card.accent{border-color:rgba(124,106,248,.3)}
+    .card.accent:hover{border-color:var(--accent);box-shadow:0 8px 28px rgba(124,106,248,.15)}
+    .card-ico{font-size:20px;margin-bottom:9px}
+    .card-title{font-weight:600;font-size:13.5px;margin-bottom:5px;color:var(--text)}
+    .card-desc{font-size:12.5px;color:var(--muted2);line-height:1.55}
+
+    /* ── TABS ── */
+    .tabs{margin:20px 0}
+    .tab-header{display:flex;border-bottom:1px solid var(--border);gap:2px}
+    .tab-btn{padding:9px 18px;font-size:13px;font-weight:600;color:var(--muted2);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .18s;font-family:var(--font-body);display:flex;align-items:center;gap:6px}
+    .tab-btn:hover{color:var(--text)}
+    .tab-btn.active{color:var(--accent-lt);border-bottom-color:var(--accent)}
+    .tab-pane{display:none;padding-top:4px}
+    .tab-pane.active{display:block}
+
+    /* ── TABLE ── */
+    .tbl-wrap{overflow-x:auto;margin:14px 0;border-radius:var(--radius);border:1px solid var(--border)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{text-align:left;padding:10px 15px;background:var(--surface2);color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;border-bottom:1px solid var(--border)}
+    td{padding:11px 15px;border-bottom:1px solid var(--border);color:#bbbdd6;vertical-align:top}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    td strong{color:var(--text)}
+    .tag{padding:2px 7px;border-radius:99px;font-size:11px;font-family:var(--font-mono)}
+    .tag-green{background:rgba(62,207,142,.15);color:var(--green)}
+    .tag-amber{background:rgba(245,166,35,.15);color:var(--amber)}
+    .tag-red{background:rgba(240,107,107,.15);color:var(--red)}
+    .tag-accent{background:rgba(124,106,248,.15);color:var(--accent-lt)}
+    .tag-blue{background:rgba(125,211,252,.15);color:var(--blue)}
+
+    /* ── STEPS ── */
+    .steps{margin:18px 0}
+    .step{display:flex;gap:16px;margin-bottom:22px;align-items:flex-start}
+    .step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a55af4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff;font-family:var(--font-mono);box-shadow:0 4px 14px rgba(124,106,248,.28)}
+    .step-title{font-weight:600;color:var(--text);margin-bottom:4px;font-size:14px}
+    .step-desc{font-size:13.5px;color:var(--muted2)}
+
+    /* ── FEAT LIST ── */
+    .feat-list{list-style:none;margin:8px 0}
+    .feat-list li{padding:8px 0 8px 20px;position:relative;font-size:13.5px;color:#9fa3c4;border-bottom:1px solid rgba(37,40,64,.6)}
+    .feat-list li:last-child{border:none}
+    .feat-list li::before{content:'▸';position:absolute;left:0;color:var(--accent)}
+    .feat-list li strong{color:var(--text)}
+
+    /* ── CODE BLOCKS ── */
+    .code-wrap{background:#07080d;border:1px solid var(--border);border-radius:var(--radius);margin:14px 0;overflow:hidden}
+    .code-header{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;background:var(--surface);border-bottom:1px solid var(--border);gap:12px}
+    .code-left{display:flex;align-items:center;gap:10px}
+    .code-dots{display:flex;gap:5px}
+    .code-dot{width:10px;height:10px;border-radius:50%}
+    .code-dot:nth-child(1){background:#ff5f57}
+    .code-dot:nth-child(2){background:#febc2e}
+    .code-dot:nth-child(3){background:#28c840}
+    .code-lang{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
+    .copy-btn{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:5px;cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0}
+    .copy-btn:hover{color:var(--text);border-color:var(--border2)}
+    .copy-btn.copied{color:var(--green);border-color:var(--green)}
+    pre{padding:18px 20px;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;overflow-x:auto;color:#9fa3c4}
+    .kw{color:var(--accent-lt)} .str{color:var(--green)} .cmt{color:#4a5070;font-style:italic}
+    .num{color:var(--amber)} .fn{color:var(--blue)} .cls{color:var(--pink)}
+    .prop{color:#93c5fd} .tag-xml{color:var(--red)} .attr{color:var(--amber)}
+    .op{color:var(--muted2)}
+
+    /* ── TREE ── */
+    .tree{background:#07080d;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin:14px 0;font-family:var(--font-mono);font-size:12.5px;line-height:1.9;color:#9fa3c4}
+    .tree .dir{color:var(--blue);font-weight:500}
+    .tree .file{color:#c4c7e0}
+    .tree .file.imp{color:var(--green)}
+    .tree .file.cfg{color:var(--amber)}
+    .tree .ct{color:#3a3f60;font-style:italic;margin-left:6px}
+
+    /* ── HERO ── */
+    .hero-banner{background:linear-gradient(135deg,rgba(124,106,248,.09) 0%,rgba(165,90,244,.05) 100%);border:1px solid rgba(124,106,248,.2);border-radius:14px;padding:32px 36px;margin-bottom:30px;position:relative;overflow:hidden}
+    .hero-banner::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(124,106,248,.1) 0%,transparent 70%);pointer-events:none}
+    .hb-tag{font-size:11px;color:var(--accent-lt);font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+    .hb-pills{display:flex;align-items:center;gap:10px;margin:14px 0;flex-wrap:wrap}
+    .hb-pill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:12.5px;font-weight:600;color:var(--text)}
+
+    /* ── PIPELINE VIS ── */
+    .pipe-flow{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;margin:18px 0}
+    .pipe-title-lbl{font-size:10px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px;text-align:center}
+    .pipe-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .pipe-box{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;text-align:center;min-width:95px;transition:all .2s}
+    .pipe-box:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(124,106,248,.12)}
+    .pipe-box .pb-ico{font-size:16px;margin-bottom:4px}
+    .pipe-box .pb-lbl{font-size:11.5px;font-weight:600;color:var(--text)}
+    .pipe-box .pb-sub{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+    .pipe-box.ok{border-color:rgba(62,207,142,.3)}
+    .pipe-box.warn-box{border-color:rgba(245,166,35,.3)}
+    .pipe-box.accent-box{border-color:rgba(124,106,248,.3)}
+    .pipe-arr{color:var(--muted);font-size:14px;flex-shrink:0}
+    .pipe-down{text-align:center;color:var(--muted);font-size:16px;margin:2px 0}
+
+    /* ── INLINE CODE ── */
+    code{font-family:var(--font-mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--accent-lt);white-space:nowrap}
+
+    /* ── CHECKLIST ── */
+    .checklist{list-style:none;margin:10px 0}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:13.5px;color:#9fa3c4;border-bottom:1px solid rgba(37,40,64,.5)}
+    .checklist li:last-child{border:none}
+    .ck{width:18px;height:18px;border-radius:5px;background:rgba(62,207,142,.12);border:1px solid rgba(62,207,142,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--green);margin-top:2px}
+
+    /* ── PLUGIN CARD ── */
+    .plugin-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0}
+    .plugin-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;transition:all .2s}
+    .plugin-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+    .plugin-card .pc-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+    .plugin-card .pc-ico{font-size:18px}
+    .plugin-card .pc-name{font-weight:700;font-size:13px;color:var(--text)}
+    .plugin-card .pc-id{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+    .plugin-card p{font-size:12px;margin:0;color:var(--muted2);line-height:1.5}
+
+    /* ── SCREEN MOCK ── */
+    .screen{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+    .screen-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:8px}
+    .screen-dots{display:flex;gap:5px}
+    .screen-dot{width:9px;height:9px;border-radius:50%}
+    .screen-dot:nth-child(1){background:#ff5f57}
+    .screen-dot:nth-child(2){background:#febc2e}
+    .screen-dot:nth-child(3){background:#28c840}
+    .screen-url{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:3px 12px;flex:1}
+    .screen-body{padding:20px 24px}
+
+    /* ── MENU ROW ── */
+    .menu-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;font-size:13px;color:var(--muted2)}
+    .menu-item{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:12px;color:var(--text);font-weight:500}
+    .menu-arr{color:var(--muted);font-size:12px}
+
+    /* ── HAMBURGER ── */
+    .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:8px;width:38px;height:38px;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+
+    @media(max-width:860px){
+      #sidebar{transform:translateX(-100%)}
+      #sidebar.open{transform:translateX(0)}
+      main{margin-left:0}
+      .section{padding:40px 22px}
+      h1{font-size:30px}
+      h2{font-size:22px}
+      .cards,.cards.col3,.cards.col4,.plugin-grid{grid-template-columns:1fr}
+      .hamburger{display:flex}
+    }
+  </style>
+</head>
+<body>
+<div class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">🐋</div>
+      <div class="sb-title">Jenkins Guide</div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span>LTS 2.x · 2025</div>
+  </div>
+
+  <div class="sb-progress">
+    <div class="sb-progress-label"><span>Tiến độ đọc</span><span id="prog-pct">0%</span></div>
+    <div class="sb-progress-bar"><div class="sb-progress-fill" id="prog-fill"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">📚 Series DevOps</div>
+    <a class="sb-link" href="terminal-macbook.html"><span class="sb-icon">💻</span>Terminal macOS</a>
+    <a class="sb-link" href="linux-guide.html"><span class="sb-icon">🐧</span>Linux</a>
+    <a class="sb-link" href="docker-guide.html"><span class="sb-icon">🐳</span>Docker</a>
+    <a class="sb-link" href="aws-guide.html"><span class="sb-icon">☁️</span>AWS</a>
+    <a class="sb-link" href="gcp-guide.html"><span class="sb-icon">🌐</span>GCP</a>
+    <a class="sb-link" href="azure-guide.html"><span class="sb-icon">🔷</span>Azure</a>
+    <a class="sb-link" href="teraform-guide.html"><span class="sb-icon">🏗️</span>Terraform</a>
+    <a class="sb-link" href="kubernate-guide.html"><span class="sb-icon">☸️</span>Kubernetes</a>
+    <a class="sb-link" href="gitlab-cicd-guide.html"><span class="sb-icon">🦊</span>GitLab CI/CD</a>
+    <a class="sb-link active" href="jenkins-guide.html"><span class="sb-icon">👴</span>Jenkins</a>
+    <a class="sb-link" href="cicd-local-guide.html"><span class="sb-icon">🏠</span>CI/CD Local</a>
+    <a class="sb-link" href="gitlab-cicd-k8s.html"><span class="sb-icon">🦊</span>GitLab CI/CD K8s</a>
+    <a class="sb-link" href="jenkins-cicd-k8s.html"><span class="sb-icon">👴</span>Jenkins CI/CD K8s</a>
+    <a class="sb-link" href="eks-cicd-guide.html"><span class="sb-icon">🚀</span>EKS · CI/CD · Lens</a>
+    <a class="sb-link" href="cicd-springboot-react.html"><span class="sb-icon">⚛️</span>CI/CD Springboot React</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Nhập môn</div>
+    <a class="sb-link active" href="#intro"><span class="sb-icon">🏠</span>Giới thiệu Jenkins</a>
+    <a class="sb-link" href="#concepts"><span class="sb-icon">💡</span>Kiến trúc & Concepts</a>
+    <a class="sb-link" href="#install"><span class="sb-icon">⚙</span>Cài đặt Jenkins<span class="sb-badge green">docker</span></a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Cấu hình</div>
+    <a class="sb-link" href="#first-setup"><span class="sb-icon">🔧</span>Setup lần đầu</a>
+    <a class="sb-link" href="#plugins"><span class="sb-icon">🔌</span>Plugins quan trọng</a>
+    <a class="sb-link" href="#credentials"><span class="sb-icon">🔐</span>Credentials & Secrets</a>
+    <a class="sb-link" href="#agents"><span class="sb-icon">🤖</span>Agents & Nodes</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Pipeline</div>
+    <a class="sb-link" href="#pipeline-types"><span class="sb-icon">🔄</span>Loại Pipeline</a>
+    <a class="sb-link" href="#jenkinsfile"><span class="sb-icon">📝</span>Jenkinsfile từ A-Z<span class="sb-badge">core</span></a>
+    <a class="sb-link" href="#shared-libs"><span class="sb-icon">📚</span>Shared Libraries</a>
+    <a class="sb-link" href="#multibranch"><span class="sb-icon">🌿</span>Multibranch Pipeline</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Thực chiến</div>
+    <a class="sb-link" href="#docker-pipeline"><span class="sb-icon">🐳</span>Docker trong Pipeline</a>
+    <a class="sb-link" href="#testing"><span class="sb-icon">🧪</span>Test Reports & Coverage</a>
+    <a class="sb-link" href="#notifications"><span class="sb-icon">🔔</span>Notifications</a>
+    <a class="sb-link" href="#deploy"><span class="sb-icon">🚀</span>Deploy strategies</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Nâng cao</div>
+    <a class="sb-link" href="#security"><span class="sb-icon">🛡</span>Security & RBAC</a>
+    <a class="sb-link" href="#performance"><span class="sb-icon">⚡</span>Tối ưu hiệu năng</a>
+    <a class="sb-link" href="#casc"><span class="sb-icon">📋</span>Config as Code<span class="sb-badge amber">JCasC</span></a>
+    <a class="sb-link" href="#troubleshoot"><span class="sb-icon">🐛</span>Troubleshooting</a>
+  </div>
+
+  <div class="sb-footer">jenkins-guide · 2025</div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main>
+
+<!-- ══════════════════════════════════════
+     INTRO
+══════════════════════════════════════ -->
+<section class="section" id="intro">
+  <div class="hero-banner">
+    <div class="hb-tag">// jenkins · automation server · 2025</div>
+    <h1><span class="grad">Jenkins</span><br>từ A đến Z</h1>
+    <p>Hướng dẫn toàn diện về Jenkins — automation server phổ biến nhất thế giới. Từ cài đặt, cấu hình, viết Jenkinsfile cho đến tối ưu pipeline production.</p>
+    <div class="hb-pills">
+      <div class="hb-pill">🐋 Docker</div>
+      <div class="hb-pill">📝 Declarative Pipeline</div>
+      <div class="hb-pill">🔌 Plugins</div>
+      <div class="hb-pill">🤖 Agents</div>
+      <div class="hb-pill">📚 Shared Libraries</div>
+    </div>
+  </div>
+
+  <div class="section-tag">Tổng quan</div>
+  <p>Jenkins là open-source automation server viết bằng Java, ra đời từ 2004. Với hơn <strong style="color:var(--text)">1800+ plugins</strong>, Jenkins có thể tích hợp với hầu hết mọi tool trong hệ sinh thái phát triển phần mềm.</p>
+
+  <div class="cards col3">
+    <div class="card accent">
+      <div class="card-ico">🌍</div>
+      <div class="card-title">Phổ biến nhất</div>
+      <div class="card-desc">Được dùng tại hàng triệu tổ chức toàn cầu. Community lớn, tài liệu phong phú.</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">🔌</div>
+      <div class="card-title">1800+ Plugins</div>
+      <div class="card-desc">Tích hợp với mọi tool: Git, Docker, Kubernetes, Slack, AWS, Azure, GCP...</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">⚙</div>
+      <div class="card-title">Cực kỳ linh hoạt</div>
+      <div class="card-desc">Pipeline as Code với Groovy. Chạy bất kỳ đâu: bare metal, VM, Docker, K8s.</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">🔓</div>
+      <div class="card-title">100% Open Source</div>
+      <div class="card-desc">Miễn phí hoàn toàn. Self-hosted, toàn quyền kiểm soát data và pipeline.</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">🌿</div>
+      <div class="card-title">Multibranch</div>
+      <div class="card-desc">Tự động phát hiện và tạo pipeline cho mọi branch và Pull Request.</div>
+    </div>
+    <div class="card accent">
+      <div class="card-ico">📚</div>
+      <div class="card-title">Shared Libraries</div>
+      <div class="card-desc">Tái sử dụng Groovy code giữa nhiều pipeline. DRY principle cho CI/CD.</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-label">ℹ Jenkins vs Alternatives</div>
+    Jenkins mạnh nhất về tính linh hoạt và plugin ecosystem. Trade-off là cần cấu hình nhiều hơn so với GitLab CI hay GitHub Actions. Phù hợp nhất với các tổ chức lớn cần customize sâu và self-host hoàn toàn.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CONCEPTS
+══════════════════════════════════════ -->
+<section class="section" id="concepts">
+  <div class="section-tag">Kiến trúc</div>
+  <h2>💡 Kiến trúc & Concepts cốt lõi</h2>
+
+  <div class="pipe-flow">
+    <div class="pipe-title-lbl">// JENKINS ARCHITECTURE</div>
+    <div class="pipe-row">
+      <div class="pipe-box accent-box">
+        <div class="pb-ico">👨‍💻</div>
+        <div class="pb-lbl">Developer</div>
+        <div class="pb-sub">push code</div>
+      </div>
+      <div class="pipe-arr">→</div>
+      <div class="pipe-box accent-box">
+        <div class="pb-ico">🔗</div>
+        <div class="pb-lbl">SCM</div>
+        <div class="pb-sub">Git / SVN</div>
+      </div>
+      <div class="pipe-arr">→</div>
+      <div class="pipe-box accent-box">
+        <div class="pb-ico">🕹</div>
+        <div class="pb-lbl">Jenkins Controller</div>
+        <div class="pb-sub">orchestrate</div>
+      </div>
+    </div>
+    <div class="pipe-down">↓  phân phối jobs</div>
+    <div class="pipe-row">
+      <div class="pipe-box ok">
+        <div class="pb-ico">🤖</div>
+        <div class="pb-lbl">Agent 1</div>
+        <div class="pb-sub">Linux · Java</div>
+      </div>
+      <div class="pipe-arr" style="opacity:.3">|</div>
+      <div class="pipe-box ok">
+        <div class="pb-ico">🤖</div>
+        <div class="pb-lbl">Agent 2</div>
+        <div class="pb-sub">Docker · Node</div>
+      </div>
+      <div class="pipe-arr" style="opacity:.3">|</div>
+      <div class="pipe-box ok">
+        <div class="pb-ico">🤖</div>
+        <div class="pb-lbl">Agent 3</div>
+        <div class="pb-sub">Windows · .NET</div>
+      </div>
+      <div class="pipe-arr" style="opacity:.3">|</div>
+      <div class="pipe-box ok">
+        <div class="pb-ico">☸</div>
+        <div class="pb-lbl">K8s Pod</div>
+        <div class="pb-sub">ephemeral</div>
+      </div>
+    </div>
+    <div class="pipe-down">↓  artifacts + reports</div>
+    <div class="pipe-row">
+      <div class="pipe-box warn-box">
+        <div class="pb-ico">📊</div>
+        <div class="pb-lbl">Test Reports</div>
+        <div class="pb-sub">JUnit / HTML</div>
+      </div>
+      <div class="pipe-arr">→</div>
+      <div class="pipe-box warn-box">
+        <div class="pb-ico">🐳</div>
+        <div class="pb-lbl">Registry</div>
+        <div class="pb-sub">Docker images</div>
+      </div>
+      <div class="pipe-arr">→</div>
+      <div class="pipe-box warn-box">
+        <div class="pb-ico">🚀</div>
+        <div class="pb-lbl">Deploy</div>
+        <div class="pb-sub">staging / prod</div>
+      </div>
+      <div class="pipe-arr">→</div>
+      <div class="pipe-box warn-box">
+        <div class="pb-ico">🔔</div>
+        <div class="pb-lbl">Notify</div>
+        <div class="pb-sub">Slack / email</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Khái niệm</th><th>Ý nghĩa</th><th>Tương đương</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Controller</strong></td><td>Server trung tâm điều phối, lưu config, schedule jobs. Không nên chạy build tại đây.</td><td>CI Server</td></tr>
+        <tr><td><strong>Agent / Node</strong></td><td>Máy thực thi build jobs. Kết nối với Controller qua SSH hoặc JNLP.</td><td>Runner / Worker</td></tr>
+        <tr><td><strong>Job / Project</strong></td><td>Đơn vị công việc cơ bản. Freestyle, Pipeline, Multibranch...</td><td>Job / Workflow</td></tr>
+        <tr><td><strong>Build</strong></td><td>Một lần thực thi của Job. Có số thứ tự (#1, #2...), logs, status.</td><td>Run / Execution</td></tr>
+        <tr><td><strong>Pipeline</strong></td><td>Chuỗi stages được định nghĩa bằng code (Jenkinsfile / Groovy DSL).</td><td>Pipeline / Workflow</td></tr>
+        <tr><td><strong>Stage</strong></td><td>Nhóm các bước logic (Build, Test, Deploy). Hiển thị trong Stage View.</td><td>Stage / Phase</td></tr>
+        <tr><td><strong>Step</strong></td><td>Lệnh đơn lẻ trong stage: <code>sh</code>, <code>bat</code>, <code>git</code>, <code>docker</code>...</td><td>Step / Command</td></tr>
+        <tr><td><strong>Workspace</strong></td><td>Thư mục trên agent nơi code được checkout và build.</td><td>Working Directory</td></tr>
+        <tr><td><strong>Artifact</strong></td><td>File output được lưu lại sau build (JAR, WAR, Docker image...).</td><td>Artifact</td></tr>
+        <tr><td><strong>Credential</strong></td><td>Secret được lưu an toàn: password, SSH key, API token...</td><td>Secret / Variable</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     INSTALL
+══════════════════════════════════════ -->
+<section class="section" id="install">
+  <div class="section-tag">Cài đặt</div>
+  <h2>⚙ Cài đặt Jenkins với Docker</h2>
+  <p>Cách khuyến nghị nhất: chạy Jenkins trong Docker để dễ quản lý, upgrade, và backup.</p>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button class="tab-btn active" onclick="switchTab(this,'install-docker')">🐳 Docker Compose</button>
+      <button class="tab-btn" onclick="switchTab(this,'install-bare')">🖥 Bare Metal (Linux)</button>
+      <button class="tab-btn" onclick="switchTab(this,'install-k8s')">☸ Kubernetes (Helm)</button>
+    </div>
+
+    <div class="tab-pane active" id="install-docker">
+      <h3>📄 docker-compose.yml</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · docker-compose.yml</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">networks</span>:
+  <span class="prop">jenkins-net</span>:
+    <span class="kw">driver</span>: bridge
+
+<span class="kw">volumes</span>:
+  <span class="prop">jenkins-home</span>:
+  <span class="prop">jenkins-docker-certs</span>:
+
+<span class="kw">services</span>:
+  <span class="cmt"># Docker-in-Docker — cho phép Jenkins build Docker images</span>
+  <span class="prop">docker</span>:
+    <span class="kw">image</span>: docker:dind
+    <span class="kw">container_name</span>: jenkins-docker
+    <span class="kw">privileged</span>: <span class="kw">true</span>
+    <span class="kw">restart</span>: unless-stopped
+    <span class="kw">networks</span>:
+      <span class="prop">jenkins-net</span>:
+        <span class="kw">aliases</span>: [docker]
+    <span class="kw">environment</span>:
+      - DOCKER_TLS_CERTDIR=/certs
+    <span class="kw">volumes</span>:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-home:/var/jenkins_home
+    <span class="kw">ports</span>:
+      - <span class="str">"2376:2376"</span>
+
+  <span class="prop">jenkins</span>:
+    <span class="kw">image</span>: jenkins/jenkins:lts-jdk17
+    <span class="kw">container_name</span>: jenkins
+    <span class="kw">restart</span>: unless-stopped
+    <span class="kw">networks</span>: [jenkins-net]
+    <span class="kw">ports</span>:
+      - <span class="str">"8080:8080"</span>    <span class="cmt"># Web UI</span>
+      - <span class="str">"50000:50000"</span>  <span class="cmt"># Agent JNLP port</span>
+    <span class="kw">environment</span>:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+      <span class="cmt"># Skip setup wizard (optional)</span>
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    <span class="kw">volumes</span>:
+      - jenkins-home:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+    <span class="kw">depends_on</span>:
+      - docker</pre>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Khởi động</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Start Jenkins</span>
+docker compose up -d
+
+<span class="cmt"># Xem logs, chờ "Jenkins is fully up and running"</span>
+docker logs -f jenkins
+
+<span class="cmt"># Lấy initial admin password</span>
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+<span class="cmt"># Truy cập UI</span>
+<span class="cmt"># → http://localhost:8080</span></pre>
+      </div>
+
+      <div class="callout good">
+        <div class="callout-label">✅ Tại sao dùng Docker-in-Docker?</div>
+        DinD cho phép Jenkins build Docker images bên trong container. <code>jenkins-docker</code> là daemon Docker riêng biệt, Jenkins kết nối qua TCP TLS — bảo mật hơn mount <code>/var/run/docker.sock</code> trực tiếp.
+      </div>
+    </div>
+
+    <div class="tab-pane" id="install-bare">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Ubuntu / Debian</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># 1. Cài Java 17</span>
+sudo apt update && sudo apt install -y fontconfig openjdk-17-jdk
+
+<span class="cmt"># 2. Thêm Jenkins APT repository</span>
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+
+echo <span class="str">"deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]"</span> \
+  https://pkg.jenkins.io/debian-stable binary/ | \
+  sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+<span class="cmt"># 3. Cài Jenkins</span>
+sudo apt update && sudo apt install -y jenkins
+
+<span class="cmt"># 4. Start & enable service</span>
+sudo systemctl enable jenkins
+sudo systemctl start  jenkins
+sudo systemctl status jenkins
+
+<span class="cmt"># 5. Lấy initial password</span>
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+<span class="cmt"># Mặc định chạy trên port 8080
+# Đổi port: sudo nano /etc/default/jenkins → HTTP_PORT=9090</span></pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="install-k8s">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Helm install trên Kubernetes</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Thêm Jenkins Helm chart repo</span>
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+
+<span class="cmt"># Tạo namespace</span>
+kubectl create namespace jenkins
+
+<span class="cmt"># Cài Jenkins với custom values</span>
+helm install jenkins jenkins/jenkins \
+  --namespace jenkins \
+  --set controller.serviceType=LoadBalancer \
+  --set controller.resources.requests.memory=2Gi \
+  --set controller.resources.requests.cpu=500m \
+  --set persistence.enabled=true \
+  --set persistence.size=20Gi
+
+<span class="cmt"># Lấy admin password</span>
+kubectl exec --namespace jenkins -it svc/jenkins -c jenkins \
+  -- /bin/cat /run/secrets/additional/chart-admin-password</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FIRST SETUP
+══════════════════════════════════════ -->
+<section class="section" id="first-setup">
+  <div class="section-tag">Cấu hình</div>
+  <h2>🔧 Setup lần đầu tiên</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Unlock Jenkins</div>
+        <div class="step-desc">Vào <code>http://localhost:8080</code> → nhập <strong>initialAdminPassword</strong> từ lệnh phía trên.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Cài plugins ban đầu</div>
+        <div class="step-desc">Chọn <strong>"Install suggested plugins"</strong> — Jenkins tự cài các plugin phổ biến nhất. Mất 2–5 phút tuỳ tốc độ mạng.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Tạo Admin Account</div>
+        <div class="step-desc">Điền đầy đủ: Username, Password, Full name, Email. Đây là tài khoản admin chính, ghi nhớ cẩn thận.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Cấu hình Jenkins URL</div>
+        <div class="step-desc">Mặc định là <code>http://localhost:8080/</code>. Nếu có domain, đổi thành <code>https://jenkins.yourcompany.com/</code> — quan trọng cho webhook và notifications.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Cấu hình System</div>
+        <div class="step-desc">
+          <div class="menu-row">
+            <span class="menu-item">Manage Jenkins</span>
+            <span class="menu-arr">→</span>
+            <span class="menu-item">System</span>
+          </div>
+          Thiết lập: <strong>System Message</strong>, <strong>Executors</strong> (số build parallel), <strong>Jenkins URL</strong>, <strong>Email server</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Cấu hình Global Tools</div>
+        <div class="step-desc">
+          <div class="menu-row">
+            <span class="menu-item">Manage Jenkins</span>
+            <span class="menu-arr">→</span>
+            <span class="menu-item">Tools</span>
+          </div>
+          Cấu hình JDK, Maven, NodeJS, Git, Docker... Có thể để Jenkins tự install hoặc chỉ path có sẵn trên agent.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>⚙ Cấu hình số Executor <span class="sub">// Manage Jenkins → System</span></h3>
+  <div class="callout warn">
+    <div class="callout-label">⚠ Quan trọng về Controller Executor</div>
+    Đặt <strong>Number of executors = 0</strong> trên Controller node. Controller chỉ nên điều phối, không chạy build. Để build chạy trên dedicated Agents. Đây là best practice bảo mật và performance.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Cấu hình qua Script Console (nếu cần)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// Manage Jenkins → Script Console</span>
+<span class="cmt">// Đặt số executor của controller về 0</span>
+<span class="kw">import</span> jenkins.model.*
+
+<span class="kw">def</span> jenkins = Jenkins.<span class="fn">instance</span>
+jenkins.setNumExecutors(<span class="num">0</span>)
+jenkins.<span class="fn">save</span>()
+<span class="fn">println</span> <span class="str">"Done! Executors set to 0"</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PLUGINS
+══════════════════════════════════════ -->
+<section class="section" id="plugins">
+  <div class="section-tag">Plugins</div>
+  <h2>🔌 Plugins quan trọng cần cài</h2>
+  <p>Jenkins có 1800+ plugins. Dưới đây là danh sách plugin <em>thiết yếu</em> cho pipeline hiện đại:</p>
+
+  <h3>🔑 Nhóm Core — Phải có</h3>
+  <div class="plugin-grid">
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">📝</div><div><div class="pc-name">Pipeline</div><div class="pc-id">workflow-aggregator</div></div></div>
+      <p>Bundle plugin cho Declarative & Scripted pipeline. Bắt buộc phải có.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🌿</div><div><div class="pc-name">Git</div><div class="pc-id">git</div></div></div>
+      <p>Tích hợp Git SCM. Clone repo, checkout branch, poll SCM changes.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🌿</div><div><div class="pc-name">Multibranch Pipeline</div><div class="pc-id">workflow-multibranch</div></div></div>
+      <p>Tự động tạo pipeline cho mỗi branch và PR có Jenkinsfile.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🔐</div><div><div class="pc-name">Credentials Binding</div><div class="pc-id">credentials-binding</div></div></div>
+      <p>Bind credentials vào environment variables an toàn trong pipeline.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🔐</div><div><div class="pc-name">Credentials</div><div class="pc-id">credentials</div></div></div>
+      <p>Quản lý secrets: username/password, SSH key, secret text, certificates.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">📚</div><div><div class="pc-name">Pipeline Shared Groovy Libs</div><div class="pc-id">workflow-cps-global-lib</div></div></div>
+      <p>Shared Libraries — tái sử dụng Groovy code giữa nhiều pipeline.</p>
+    </div>
+  </div>
+
+  <h3>🐳 Nhóm Docker & Build</h3>
+  <div class="plugin-grid">
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🐳</div><div><div class="pc-name">Docker Pipeline</div><div class="pc-id">docker-workflow</div></div></div>
+      <p>DSL <code>docker.build()</code>, <code>docker.image()</code>, <code>docker.withRegistry()</code> trong pipeline.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🐳</div><div><div class="pc-name">Docker</div><div class="pc-id">docker-plugin</div></div></div>
+      <p>Dùng Docker container làm build agent. Mỗi build một container sạch.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">☕</div><div><div class="pc-name">Maven Integration</div><div class="pc-id">maven-plugin</div></div></div>
+      <p>Tích hợp sâu với Maven. Auto-install Maven, parse POM, publish reports.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🟢</div><div><div class="pc-name">NodeJS</div><div class="pc-id">nodejs</div></div></div>
+      <p>Quản lý NodeJS version. Cài npm packages global. Dùng trong pipeline.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">📊</div><div><div class="pc-name">JUnit</div><div class="pc-id">junit</div></div></div>
+      <p>Parse và hiển thị test reports. Trending chart, failure diffs, history.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">📈</div><div><div class="pc-name">Jacoco</div><div class="pc-id">jacoco</div></div></div>
+      <p>Hiển thị code coverage từ JaCoCo reports. Fail build nếu coverage drop.</p>
+    </div>
+  </div>
+
+  <h3>🔔 Nhóm Notifications & Integration</h3>
+  <div class="plugin-grid">
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">💬</div><div><div class="pc-name">Slack Notification</div><div class="pc-id">slack</div></div></div>
+      <p>Gửi thông báo build status đến Slack channel với đầy đủ thông tin.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">📧</div><div><div class="pc-name">Email Extension</div><div class="pc-id">email-ext</div></div></div>
+      <p>Email notification nâng cao: template, condition, attach logs, test reports.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🔬</div><div><div class="pc-name">SonarQube Scanner</div><div class="pc-id">sonar</div></div></div>
+      <p>Tích hợp SonarQube code analysis. Quality Gate check trong pipeline.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🐙</div><div><div class="pc-name">GitHub</div><div class="pc-id">github</div></div></div>
+      <p>Tích hợp GitHub webhooks, PR status checks, auto-link to commits.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🦊</div><div><div class="pc-name">GitLab</div><div class="pc-id">gitlab-plugin</div></div></div>
+      <p>Nhận webhook từ GitLab, update MR status, tích hợp GitLab CI bridge.</p>
+    </div>
+    <div class="plugin-card">
+      <div class="pc-head"><div class="pc-ico">🔵</div><div><div class="pc-name">Blue Ocean</div><div class="pc-id">blueocean</div></div></div>
+      <p>UI hiện đại, trực quan cho pipeline visualization. Xem logs đẹp hơn nhiều.</p>
+    </div>
+  </div>
+
+  <h3>Cài plugin hàng loạt qua Jenkins CLI</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Cài tất cả plugins cần thiết</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Download Jenkins CLI jar</span>
+wget http://localhost:8080/jnlpJars/jenkins-cli.jar
+
+<span class="cmt"># Cài plugin hàng loạt</span>
+java -jar jenkins-cli.jar -s http://localhost:8080 \
+  -auth admin:YOUR_ADMIN_PASSWORD \
+  install-plugin \
+    workflow-aggregator \
+    git \
+    workflow-multibranch \
+    credentials \
+    credentials-binding \
+    workflow-cps-global-lib \
+    docker-workflow \
+    docker-plugin \
+    maven-plugin \
+    nodejs \
+    junit \
+    jacoco \
+    slack \
+    email-ext \
+    sonar \
+    github \
+    blueocean \
+    -restart  <span class="cmt"># Restart Jenkins sau khi cài xong</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CREDENTIALS
+══════════════════════════════════════ -->
+<section class="section" id="credentials">
+  <div class="section-tag">Security</div>
+  <h2>🔐 Credentials & Secrets</h2>
+  <p>Jenkins lưu secrets an toàn trong encrypted store. Không bao giờ hardcode password vào Jenkinsfile.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Loại Credential</th><th>Dùng cho</th><th>ID ví dụ</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Username with password</strong></td><td>Git HTTPS, Docker Registry, Maven Nexus</td><td><code>github-credentials</code></td></tr>
+        <tr><td><strong>SSH Username with private key</strong></td><td>Git SSH, Server SSH deploy</td><td><code>deploy-ssh-key</code></td></tr>
+        <tr><td><strong>Secret text</strong></td><td>API tokens, Slack webhook, env vars</td><td><code>slack-token</code></td></tr>
+        <tr><td><strong>Secret file</strong></td><td>Kubeconfig, .env file, keystore</td><td><code>kube-config</code></td></tr>
+        <tr><td><strong>Certificate</strong></td><td>SSL/TLS certificates, keystores</td><td><code>server-cert</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Thêm Credential qua UI</h3>
+  <div class="menu-row" style="margin-bottom:12px">
+    <span class="menu-item">Manage Jenkins</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Credentials</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">System</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Global credentials</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Add Credentials</span>
+  </div>
+
+  <h3>Dùng Credentials trong Jenkinsfile</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Các cách dùng credentials</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">pipeline</span> {
+    <span class="kw">agent</span> any
+
+    <span class="kw">environment</span> {
+        <span class="cmt">// Cách 1: Bind Secret Text → biến env đơn giản</span>
+        <span class="prop">SLACK_TOKEN</span> = credentials(<span class="str">'slack-token'</span>)
+
+        <span class="cmt">// Cách 2: Username + Password → tạo 2 biến: _USR và _PSW</span>
+        <span class="prop">DOCKER_CREDS</span> = credentials(<span class="str">'docker-registry-creds'</span>)
+        <span class="cmt">// → DOCKER_CREDS_USR = username</span>
+        <span class="cmt">// → DOCKER_CREDS_PSW = password</span>
+    }
+
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Use Credentials'</span>) {
+            <span class="kw">steps</span> {
+                <span class="cmt">// Cách 3: withCredentials block — scope hẹp hơn, an toàn hơn</span>
+                <span class="fn">withCredentials</span>([
+                    <span class="fn">usernamePassword</span>(
+                        credentialsId: <span class="str">'github-credentials'</span>,
+                        usernameVariable: <span class="str">'GIT_USER'</span>,
+                        passwordVariable: <span class="str">'GIT_TOKEN'</span>
+                    )
+                ]) {
+                    <span class="fn">sh</span> <span class="str">'''
+                        git config user.email "$GIT_USER"
+                        git push https://$GIT_USER:$GIT_TOKEN@github.com/...
+                    '''</span>
+                }
+
+                <span class="cmt">// Cách 4: SSH key</span>
+                <span class="fn">withCredentials</span>([
+                    <span class="fn">sshUserPrivateKey</span>(
+                        credentialsId: <span class="str">'deploy-ssh-key'</span>,
+                        keyFileVariable: <span class="str">'SSH_KEY'</span>,
+                        usernameVariable: <span class="str">'SSH_USER'</span>
+                    )
+                ]) {
+                    <span class="fn">sh</span> <span class="str">'ssh -i $SSH_KEY $SSH_USER@server.com "deploy.sh"'</span>
+                }
+
+                <span class="cmt">// Cách 5: Secret file</span>
+                <span class="fn">withCredentials</span>([
+                    <span class="fn">file</span>(credentialsId: <span class="str">'kube-config'</span>, variable: <span class="str">'KUBECONFIG'</span>)
+                ]) {
+                    <span class="fn">sh</span> <span class="str">'kubectl apply -f deployment.yaml'</span>
+                }
+            }
+        }
+    }
+}</pre>
+  </div>
+
+  <div class="callout err">
+    <div class="callout-label">🚨 Không bao giờ làm</div>
+    Không dùng <code>echo $SECRET</code> — Jenkins sẽ mask trong logs nhưng đây vẫn là bad practice. Không hardcode credential ID vào Jenkinsfile — dùng parameter hoặc environment variable.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     AGENTS
+══════════════════════════════════════ -->
+<section class="section" id="agents">
+  <div class="section-tag">Agents</div>
+  <h2>🤖 Agents & Nodes</h2>
+  <p>Agent là nơi thực thi build. Có nhiều loại agent khác nhau cho các use case khác nhau.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🖥</div>
+      <div class="card-title">Permanent Agent (SSH)</div>
+      <div class="card-desc">Server vật lý hoặc VM được cấu hình cố định. Kết nối qua SSH. Phù hợp cho build cần môi trường đặc biệt.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🐳</div>
+      <div class="card-title">Docker Agent</div>
+      <div class="card-desc">Mỗi build chạy trong Docker container sạch. Không cần cài tool trên host. Phổ biến nhất hiện tại.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">☸</div>
+      <div class="card-title">Kubernetes Agent</div>
+      <div class="card-desc">Pod được tạo tự động khi có build, xóa sau khi xong. Scale tự động, không tốn tài nguyên idle.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">☁</div>
+      <div class="card-title">Cloud Agent (EC2/GCP)</div>
+      <div class="card-desc">Spin up cloud VM khi cần, terminate sau build. Cost-efficient cho workload không đều.</div>
+    </div>
+  </div>
+
+  <h3>Thêm SSH Agent</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Chuẩn bị máy Agent</div>
+        <div class="step-desc">Cài Java (≥11), tạo user <code>jenkins</code>, thêm SSH public key của Jenkins Controller vào <code>~/.ssh/authorized_keys</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Thêm Node trong Jenkins</div>
+        <div class="step-desc">
+          <div class="menu-row">
+            <span class="menu-item">Manage Jenkins</span>
+            <span class="menu-arr">→</span>
+            <span class="menu-item">Nodes</span>
+            <span class="menu-arr">→</span>
+            <span class="menu-item">New Node</span>
+          </div>
+          Điền: Name, Remote root directory (<code>/home/jenkins/agent</code>), Labels, Launch method = SSH.
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Thêm SSH Credential</div>
+        <div class="step-desc">Chọn SSH credential đã tạo (private key của Jenkins). Save và Launch Agent để test kết nối.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Docker Agent trong Jenkinsfile</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Docker agent examples</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// ── Global Docker agent ──</span>
+<span class="kw">pipeline</span> {
+    <span class="kw">agent</span> {
+        <span class="kw">docker</span> {
+            <span class="prop">image</span> <span class="str">'maven:3.9-eclipse-temurin-17-alpine'</span>
+            <span class="prop">args</span>  <span class="str">'-v $HOME/.m2:/root/.m2'</span>  <span class="cmt">// mount Maven cache</span>
+        }
+    }
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'mvn clean package'</span> }
+        }
+    }
+}
+
+<span class="cmt">// ── Per-stage Docker agent (khác nhau theo stage) ──</span>
+<span class="kw">pipeline</span> {
+    <span class="kw">agent</span> none  <span class="cmt">// không global agent</span>
+
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Backend Build'</span>) {
+            <span class="kw">agent</span> { <span class="kw">docker</span> { <span class="prop">image</span> <span class="str">'maven:3.9-eclipse-temurin-17-alpine'</span> } }
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'mvn clean package'</span> }
+        }
+        <span class="kw">stage</span>(<span class="str">'Frontend Build'</span>) {
+            <span class="kw">agent</span> { <span class="kw">docker</span> { <span class="prop">image</span> <span class="str">'node:20-alpine'</span> } }
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'npm ci && npm run build'</span> }
+        }
+        <span class="kw">stage</span>(<span class="str">'Docker Build'</span>) {
+            <span class="kw">agent</span> { <span class="kw">label</span> <span class="str">'docker-host'</span> }  <span class="cmt">// chạy trên node có Docker</span>
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'docker build -t my-app .'</span> }
+        }
+    }
+}
+
+<span class="cmt">// ── Kubernetes agent ──</span>
+<span class="kw">pipeline</span> {
+    <span class="kw">agent</span> {
+        <span class="kw">kubernetes</span> {
+            <span class="prop">yaml</span> <span class="str">'''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3.9-eclipse-temurin-17
+    command: [sleep, infinity]
+  - name: docker
+    image: docker:dind
+    securityContext:
+      privileged: true
+'''</span>
+            <span class="prop">defaultContainer</span> <span class="str">'maven'</span>
+        }
+    }
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'mvn package'</span> }
+        }
+        <span class="kw">stage</span>(<span class="str">'Docker'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">container</span>(<span class="str">'docker'</span>) {
+                    <span class="fn">sh</span> <span class="str">'docker build -t app .'</span>
+                }
+            }
+        }
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PIPELINE TYPES
+══════════════════════════════════════ -->
+<section class="section" id="pipeline-types">
+  <div class="section-tag">Pipeline</div>
+  <h2>🔄 Các loại Pipeline</h2>
+
+  <div class="cards">
+    <div class="card accent">
+      <div class="card-ico">📝</div>
+      <div class="card-title">Declarative Pipeline ⭐</div>
+      <div class="card-desc">Cú pháp có cấu trúc rõ ràng, dễ đọc, dễ validate. <strong>Khuyến nghị</strong> cho hầu hết dự án. Linter hỗ trợ tốt.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">⚙</div>
+      <div class="card-title">Scripted Pipeline</div>
+      <div class="card-desc">Groovy thuần tuý, linh hoạt tối đa. Dùng khi Declarative không đủ mạnh. Khó đọc hơn với người mới.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🌿</div>
+      <div class="card-title">Multibranch Pipeline</div>
+      <div class="card-desc">Quét repo, tự động tạo job cho mỗi branch có Jenkinsfile. Auto-delete khi branch bị xóa.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🏗</div>
+      <div class="card-title">Organization Folder</div>
+      <div class="card-desc">Quét toàn bộ GitHub Org hoặc GitLab Group. Tự động discover mọi repo có Jenkinsfile.</div>
+    </div>
+  </div>
+
+  <h3>Declarative vs Scripted</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Tiêu chí</th><th>Declarative</th><th>Scripted</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cú pháp</strong></td><td>Có cấu trúc <code>pipeline { }</code></td><td>Groovy tự do <code>node { }</code></td></tr>
+        <tr><td><strong>Độ khó</strong></td><td><span class="tag tag-green">Dễ học</span></td><td><span class="tag tag-amber">Cần biết Groovy</span></td></tr>
+        <tr><td><strong>Validation</strong></td><td>Linter tích hợp</td><td>Chỉ phát hiện lỗi khi chạy</td></tr>
+        <tr><td><strong>Linh hoạt</strong></td><td>Cao (dùng <code>script {}</code> khi cần)</td><td>Tối đa</td></tr>
+        <tr><td><strong>Khuyến nghị</strong></td><td><span class="tag tag-green">✓ Nên dùng</span></td><td>Chỉ khi cần thiết</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     JENKINSFILE A-Z
+══════════════════════════════════════ -->
+<section class="section" id="jenkinsfile">
+  <div class="section-tag">Core</div>
+  <h2>📝 Jenkinsfile toàn diện từ A–Z</h2>
+  <p>Dưới đây là Jenkinsfile Declarative đầy đủ với mọi tính năng thường dùng được giải thích chi tiết:</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Jenkinsfile — Declarative Pipeline hoàn chỉnh</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">/* ═══════════════════════════════════════════════
+   Jenkinsfile · Declarative Pipeline
+   Full-featured example
+═══════════════════════════════════════════════ */</span>
+
+<span class="kw">pipeline</span> {
+
+    <span class="cmt">// ── AGENT: Nơi chạy pipeline ──────────────────</span>
+    <span class="kw">agent</span> {
+        <span class="kw">docker</span> {
+            <span class="prop">image</span> <span class="str">'maven:3.9-eclipse-temurin-17-alpine'</span>
+            <span class="prop">args</span>  <span class="str">'-v /root/.m2:/root/.m2 --network host'</span>
+        }
+    }
+
+    <span class="cmt">// ── OPTIONS: Tùy chọn pipeline ────────────────</span>
+    <span class="kw">options</span> {
+        <span class="fn">buildDiscarder</span>(<span class="fn">logRotator</span>(
+            numToKeepStr: <span class="str">'20'</span>,       <span class="cmt">// giữ 20 build gần nhất</span>
+            daysToKeepStr: <span class="str">'30'</span>      <span class="cmt">// giữ trong 30 ngày</span>
+        ))
+        <span class="fn">timeout</span>(time: <span class="num">30</span>, unit: <span class="str">'MINUTES'</span>)  <span class="cmt">// timeout toàn pipeline</span>
+        <span class="fn">disableConcurrentBuilds</span>()              <span class="cmt">// không chạy parallel với chính nó</span>
+        <span class="fn">timestamps</span>()                           <span class="cmt">// thêm timestamp vào log</span>
+        <span class="fn">ansiColor</span>(<span class="str">'xterm'</span>)                    <span class="cmt">// màu trong log (cần AnsiColor plugin)</span>
+        <span class="fn">skipDefaultCheckout</span>()                  <span class="cmt">// tự control checkout</span>
+    }
+
+    <span class="cmt">// ── PARAMETERS: Input từ người dùng ──────────</span>
+    <span class="kw">parameters</span> {
+        <span class="fn">booleanParam</span>(
+            name: <span class="str">'SKIP_TESTS'</span>,
+            defaultValue: <span class="kw">false</span>,
+            description: <span class="str">'Skip test stages?'</span>
+        )
+        <span class="fn">choice</span>(
+            name: <span class="str">'DEPLOY_ENV'</span>,
+            choices: [<span class="str">'staging'</span>, <span class="str">'production'</span>],
+            description: <span class="str">'Target environment'</span>
+        )
+        <span class="fn">string</span>(
+            name: <span class="str">'IMAGE_TAG'</span>,
+            defaultValue: <span class="str">''</span>,
+            description: <span class="str">'Docker image tag (empty = commit SHA)'</span>
+        )
+    }
+
+    <span class="cmt">// ── ENVIRONMENT: Biến môi trường ─────────────</span>
+    <span class="kw">environment</span> {
+        <span class="prop">APP_NAME</span>     = <span class="str">'my-app'</span>
+        <span class="prop">REGISTRY</span>     = <span class="str">'registry.mycompany.com'</span>
+        <span class="prop">IMAGE_TAG</span>    = <span class="str">"${params.IMAGE_TAG ?: env.GIT_COMMIT.take(8)}"</span>
+        <span class="prop">IMAGE_FULL</span>   = <span class="str">"${REGISTRY}/${APP_NAME}:${IMAGE_TAG}"</span>
+        <span class="prop">MAVEN_OPTS</span>   = <span class="str">'-Xmx1024m -XX:MaxPermSize=256m'</span>
+
+        <span class="cmt">// Bind credentials an toàn</span>
+        <span class="prop">DOCKER_CREDS</span>  = credentials(<span class="str">'docker-registry-creds'</span>)
+        <span class="prop">SONAR_TOKEN</span>   = credentials(<span class="str">'sonarqube-token'</span>)
+        <span class="prop">SLACK_CHANNEL</span> = <span class="str">'#deployments'</span>
+    }
+
+    <span class="cmt">// ── STAGES ────────────────────────────────────</span>
+    <span class="kw">stages</span> {
+
+        <span class="cmt">// 1. CHECKOUT</span>
+        <span class="kw">stage</span>(<span class="str">'Checkout'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">checkout</span> scm
+                <span class="fn">script</span> {
+                    <span class="cmt">// Lưu thông tin commit</span>
+                    env.GIT_AUTHOR   = sh(script: <span class="str">'git log -1 --format="%an"'</span>, returnStdout: <span class="kw">true</span>).<span class="fn">trim</span>()
+                    env.GIT_MESSAGE  = sh(script: <span class="str">'git log -1 --format="%s"'</span>, returnStdout: <span class="kw">true</span>).<span class="fn">trim</span>()
+                    env.GIT_BRANCH_NAME = env.GIT_BRANCH.replaceAll(<span class="str">'origin/'</span>, <span class="str">''</span>)
+                }
+                <span class="fn">echo</span> <span class="str">"Branch: ${env.GIT_BRANCH_NAME}"</span>
+                <span class="fn">echo</span> <span class="str">"Commit by: ${env.GIT_AUTHOR} — ${env.GIT_MESSAGE}"</span>
+            }
+        }
+
+        <span class="cmt">// 2. BUILD</span>
+        <span class="kw">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">sh</span> <span class="str">'''
+                    echo "📦 Building ${APP_NAME}..."
+                    mvn clean package -DskipTests -q
+                    echo "✅ Build size: $(du -sh target/*.jar)"
+                '''</span>
+            }
+            <span class="kw">post</span> {
+                <span class="kw">success</span> {
+                    <span class="fn">archiveArtifacts</span> artifacts: <span class="str">'target/*.jar'</span>, fingerprint: <span class="kw">true</span>
+                }
+            }
+        }
+
+        <span class="cmt">// 3. TEST (skip nếu params.SKIP_TESTS = true)</span>
+        <span class="kw">stage</span>(<span class="str">'Unit Tests'</span>) {
+            <span class="kw">when</span> { expression { !params.SKIP_TESTS } }
+            <span class="kw">steps</span> {
+                <span class="fn">sh</span> <span class="str">'mvn test -Dgroups=unit'</span>
+            }
+            <span class="kw">post</span> {
+                <span class="kw">always</span> {
+                    <span class="fn">junit</span> testResults: <span class="str">'target/surefire-reports/**/*.xml'</span>, allowEmptyResults: <span class="kw">true</span>
+                    <span class="fn">jacoco</span>(
+                        execPattern: <span class="str">'target/jacoco.exec'</span>,
+                        classPattern: <span class="str">'target/classes'</span>,
+                        sourcePattern: <span class="str">'src/main/java'</span>,
+                        minimumLineCoverage: <span class="str">'70'</span>,
+                        changeBuildStatus: <span class="kw">true</span>
+                    )
+                }
+            }
+        }
+
+        <span class="cmt">// 4. PARALLEL STAGES — Chạy song song</span>
+        <span class="kw">stage</span>(<span class="str">'Quality Gates'</span>) {
+            <span class="kw">when</span> { expression { !params.SKIP_TESTS } }
+            <span class="kw">parallel</span> {
+                <span class="kw">stage</span>(<span class="str">'Integration Tests'</span>) {
+                    <span class="kw">agent</span> { <span class="kw">label</span> <span class="str">'docker-host'</span> }
+                    <span class="kw">steps</span> {
+                        <span class="fn">sh</span> <span class="str">'mvn verify -Dgroups=integration -q'</span>
+                    }
+                    <span class="kw">post</span> {
+                        <span class="kw">always</span> {
+                            <span class="fn">junit</span> <span class="str">'target/failsafe-reports/**/*.xml'</span>
+                        }
+                    }
+                }
+                <span class="kw">stage</span>(<span class="str">'SonarQube Analysis'</span>) {
+                    <span class="kw">steps</span> {
+                        <span class="fn">withSonarQubeEnv</span>(<span class="str">'SonarQube'</span>) {
+                            <span class="fn">sh</span> <span class="str">'mvn sonar:sonar'</span>
+                        }
+                        <span class="fn">timeout</span>(time: <span class="num">5</span>, unit: <span class="str">'MINUTES'</span>) {
+                            <span class="fn">waitForQualityGate</span> abortPipeline: <span class="kw">true</span>
+                        }
+                    }
+                }
+                <span class="kw">stage</span>(<span class="str">'Security Scan'</span>) {
+                    <span class="kw">steps</span> {
+                        <span class="fn">sh</span> <span class="str">'''
+                            docker run --rm \
+                              -v /var/run/docker.sock:/var/run/docker.sock \
+                              aquasec/trivy fs --exit-code 1 \
+                              --severity CRITICAL .
+                        '''</span>
+                    }
+                }
+            }
+        }
+
+        <span class="cmt">// 5. DOCKER BUILD & PUSH</span>
+        <span class="kw">stage</span>(<span class="str">'Docker Build & Push'</span>) {
+            <span class="kw">when</span> {
+                anyOf {
+                    <span class="fn">branch</span> <span class="str">'main'</span>
+                    <span class="fn">branch</span> <span class="str">'develop'</span>
+                    <span class="fn">branch</span> <span class="str">'release/*'</span>
+                }
+            }
+            <span class="kw">agent</span> { <span class="kw">label</span> <span class="str">'docker-host'</span> }
+            <span class="kw">steps</span> {
+                <span class="fn">script</span> {
+                    <span class="kw">docker</span>.<span class="fn">withRegistry</span>(<span class="str">"https://${REGISTRY}"</span>, <span class="str">'docker-registry-creds'</span>) {
+                        <span class="kw">def</span> img = <span class="kw">docker</span>.<span class="fn">build</span>(IMAGE_FULL, <span class="str">"--build-arg APP_VERSION=${IMAGE_TAG} ."</span>)
+                        img.<span class="fn">push</span>()
+                        img.<span class="fn">push</span>(<span class="str">'latest'</span>)
+
+                        <span class="cmt">// Tag thêm branch name</span>
+                        img.<span class="fn">push</span>(env.GIT_BRANCH_NAME.replaceAll(<span class="str">'/'</span>, <span class="str">'-'</span>))
+                    }
+                }
+                <span class="fn">echo</span> <span class="str">"✅ Pushed: ${IMAGE_FULL}"</span>
+            }
+        }
+
+        <span class="cmt">// 6. DEPLOY</span>
+        <span class="kw">stage</span>(<span class="str">'Deploy'</span>) {
+            <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+            <span class="kw">input</span> {  <span class="cmt">// Yêu cầu approve thủ công</span>
+                message <span class="str">"Deploy to ${params.DEPLOY_ENV}?"</span>
+                ok      <span class="str">"Yes, Deploy!"</span>
+                submitter <span class="str">'admin,devlead'</span>
+            }
+            <span class="kw">steps</span> {
+                <span class="fn">withCredentials</span>([
+                    <span class="fn">sshUserPrivateKey</span>(credentialsId: <span class="str">'deploy-ssh-key'</span>,
+                                     keyFileVariable: <span class="str">'SSH_KEY'</span>,
+                                     usernameVariable: <span class="str">'SSH_USER'</span>)
+                ]) {
+                    <span class="fn">sh</span> <span class="str">"""
+                        ssh -i $SSH_KEY -o StrictHostKeyChecking=no \\
+                            $SSH_USER@${params.DEPLOY_ENV}.myapp.com \\
+                            'cd /app && \\
+                             export IMAGE=${IMAGE_FULL} && \\
+                             docker compose pull && \\
+                             docker compose up -d --remove-orphans'
+                    """</span>
+                }
+            }
+        }
+
+        <span class="cmt">// 7. SMOKE TEST sau deploy</span>
+        <span class="kw">stage</span>(<span class="str">'Smoke Test'</span>) {
+            <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+            <span class="kw">steps</span> {
+                <span class="fn">retry</span>(<span class="num">3</span>) {
+                    <span class="fn">sleep</span>(<span class="num">10</span>)
+                    <span class="fn">sh</span> <span class="str">"""
+                        STATUS=\$(curl -s -o /dev/null -w "%{http_code}" \\
+                            https://${params.DEPLOY_ENV}.myapp.com/actuator/health)
+                        [ "\$STATUS" = "200" ] && echo "✅ App healthy" || exit 1
+                    """</span>
+                }
+            }
+        }
+    }
+
+    <span class="cmt">// ── POST: Chạy sau khi pipeline kết thúc ─────</span>
+    <span class="kw">post</span> {
+        <span class="kw">always</span> {
+            <span class="fn">cleanWs</span>()  <span class="cmt">// Dọn workspace</span>
+        }
+        <span class="kw">success</span> {
+            <span class="fn">slackSend</span>(
+                channel: env.SLACK_CHANNEL,
+                color: <span class="str">'good'</span>,
+                message: <span class="str">"""✅ *BUILD SUCCESS* · ${env.APP_NAME}
+Branch: `${env.GIT_BRANCH_NAME}` · Tag: `${env.IMAGE_TAG}`
+Author: ${env.GIT_AUTHOR}
+&lt;${env.BUILD_URL}|View Build&gt;"""</span>
+            )
+        }
+        <span class="kw">failure</span> {
+            <span class="fn">slackSend</span>(
+                channel: env.SLACK_CHANNEL,
+                color: <span class="str">'danger'</span>,
+                message: <span class="str">"""❌ *BUILD FAILED* · ${env.APP_NAME}
+Stage: `${env.STAGE_NAME}` · Branch: `${env.GIT_BRANCH_NAME}`
+&lt;${env.BUILD_URL}console|View Logs&gt;"""</span>
+            )
+            <span class="fn">emailext</span>(
+                subject: <span class="str">"[Jenkins] FAILED: ${env.APP_NAME} #${env.BUILD_NUMBER}"</span>,
+                body: <span class="str">"Build failed! View: ${env.BUILD_URL}"</span>,
+                to: <span class="str">'team@mycompany.com'</span>
+            )
+        }
+        <span class="kw">unstable</span> {
+            <span class="fn">slackSend</span>(channel: env.SLACK_CHANNEL, color: <span class="str">'warning'</span>,
+                      message: <span class="str">"⚠ Build UNSTABLE: ${env.APP_NAME} #${env.BUILD_NUMBER}"</span>)
+        }
+        <span class="kw">aborted</span> {
+            <span class="fn">echo</span> <span class="str">'Pipeline was aborted.'</span>
+        }
+    }
+}</pre>
+  </div>
+
+  <h3>📌 Các when condition phổ biến</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · when condition examples</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// Chạy khi ở branch main</span>
+<span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+
+<span class="cmt">// Chạy khi ở bất kỳ branch nào matching pattern</span>
+<span class="kw">when</span> { <span class="fn">branch</span> pattern: <span class="str">'release/.*'</span>, comparator: <span class="str">'REGEXP'</span> }
+
+<span class="cmt">// Chạy khi environment variable có giá trị</span>
+<span class="kw">when</span> { environment name: <span class="str">'DEPLOY_ENV'</span>, value: <span class="str">'production'</span> }
+
+<span class="cmt">// Chạy khi expression trả về true</span>
+<span class="kw">when</span> { expression { params.SKIP_TESTS == <span class="kw">false</span> } }
+
+<span class="cmt">// Chạy khi file thay đổi (cần changeset plugin)</span>
+<span class="kw">when</span> { <span class="fn">changeset</span> <span class="str">'backend/**/*'</span> }
+
+<span class="cmt">// Chạy khi trước đó build thành công</span>
+<span class="kw">when</span> { <span class="fn">buildingTag</span>() }
+
+<span class="cmt">// NOT — đảo ngược condition</span>
+<span class="kw">when</span> { <span class="kw">not</span> { <span class="fn">branch</span> <span class="str">'main'</span> } }
+
+<span class="cmt">// AND — tất cả đều phải đúng</span>
+<span class="kw">when</span> {
+    <span class="kw">allOf</span> {
+        <span class="fn">branch</span> <span class="str">'main'</span>
+        environment name: <span class="str">'CI'</span>, value: <span class="str">'true'</span>
+    }
+}
+
+<span class="cmt">// OR — ít nhất một đúng</span>
+<span class="kw">when</span> {
+    <span class="kw">anyOf</span> {
+        <span class="fn">branch</span> <span class="str">'main'</span>
+        <span class="fn">branch</span> <span class="str">'develop'</span>
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SHARED LIBRARIES
+══════════════════════════════════════ -->
+<section class="section" id="shared-libs">
+  <div class="section-tag">Advanced</div>
+  <h2>📚 Shared Libraries</h2>
+  <p>Shared Libraries cho phép tái sử dụng Groovy code giữa nhiều Jenkinsfile — DRY principle cho CI/CD.</p>
+
+  <div class="tree">
+<span class="dir">jenkins-shared-libs/</span>         <span class="ct">← Git repo riêng</span>
+├── <span class="dir">vars/</span>                        <span class="ct">← Global variables (dùng trực tiếp trong Jenkinsfile)</span>
+│   ├── <span class="file imp">buildMaven.groovy</span>          <span class="ct">← gọi: buildMaven()</span>
+│   ├── <span class="file imp">dockerBuild.groovy</span>         <span class="ct">← gọi: dockerBuild(image: 'my-app')</span>
+│   ├── <span class="file imp">deployToServer.groovy</span>      <span class="ct">← gọi: deployToServer(env: 'staging')</span>
+│   └── <span class="file imp">notifySlack.groovy</span>         <span class="ct">← gọi: notifySlack(status: 'SUCCESS')</span>
+├── <span class="dir">src/</span>                         <span class="ct">← Classes (import như Java)</span>
+│   └── <span class="dir">com/company/jenkins/</span>
+│       ├── <span class="file">Utils.groovy</span>
+│       └── <span class="file">DockerHelper.groovy</span>
+└── <span class="dir">resources/</span>                   <span class="ct">← Static files (templates, scripts)</span>
+    └── <span class="file cfg">deploy-template.sh</span>
+  </div>
+
+  <h3>1. Đăng ký Shared Library với Jenkins</h3>
+  <div class="menu-row" style="margin-bottom:10px">
+    <span class="menu-item">Manage Jenkins</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">System</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Global Pipeline Libraries</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Add</span>
+  </div>
+  <ul class="feat-list">
+    <li><strong>Name:</strong> <code>my-shared-libs</code> (dùng trong @Library annotation)</li>
+    <li><strong>Default version:</strong> <code>main</code> hoặc tag version</li>
+    <li><strong>Retrieval method:</strong> Modern SCM → Git → nhập URL repo</li>
+    <li><strong>Load implicitly:</strong> check nếu muốn auto-load (không cần @Library)</li>
+  </ul>
+
+  <h3>2. Viết hàm trong vars/</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · vars/dockerBuild.groovy</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">/**
+ * Build và push Docker image
+ * @param config Map với keys: image, registry, credentialsId, tags
+ */</span>
+<span class="kw">def</span> <span class="fn">call</span>(Map config = [:]) {
+    <span class="kw">def</span> image      = config.<span class="fn">get</span>(<span class="str">'image'</span>)      ?: error(<span class="str">'image is required'</span>)
+    <span class="kw">def</span> registry   = config.<span class="fn">get</span>(<span class="str">'registry'</span>)   ?: <span class="str">'registry.mycompany.com'</span>
+    <span class="kw">def</span> credId     = config.<span class="fn">get</span>(<span class="str">'credId'</span>)     ?: <span class="str">'docker-registry-creds'</span>
+    <span class="kw">def</span> extraTags  = config.<span class="fn">get</span>(<span class="str">'tags'</span>)      ?: []
+    <span class="kw">def</span> dockerfile = config.<span class="fn">get</span>(<span class="str">'dockerfile'</span>) ?: <span class="str">'Dockerfile'</span>
+    <span class="kw">def</span> context    = config.<span class="fn">get</span>(<span class="str">'context'</span>)    ?: <span class="str">'.'</span>
+
+    <span class="kw">def</span> shortSha = sh(script: <span class="str">'git rev-parse --short HEAD'</span>, returnStdout: <span class="kw">true</span>).<span class="fn">trim</span>()
+    <span class="kw">def</span> fullImage = <span class="str">"${registry}/${image}:${shortSha}"</span>
+
+    <span class="kw">docker</span>.<span class="fn">withRegistry</span>(<span class="str">"https://${registry}"</span>, credId) {
+        <span class="kw">def</span> img = <span class="kw">docker</span>.<span class="fn">build</span>(fullImage, <span class="str">"-f ${dockerfile} ${context}"</span>)
+        img.<span class="fn">push</span>()
+        img.<span class="fn">push</span>(<span class="str">'latest'</span>)
+
+        extraTags.<span class="fn">each</span> { tag ->
+            img.<span class="fn">push</span>(tag)
+        }
+    }
+
+    <span class="fn">echo</span> <span class="str">"✅ Pushed: ${fullImage}"</span>
+    <span class="kw">return</span> fullImage
+}</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · vars/notifySlack.groovy</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">def</span> <span class="fn">call</span>(Map config = [:]) {
+    <span class="kw">def</span> status  = config.<span class="fn">get</span>(<span class="str">'status'</span>)  ?: currentBuild.currentResult
+    <span class="kw">def</span> channel = config.<span class="fn">get</span>(<span class="str">'channel'</span>) ?: <span class="str">'#deployments'</span>
+    <span class="kw">def</span> message = config.<span class="fn">get</span>(<span class="str">'message'</span>) ?: <span class="str">''</span>
+
+    <span class="kw">def</span> colorMap = [SUCCESS: <span class="str">'good'</span>, FAILURE: <span class="str">'danger'</span>, UNSTABLE: <span class="str">'warning'</span>, ABORTED: <span class="str">'#808080'</span>]
+    <span class="kw">def</span> iconMap  = [SUCCESS: <span class="str">'✅'</span>, FAILURE: <span class="str">'❌'</span>, UNSTABLE: <span class="str">'⚠️'</span>, ABORTED: <span class="str">'🛑'</span>]
+
+    <span class="kw">def</span> text = <span class="str">"""${iconMap[status] ?: '🔔'} *${env.JOB_NAME}* #${env.BUILD_NUMBER} · ${status}
+Branch: `${env.GIT_BRANCH_NAME ?: env.GIT_BRANCH}` · &lt;${env.BUILD_URL}|View Build&gt;
+${message}"""</span>
+
+    <span class="fn">slackSend</span>(channel: channel, color: colorMap[status] ?: <span class="str">'#808080'</span>, message: text)
+}</pre>
+  </div>
+
+  <h3>3. Dùng trong Jenkinsfile</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Jenkinsfile dùng Shared Library</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// Load shared library</span>
+@<span class="cls">Library</span>(<span class="str">'my-shared-libs@main'</span>) _
+
+<span class="kw">pipeline</span> {
+    <span class="kw">agent</span> { <span class="kw">docker</span> { <span class="prop">image</span> <span class="str">'maven:3.9-eclipse-temurin-17-alpine'</span> } }
+
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'mvn clean package -DskipTests'</span> }
+        }
+
+        <span class="kw">stage</span>(<span class="str">'Docker'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">script</span> {
+                    <span class="cmt">// Gọi hàm từ shared library — gọn gàng!</span>
+                    env.IMAGE = <span class="fn">dockerBuild</span>(
+                        image: <span class="str">'my-app'</span>,
+                        tags: [env.GIT_BRANCH.replaceAll(<span class="str">'/'</span>,<span class="str">'-'</span>)]
+                    )
+                }
+            }
+        }
+
+        <span class="kw">stage</span>(<span class="str">'Deploy'</span>) {
+            <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+            <span class="kw">steps</span> {
+                <span class="fn">deployToServer</span>(env: <span class="str">'staging'</span>, image: env.IMAGE)
+            }
+        }
+    }
+
+    <span class="kw">post</span> {
+        <span class="kw">always</span> {
+            <span class="fn">notifySlack</span>()  <span class="cmt">// tự detect status từ currentBuild</span>
+        }
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     MULTIBRANCH
+══════════════════════════════════════ -->
+<section class="section" id="multibranch">
+  <div class="section-tag">Multibranch</div>
+  <h2>🌿 Multibranch Pipeline</h2>
+  <p>Multibranch tự động quét repo, tạo pipeline job cho mỗi branch và PR có Jenkinsfile — không cần tạo job thủ công.</p>
+
+  <h3>Tạo Multibranch Pipeline</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">New Item → Multibranch Pipeline</div>
+        <div class="step-desc">Đặt tên project (ví dụ: <code>my-app</code>). Jenkins sẽ tự tạo sub-jobs cho mỗi branch.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Branch Sources → Add Source → Git</div>
+        <div class="step-desc">Nhập URL repo, chọn credentials. Nếu dùng GitHub/GitLab, chọn plugin tương ứng để có webhook auto-trigger.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Build Configuration</div>
+        <div class="step-desc">Mode: <strong>by Jenkinsfile</strong>. Script Path: <code>Jenkinsfile</code> (hoặc đường dẫn khác nếu Jenkinsfile không ở root).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Scan Multibranch Pipeline</div>
+        <div class="step-desc">Click <strong>"Scan Multibranch Pipeline Now"</strong>. Jenkins quét repo và tạo jobs. Sau đó setup webhook để auto-trigger khi push.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Cấu hình Branch Filter</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Jenkinsfile với branch-specific logic</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">pipeline</span> {
+    <span class="kw">agent</span> any
+
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Build & Test'</span>) {
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'mvn clean verify'</span> }
+        }
+
+        <span class="cmt">// Chỉ deploy lên staging khi push vào develop</span>
+        <span class="kw">stage</span>(<span class="str">'Deploy Staging'</span>) {
+            <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'develop'</span> }
+            <span class="kw">steps</span> { <span class="fn">echo</span> <span class="str">'Deploying to staging...'</span> }
+        }
+
+        <span class="cmt">// Chỉ deploy production khi push vào main (+ manual approval)</span>
+        <span class="kw">stage</span>(<span class="str">'Deploy Production'</span>) {
+            <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+            <span class="kw">input</span> { message <span class="str">'Deploy to Production?'</span>; ok <span class="str">'Deploy!'</span> }
+            <span class="kw">steps</span> { <span class="fn">echo</span> <span class="str">'Deploying to production...'</span> }
+        }
+
+        <span class="cmt">// Chạy extended test cho release branches</span>
+        <span class="kw">stage</span>(<span class="str">'Release Tests'</span>) {
+            <span class="kw">when</span> { <span class="fn">branch</span> pattern: <span class="str">'release/.*'</span>, comparator: <span class="str">'REGEXP'</span> }
+            <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'mvn verify -Pintegration,performance'</span> }
+        }
+    }
+}</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-label">💡 GitHub/GitLab PR Support</div>
+    Với GitHub Branch Source plugin hoặc GitLab Branch Source plugin, Jenkins tự động build PR và đẩy status check về. Developer thấy ✅ hay ❌ ngay trên PR — không cần vào Jenkins.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     DOCKER PIPELINE
+══════════════════════════════════════ -->
+<section class="section" id="docker-pipeline">
+  <div class="section-tag">Docker</div>
+  <h2>🐳 Docker trong Jenkins Pipeline</h2>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button class="tab-btn active" onclick="switchTab(this,'docker-build')">Build & Push</button>
+      <button class="tab-btn" onclick="switchTab(this,'docker-registry')">Private Registry</button>
+      <button class="tab-btn" onclick="switchTab(this,'docker-compose-tab')">Docker Compose</button>
+    </div>
+
+    <div class="tab-pane active" id="docker-build">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Docker build, tag, push</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">stage</span>(<span class="str">'Docker Build & Push'</span>) {
+    <span class="kw">steps</span> {
+        <span class="fn">script</span> {
+            <span class="kw">def</span> shortSha = sh(script: <span class="str">'git rev-parse --short HEAD'</span>, returnStdout: <span class="kw">true</span>).<span class="fn">trim</span>()
+            <span class="kw">def</span> registry = <span class="str">'registry.mycompany.com'</span>
+            <span class="kw">def</span> imageName = <span class="str">"${registry}/my-app"</span>
+
+            <span class="cmt">// Build với cache từ latest</span>
+            sh <span class="str">"""
+                docker pull ${imageName}:latest || true
+                docker build \\
+                    --cache-from ${imageName}:latest \\
+                    --build-arg BUILDKIT_INLINE_CACHE=1 \\
+                    --build-arg APP_VERSION=${shortSha} \\
+                    -t ${imageName}:${shortSha} \\
+                    -t ${imageName}:latest \\
+                    .
+            """</span>
+
+            <span class="cmt">// Push với credentials</span>
+            <span class="kw">docker</span>.<span class="fn">withRegistry</span>(<span class="str">"https://${registry}"</span>, <span class="str">'registry-creds'</span>) {
+                sh <span class="str">"docker push ${imageName}:${shortSha}"</span>
+                sh <span class="str">"docker push ${imageName}:latest"</span>
+            }
+
+            <span class="cmt">// Lưu image name để dùng ở stages sau</span>
+            env.DOCKER_IMAGE = <span class="str">"${imageName}:${shortSha}"</span>
+            <span class="fn">echo</span> <span class="str">"📦 Image pushed: ${env.DOCKER_IMAGE}"</span>
+
+            <span class="cmt">// Cleanup local images</span>
+            sh <span class="str">"docker rmi ${imageName}:${shortSha} ${imageName}:latest || true"</span>
+        }
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="docker-registry">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Các loại registry</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="fn">script</span> {
+    <span class="cmt">// Docker Hub</span>
+    <span class="kw">docker</span>.<span class="fn">withRegistry</span>(<span class="str">'https://index.docker.io/v1/'</span>, <span class="str">'dockerhub-creds'</span>) {
+        <span class="kw">docker</span>.<span class="fn">build</span>(<span class="str">'myusername/my-app:latest'</span>).<span class="fn">push</span>()
+    }
+
+    <span class="cmt">// GitHub Container Registry (GHCR)</span>
+    <span class="kw">docker</span>.<span class="fn">withRegistry</span>(<span class="str">'https://ghcr.io'</span>, <span class="str">'github-token-creds'</span>) {
+        <span class="kw">docker</span>.<span class="fn">build</span>(<span class="str">'ghcr.io/myorg/my-app:latest'</span>).<span class="fn">push</span>()
+    }
+
+    <span class="cmt">// AWS ECR</span>
+    <span class="fn">withAWS</span>(credentials: <span class="str">'aws-creds'</span>, region: <span class="str">'ap-southeast-1'</span>) {
+        <span class="kw">def</span> ecrUrl = <span class="str">'123456789.dkr.ecr.ap-southeast-1.amazonaws.com'</span>
+        sh <span class="str">"aws ecr get-login-password | docker login --username AWS --password-stdin ${ecrUrl}"</span>
+        <span class="kw">docker</span>.<span class="fn">build</span>(<span class="str">"${ecrUrl}/my-app:latest"</span>).<span class="fn">push</span>()
+    }
+
+    <span class="cmt">// GitLab Registry</span>
+    <span class="kw">docker</span>.<span class="fn">withRegistry</span>(<span class="str">'https://registry.gitlab.com'</span>, <span class="str">'gitlab-deploy-token'</span>) {
+        <span class="kw">docker</span>.<span class="fn">build</span>(<span class="str">'registry.gitlab.com/mygroup/my-app:latest'</span>).<span class="fn">push</span>()
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="docker-compose-tab">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Docker Compose trong Jenkins</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt">// Integration test với Docker Compose</span>
+<span class="kw">stage</span>(<span class="str">'Integration Tests'</span>) {
+    <span class="kw">steps</span> {
+        <span class="fn">script</span> {
+            <span class="kw">try</span> {
+                <span class="cmt">// Start dependencies</span>
+                sh <span class="str">'docker compose -f docker-compose.test.yml up -d'</span>
+
+                <span class="cmt">// Wait for health</span>
+                sh <span class="str">'''
+                    timeout 60 bash -c "
+                        until curl -sf http://localhost:5432 2>/dev/null; do
+                            echo 'Waiting for DB...'
+                            sleep 3
+                        done
+                    "
+                '''</span>
+
+                <span class="cmt">// Run tests</span>
+                sh <span class="str">'mvn verify -Pintegration'</span>
+
+            } <span class="kw">finally</span> {
+                <span class="cmt">// Cleanup dù test pass hay fail</span>
+                sh <span class="str">'docker compose -f docker-compose.test.yml down -v'</span>
+            }
+        }
+    }
+    <span class="kw">post</span> {
+        <span class="kw">always</span> {
+            <span class="fn">junit</span> <span class="str">'target/failsafe-reports/**/*.xml'</span>
+        }
+    }
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     TESTING
+══════════════════════════════════════ -->
+<section class="section" id="testing">
+  <div class="section-tag">Quality</div>
+  <h2>🧪 Test Reports & Coverage</h2>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Đầy đủ test reporting</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">stage</span>(<span class="str">'Test'</span>) {
+    <span class="kw">steps</span> {
+        <span class="fn">sh</span> <span class="str">'mvn test'</span>
+    }
+    <span class="kw">post</span> {
+        <span class="kw">always</span> {
+            <span class="cmt">// JUnit test report</span>
+            <span class="fn">junit</span>(
+                testResults: <span class="str">'target/surefire-reports/**/*.xml'</span>,
+                allowEmptyResults: <span class="kw">true</span>,
+                skipMarkingBuildUnstable: <span class="kw">false</span>
+            )
+
+            <span class="cmt">// JaCoCo coverage</span>
+            <span class="fn">jacoco</span>(
+                execPattern: <span class="str">'target/jacoco.exec'</span>,
+                classPattern: <span class="str">'target/classes'</span>,
+                sourcePattern: <span class="str">'src/main/java'</span>,
+                exclusionPattern: <span class="str">'**/model/**,**/dto/**,**/config/**'</span>,
+                minimumLineCoverage: <span class="str">'70'</span>,
+                minimumBranchCoverage: <span class="str">'60'</span>,
+                changeBuildStatus: <span class="kw">true</span>
+            )
+
+            <span class="cmt">// HTML Report (test coverage website)</span>
+            <span class="fn">publishHTML</span>(target: [
+                allowMissing: <span class="kw">false</span>,
+                alwaysLinkToLastBuild: <span class="kw">true</span>,
+                keepAll: <span class="kw">true</span>,
+                reportDir: <span class="str">'target/site/jacoco'</span>,
+                reportFiles: <span class="str">'index.html'</span>,
+                reportName: <span class="str">'Code Coverage Report'</span>
+            ])
+
+            <span class="cmt">// Archive test artifacts</span>
+            <span class="fn">archiveArtifacts</span>(
+                artifacts: <span class="str">'target/surefire-reports/**,target/site/**'</span>,
+                allowEmptyArchive: <span class="kw">true</span>
+            )
+        }
+    }
+}
+
+<span class="cmt">// Performance/Load test results</span>
+<span class="kw">stage</span>(<span class="str">'Performance Test'</span>) {
+    <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+    <span class="kw">steps</span> {
+        <span class="fn">sh</span> <span class="str">'jmeter -n -t tests/load-test.jmx -l results.jtl'</span>
+        <span class="fn">perfReport</span>(
+            sourceDataFiles: <span class="str">'results.jtl'</span>,
+            errorFailedThreshold: <span class="num">5</span>,  <span class="cmt">// fail nếu error rate > 5%</span>
+            errorUnstableThreshold: <span class="num">2</span>
+        )
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     NOTIFICATIONS
+══════════════════════════════════════ -->
+<section class="section" id="notifications">
+  <div class="section-tag">Notifications</div>
+  <h2>🔔 Notifications</h2>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button class="tab-btn active" onclick="switchTab(this,'notif-slack')">💬 Slack</button>
+      <button class="tab-btn" onclick="switchTab(this,'notif-email')">📧 Email</button>
+      <button class="tab-btn" onclick="switchTab(this,'notif-github')">🐙 GitHub Status</button>
+    </div>
+
+    <div class="tab-pane active" id="notif-slack">
+      <h3>Setup Slack</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-title">Tạo Slack App & Webhook</div>
+            <div class="step-desc">Vào <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → Create App → Incoming Webhooks → Activate → Add to channel. Copy Webhook URL.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <div class="step-title">Cài Slack Notification Plugin</div>
+            <div class="step-desc">Manage Jenkins → Plugins → tìm "Slack Notification" → Install.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <div class="step-title">Cấu hình trong System</div>
+            <div class="step-desc">
+              <div class="menu-row">
+                <span class="menu-item">Manage Jenkins</span>
+                <span class="menu-arr">→</span>
+                <span class="menu-item">System</span>
+                <span class="menu-arr">→</span>
+                <span class="menu-item">Slack</span>
+              </div>
+              Nhập Workspace, Default channel, Credential (Secret text = Bot token hoặc webhook URL).
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Slack notification examples</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">post</span> {
+    <span class="kw">success</span> {
+        <span class="fn">slackSend</span>(
+            channel: <span class="str">'#deployments'</span>,
+            color: <span class="str">'good'</span>,
+            message: <span class="str">"""✅ *${env.JOB_NAME}* #${env.BUILD_NUMBER} SUCCESS
+Branch: `${env.GIT_BRANCH}` · Duration: ${currentBuild.durationString}
+&lt;${env.BUILD_URL}|View Build&gt; · &lt;${env.BUILD_URL}console|View Logs&gt;"""</span>
+        )
+    }
+    <span class="kw">failure</span> {
+        <span class="fn">slackSend</span>(
+            channel: <span class="str">'#deployments'</span>,
+            color: <span class="str">'danger'</span>,
+            <span class="cmt">// Blocks API cho rich message</span>
+            blocks: <span class="str">"""[
+                {"type":"header","text":{"type":"plain_text","text":"❌ Build Failed"}},
+                {"type":"section","fields":[
+                    {"type":"mrkdwn","text":"*Job:* ${env.JOB_NAME}"},
+                    {"type":"mrkdwn","text":"*Build:* #${env.BUILD_NUMBER}"},
+                    {"type":"mrkdwn","text":"*Branch:* ${env.GIT_BRANCH}"},
+                    {"type":"mrkdwn","text":"*Duration:* ${currentBuild.durationString}"}
+                ]},
+                {"type":"actions","elements":[
+                    {"type":"button","text":{"type":"plain_text","text":"View Logs"},
+                     "url":"${env.BUILD_URL}console"}
+                ]}
+            ]"""</span>
+        )
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="notif-email">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Email Extended notifications</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">post</span> {
+    <span class="kw">failure</span> {
+        <span class="fn">emailext</span>(
+            subject: <span class="str">"[Jenkins] ❌ FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}"</span>,
+            body: <span class="str">"""
+&lt;h2&gt;Build Failed&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Job:&lt;/strong&gt; ${env.JOB_NAME}&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Build:&lt;/strong&gt; #${env.BUILD_NUMBER}&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Branch:&lt;/strong&gt; ${env.GIT_BRANCH}&lt;/p&gt;
+&lt;p&gt;&lt;a href="${env.BUILD_URL}console"&gt;View Logs&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Failed stage: &lt;strong&gt;${env.STAGE_NAME}&lt;/strong&gt;&lt;/p&gt;
+${env.BUILD_LOG, maxLines=50, escapeHtml=true}
+            """</span>,
+            mimeType: <span class="str">'text/html'</span>,
+            <span class="cmt">// Gửi cho người commit</span>
+            to: <span class="str">'${DEFAULT_RECIPIENTS}'</span>,
+            replyTo: <span class="str">'jenkins@mycompany.com'</span>,
+            <span class="cmt">// Đính kèm test report</span>
+            attachmentsPattern: <span class="str">'target/surefire-reports/**/*.xml'</span>,
+            <span class="cmt">// Chỉ gửi khi build trước đó OK (tức là newly failed)</span>
+            sendToIndividuals: <span class="kw">true</span>
+        )
+    }
+    <span class="cmt">// Gửi khi recovered (build trước fail, build này ok)</span>
+    <span class="kw">fixed</span> {
+        <span class="fn">emailext</span>(
+            subject: <span class="str">"[Jenkins] ✅ RECOVERED: ${env.JOB_NAME} #${env.BUILD_NUMBER}"</span>,
+            body: <span class="str">"Build is back to normal! &lt;a href='${env.BUILD_URL}'&gt;View&lt;/a&gt;"</span>,
+            mimeType: <span class="str">'text/html'</span>,
+            to: <span class="str">'team@mycompany.com'</span>
+        )
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="notif-github">
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · GitHub commit status update</div></div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">pipeline</span> {
+    <span class="kw">agent</span> any
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> {
+                <span class="cmt">// Báo GitHub: đang build</span>
+                <span class="fn">githubNotify</span>(
+                    status: <span class="str">'PENDING'</span>,
+                    description: <span class="str">'Building...'</span>,
+                    context: <span class="str">'ci/jenkins'</span>
+                )
+                <span class="fn">sh</span> <span class="str">'mvn clean package'</span>
+            }
+        }
+    }
+    <span class="kw">post</span> {
+        <span class="kw">success</span> {
+            <span class="fn">githubNotify</span>(
+                status: <span class="str">'SUCCESS'</span>,
+                description: <span class="str">'All checks passed!'</span>,
+                context: <span class="str">'ci/jenkins'</span>
+            )
+        }
+        <span class="kw">failure</span> {
+            <span class="fn">githubNotify</span>(
+                status: <span class="str">'FAILURE'</span>,
+                description: <span class="str">'Build failed!'</span>,
+                context: <span class="str">'ci/jenkins'</span>
+            )
+        }
+    }
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     DEPLOY
+══════════════════════════════════════ -->
+<section class="section" id="deploy">
+  <div class="section-tag">Deploy</div>
+  <h2>🚀 Deploy Strategies</h2>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Deploy qua SSH với approval</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">stage</span>(<span class="str">'Deploy Staging'</span>) {
+    <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'develop'</span> }
+    <span class="kw">steps</span> {
+        <span class="fn">withCredentials</span>([
+            <span class="fn">sshUserPrivateKey</span>(credentialsId: <span class="str">'staging-ssh-key'</span>,
+                             keyFileVariable: <span class="str">'SSH_KEY'</span>,
+                             usernameVariable: <span class="str">'SSH_USER'</span>)
+        ]) {
+            <span class="fn">sh</span> <span class="str">"""
+                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \\
+                    \$SSH_USER@staging.myapp.com \\
+                    'cd /app && \\
+                     docker compose pull && \\
+                     docker compose up -d --remove-orphans && \\
+                     docker image prune -f'
+            """</span>
+        }
+    }
+}
+
+<span class="kw">stage</span>(<span class="str">'Approve Production Deploy'</span>) {
+    <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+    <span class="kw">steps</span> {
+        <span class="fn">script</span> {
+            <span class="cmt">// Timeout 1 giờ để team approve</span>
+            <span class="kw">def</span> approval = <span class="fn">input</span>(
+                message: <span class="str">'Ready to deploy to PRODUCTION?'</span>,
+                ok: <span class="str">'Deploy to Production!'</span>,
+                submitter: <span class="str">'admin,cto,devlead'</span>,
+                parameters: [
+                    <span class="fn">choice</span>(name: <span class="str">'CONFIRM'</span>, choices: [<span class="str">'YES'</span>, <span class="str">'NO'</span>], description: <span class="str">'Confirm?'</span>)
+                ]
+            )
+            <span class="kw">if</span> (approval != <span class="str">'YES'</span>) {
+                <span class="fn">error</span>(<span class="str">'Deploy cancelled by approver'</span>)
+            }
+        }
+    }
+}
+
+<span class="kw">stage</span>(<span class="str">'Deploy Production'</span>) {
+    <span class="kw">when</span> { <span class="fn">branch</span> <span class="str">'main'</span> }
+    <span class="kw">steps</span> {
+        <span class="fn">withCredentials</span>([
+            <span class="fn">sshUserPrivateKey</span>(credentialsId: <span class="str">'prod-ssh-key'</span>,
+                             keyFileVariable: <span class="str">'SSH_KEY'</span>,
+                             usernameVariable: <span class="str">'SSH_USER'</span>)
+        ]) {
+            <span class="fn">sh</span> <span class="str">"""
+                ssh -i \$SSH_KEY \$SSH_USER@prod.myapp.com \\
+                    'cd /app && \\
+                     export IMAGE=${env.DOCKER_IMAGE} && \\
+                     ./scripts/blue-green-deploy.sh'
+            """</span>
+        }
+    }
+}</pre>
+  </div>
+
+  <h3>Rollback nhanh trong Jenkins</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Rollback Pipeline (job riêng)</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// Job rollback riêng — trigger khi cần</span>
+<span class="kw">pipeline</span> {
+    <span class="kw">agent</span> any
+    <span class="kw">parameters</span> {
+        <span class="fn">string</span>(name: <span class="str">'ROLLBACK_VERSION'</span>, description: <span class="str">'Tag của version muốn rollback về'</span>)
+        <span class="fn">choice</span>(name: <span class="str">'ENV'</span>, choices: [<span class="str">'staging'</span>, <span class="str">'production'</span>])
+    }
+    <span class="kw">stages</span> {
+        <span class="kw">stage</span>(<span class="str">'Rollback'</span>) {
+            <span class="kw">steps</span> {
+                <span class="fn">script</span> {
+                    <span class="kw">def</span> image = <span class="str">"registry.mycompany.com/my-app:${params.ROLLBACK_VERSION}"</span>
+                    <span class="fn">echo</span> <span class="str">"🔄 Rolling back ${params.ENV} to ${image}"</span>
+
+                    sh <span class="str">"""
+                        ssh deploy@${params.ENV}.myapp.com \\
+                            'docker pull ${image} && \\
+                             docker stop app && docker rm app && \\
+                             docker run -d --name app -p 8080:8080 ${image}'
+                    """</span>
+                }
+            }
+        }
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECURITY
+══════════════════════════════════════ -->
+<section class="section" id="security">
+  <div class="section-tag">Security</div>
+  <h2>🛡 Security & RBAC</h2>
+
+  <div class="callout err">
+    <div class="callout-label">🚨 Security Checklist quan trọng</div>
+    Bật HTTPS cho Jenkins UI. Không để Jenkins accessible từ internet không cần thiết. Enable CSRF protection. Disable Script Security chỉ khi hiểu rõ rủi ro.
+  </div>
+
+  <h3>Bật Matrix Authorization</h3>
+  <div class="menu-row">
+    <span class="menu-item">Manage Jenkins</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Security</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Authorization</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Matrix-based security</span>
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:14px">
+    <table>
+      <thead><tr><th>Role</th><th>Permissions</th><th>Dùng cho</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Admin</strong></td><td>Overall/Administer</td><td>Jenkins admin, DevOps lead</td></tr>
+        <tr><td><strong>Developer</strong></td><td>Job/Build, Job/Read, View/Read</td><td>Dev team build jobs</td></tr>
+        <tr><td><strong>Viewer</strong></td><td>Overall/Read, Job/Read</td><td>Manager, Stakeholder xem build status</td></tr>
+        <tr><td><strong>Deploy</strong></td><td>Job/Build + Job/Configure</td><td>CI service account, automation scripts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Script Security — Approved Signatures</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Sandbox-safe patterns</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// ✅ OK trong sandbox — Declarative, standard steps</span>
+<span class="fn">sh</span> <span class="str">'mvn clean package'</span>
+<span class="fn">echo</span> env.BUILD_NUMBER
+<span class="fn">checkout</span> scm
+
+<span class="cmt">// ✅ OK — sử dụng built-in steps</span>
+<span class="fn">withCredentials</span>([...]) { ... }
+<span class="fn">timeout</span>(time: <span class="num">10</span>, unit: <span class="str">'MINUTES'</span>) { ... }
+<span class="fn">retry</span>(<span class="num">3</span>) { ... }
+
+<span class="cmt">// ⚠ Cần approve trong Script Approval nếu dùng Scripted</span>
+<span class="cmt">// Manage Jenkins → In-process Script Approval → Approve</span>
+<span class="kw">def</span> result = sh(script: <span class="str">'git rev-parse HEAD'</span>, returnStdout: <span class="kw">true</span>)
+<span class="kw">def</span> props = readJSON file: <span class="str">'config.json'</span>
+
+<span class="cmt">// Hoặc dùng @NonCPS annotation cho method không cần serialize</span>
+@<span class="cls">NonCPS</span>
+<span class="kw">def</span> <span class="fn">parseVersion</span>(<span class="cls">String</span> text) {
+    <span class="kw">def</span> matcher = text =~ <span class="str">/version: (\d+\.\d+)/</span>
+    <span class="kw">return</span> matcher ? matcher[<span class="num">0</span>][<span class="num">1</span>] : <span class="str">'unknown'</span>
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PERFORMANCE
+══════════════════════════════════════ -->
+<section class="section" id="performance">
+  <div class="section-tag">Optimization</div>
+  <h2>⚡ Tối ưu hiệu năng Jenkins</h2>
+
+  <div class="cards col3">
+    <div class="card">
+      <div class="card-ico">💾</div>
+      <div class="card-title">Giảm workspace</div>
+      <div class="card-desc">Dùng <code>cleanWs()</code> trong post always. Hoặc <code>ws('my-workspace') { }</code> để share workspace.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔄</div>
+      <div class="card-title">Parallel stages</div>
+      <div class="card-desc">Chạy test suite, lint, security scan song song. Giảm thời gian từ 15 phút còn 5 phút.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📦</div>
+      <div class="card-title">Build cache</div>
+      <div class="card-desc">Mount Maven/npm cache giữa builds. Docker BuildKit cache. Giảm 70% thời gian build.</div>
+    </div>
+  </div>
+
+  <h3>Parallel stages nâng cao</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Dynamic parallel stages</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">stage</span>(<span class="str">'Test Matrix'</span>) {
+    <span class="kw">steps</span> {
+        <span class="fn">script</span> {
+            <span class="cmt">// Dynamic parallel: test trên nhiều JDK version</span>
+            <span class="kw">def</span> javaVersions = [<span class="str">'17'</span>, <span class="str">'21'</span>]
+            <span class="kw">def</span> parallelStages = javaVersions.<span class="fn">collectEntries</span> { version ->
+                [<span class="str">"Java ${version}"</span>: {
+                    <span class="fn">stage</span>(<span class="str">"Test on Java ${version}"</span>) {
+                        <span class="kw">docker</span>.<span class="fn">image</span>(<span class="str">"eclipse-temurin:${version}-jdk-alpine"</span>).<span class="fn">inside</span> {
+                            sh <span class="str">"mvn test -q"</span>
+                        }
+                    }
+                }]
+            }
+            <span class="fn">parallel</span> parallelStages
+        }
+    }
+}
+
+<span class="cmt">// Limit concurrent builds với throttle</span>
+<span class="kw">options</span> {
+    <span class="fn">throttleJobProperty</span>(
+        categories: [<span class="str">'docker-builds'</span>],
+        throttleEnabled: <span class="kw">true</span>,
+        throttleOption: <span class="str">'category'</span>
+    )
+}</pre>
+  </div>
+
+  <h3>Tối ưu JVM cho Jenkins</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · JAVA_OPTS tối ưu</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre"><span class="cmt"># Trong docker-compose.yml environment hoặc /etc/default/jenkins</span>
+JAVA_OPTS=<span class="str">"-Xms512m
+  -Xmx2g
+  -XX:+UseG1GC
+  -XX:+UseStringDeduplication
+  -XX:MaxGCPauseMillis=200
+  -Djava.awt.headless=true
+  -Dhudson.model.DirectoryBrowserSupport.CSP=
+  -Djenkins.install.runSetupWizard=false
+  -Dorg.jenkinsci.plugins.gitclient.Git.timeOut=60"</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CASC
+══════════════════════════════════════ -->
+<section class="section" id="casc">
+  <div class="section-tag">Advanced</div>
+  <h2>📋 Configuration as Code (JCasC)</h2>
+  <p>Jenkins Configuration as Code plugin cho phép định nghĩa toàn bộ cấu hình Jenkins dưới dạng YAML file — Infrastructure as Code cho CI server.</p>
+
+  <div class="callout good">
+    <div class="callout-label">✅ Lợi ích của JCasC</div>
+    Reproducible setup — clone Jenkins server trong 5 phút. Version control cấu hình. Không bao giờ mất config khi reset. Dễ dàng audit thay đổi.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · jenkins.yaml — JCasC config đầy đủ</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">jenkins</span>:
+  <span class="prop">systemMessage</span>: <span class="str">"🚀 Jenkins CI/CD · Managed by JCasC"</span>
+  <span class="prop">numExecutors</span>: <span class="num">0</span>         <span class="cmt"># controller không chạy build</span>
+  <span class="prop">scmCheckoutRetryCount</span>: <span class="num">3</span>
+  <span class="prop">mode</span>: EXCLUSIVE
+
+  <span class="prop">securityRealm</span>:
+    <span class="kw">local</span>:
+      <span class="prop">allowsSignup</span>: <span class="kw">false</span>
+      <span class="prop">users</span>:
+        - <span class="prop">id</span>: admin
+          <span class="kw">name</span>: Administrator
+          <span class="kw">password</span>: <span class="str">"${JENKINS_ADMIN_PASS}"</span>  <span class="cmt"># từ env var</span>
+
+  <span class="prop">authorizationStrategy</span>:
+    <span class="kw">roleBased</span>:
+      <span class="prop">roles</span>:
+        <span class="kw">global</span>:
+          - <span class="prop">name</span>: admin
+            <span class="kw">description</span>: Jenkins administrators
+            <span class="kw">permissions</span>: [Overall/Administer]
+            <span class="kw">assignments</span>: [admin]
+          - <span class="prop">name</span>: developer
+            <span class="kw">description</span>: Developers
+            <span class="kw">permissions</span>: [Overall/Read, Job/Build, Job/Read, View/Read]
+            <span class="kw">assignments</span>: []
+
+  <span class="prop">nodes</span>:
+    - <span class="kw">permanent</span>:
+        <span class="prop">name</span>: docker-agent-01
+        <span class="kw">labelString</span>: docker-host linux
+        <span class="kw">numExecutors</span>: <span class="num">4</span>
+        <span class="kw">remoteFS</span>: /home/jenkins/agent
+        <span class="kw">launcher</span>:
+          <span class="prop">ssh</span>:
+            <span class="kw">host</span>: agent01.internal
+            <span class="kw">port</span>: <span class="num">22</span>
+            <span class="kw">credentialsId</span>: agent-ssh-key
+
+<span class="kw">credentials</span>:
+  <span class="prop">system</span>:
+    <span class="kw">domainCredentials</span>:
+      - <span class="prop">credentials</span>:
+          - <span class="kw">usernamePassword</span>:
+              <span class="prop">id</span>: docker-registry-creds
+              <span class="kw">username</span>: <span class="str">"${REGISTRY_USER}"</span>
+              <span class="kw">password</span>: <span class="str">"${REGISTRY_PASS}"</span>
+              <span class="kw">description</span>: Docker Registry Credentials
+          - <span class="kw">string</span>:
+              <span class="prop">id</span>: slack-token
+              <span class="kw">secret</span>: <span class="str">"${SLACK_TOKEN}"</span>
+              <span class="kw">description</span>: Slack Bot Token
+
+<span class="kw">unclassified</span>:
+  <span class="prop">slackNotifier</span>:
+    <span class="kw">teamDomain</span>: mycompany
+    <span class="kw">tokenCredentialId</span>: slack-token
+    <span class="kw">room</span>: <span class="str">'#deployments'</span>
+
+  <span class="prop">sonarGlobalConfiguration</span>:
+    <span class="kw">buildWrapperEnabled</span>: <span class="kw">true</span>
+    <span class="kw">installations</span>:
+      - <span class="prop">name</span>: SonarQube
+        <span class="kw">serverUrl</span>: http://sonarqube:9000
+        <span class="kw">credentialsId</span>: sonarqube-token
+
+<span class="kw">tool</span>:
+  <span class="prop">jdk</span>:
+    <span class="kw">installations</span>:
+      - <span class="prop">name</span>: JDK-17
+        <span class="kw">home</span>: /usr/local/openjdk-17
+  <span class="prop">maven</span>:
+    <span class="kw">installations</span>:
+      - <span class="prop">name</span>: Maven-3.9
+        <span class="kw">properties</span>:
+          - <span class="kw">installSource</span>:
+              <span class="prop">installers</span>:
+                - <span class="kw">maven</span>:
+                    <span class="prop">id</span>: <span class="str">"3.9.5"</span>
+  <span class="prop">nodejs</span>:
+    <span class="kw">installations</span>:
+      - <span class="prop">name</span>: Node-20
+        <span class="kw">properties</span>:
+          - <span class="kw">installSource</span>:
+              <span class="prop">installers</span>:
+                - <span class="kw">nodeJSInstaller</span>:
+                    <span class="prop">id</span>: <span class="str">"20.10.0"</span></pre>
+  </div>
+
+  <h3>Mount JCasC vào Docker Compose</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">yaml · docker-compose.yml với JCasC</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre"><span class="prop">jenkins</span>:
+    <span class="kw">image</span>: jenkins/jenkins:lts-jdk17
+    <span class="kw">environment</span>:
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
+      - JENKINS_ADMIN_PASS=<span class="str">${JENKINS_ADMIN_PASS}</span>
+      - REGISTRY_USER=<span class="str">${REGISTRY_USER}</span>
+      - REGISTRY_PASS=<span class="str">${REGISTRY_PASS}</span>
+      - SLACK_TOKEN=<span class="str">${SLACK_TOKEN}</span>
+    <span class="kw">volumes</span>:
+      - jenkins-home:/var/jenkins_home
+      - <span class="str">./jenkins.yaml:/var/jenkins_home/casc.yaml:ro</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     TROUBLESHOOT
+══════════════════════════════════════ -->
+<section class="section" id="troubleshoot">
+  <div class="section-tag">Debug</div>
+  <h2>🐛 Troubleshooting thường gặp</h2>
+
+  <h3>❌ "java.lang.OutOfMemoryError: Java heap space"</h3>
+  <div class="callout warn">
+    <div class="callout-label">⚠ Jenkins thiếu RAM</div>
+    Tăng heap size. Xóa old builds. Reduce number of executors. Chuyển builds về agents.
+  </div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">bash · Fix OOM</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Tăng heap trong Docker Compose environment:</span>
+JAVA_OPTS=-Xms512m -Xmx4g -XX:+UseG1GC
+
+<span class="cmt"># Dọn build history qua Script Console:</span>
+<span class="cmt"># Manage Jenkins → Script Console</span>
+Jenkins.instance.allItems(Job).each { job ->
+    job.builds.each { build ->
+        if (build.number < (job.lastBuild.number - 20)) {
+            build.delete()
+        }
+    }
+}
+
+<span class="cmt"># Xem memory usage</span>
+<span class="cmt"># Manage Jenkins → System Information → Memory Usage</span></pre>
+  </div>
+
+  <h3>❌ Pipeline stuck ở "Waiting for next available executor"</h3>
+  <ul class="feat-list">
+    <li><strong>Không có agent nào available:</strong> Kiểm tra <strong>Manage Jenkins → Nodes</strong> — agent có Online không? Số executor đã đầy chưa?</li>
+    <li><strong>Label mismatch:</strong> Pipeline yêu cầu <code>agent { label 'docker-host' }</code> nhưng không có node nào có label đó.</li>
+    <li><strong>Controller executor = 0:</strong> Nếu không có agent nào, đặt controller executor > 0 tạm thời để test.</li>
+  </ul>
+
+  <h3>❌ "Host key verification failed" khi SSH deploy</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Fix SSH host verification</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre"><span class="cmt">// Thêm -o StrictHostKeyChecking=no (dev/staging only)</span>
+<span class="fn">sh</span> <span class="str">'ssh -o StrictHostKeyChecking=no -i $SSH_KEY user@host "cmd"'</span>
+
+<span class="cmt">// Hoặc thêm known_hosts an toàn hơn</span>
+<span class="fn">sh</span> <span class="str">'''
+    mkdir -p ~/.ssh
+    ssh-keyscan -H staging.myapp.com >> ~/.ssh/known_hosts
+    ssh -i $SSH_KEY user@staging.myapp.com "deploy.sh"
+'''</span></pre>
+  </div>
+
+  <h3>❌ Groovy script bị từ chối (Script Security)</h3>
+  <div class="menu-row">
+    <span class="menu-item">Manage Jenkins</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">In-process Script Approval</span>
+    <span class="menu-arr">→</span>
+    <span class="menu-item">Approve pending signatures</span>
+  </div>
+  <p style="margin-top:10px">Hoặc chuyển logic sang Shared Library (được trust nhiều hơn). Hoặc dùng Declarative thay Scripted để tránh sandbox issues.</p>
+
+  <h3>❌ Build chậm không rõ nguyên nhân</h3>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-left"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><div class="code-lang">groovy · Debug timing</div></div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre"><span class="cmt">// Wrap stages với timestamps để xem bước nào chậm</span>
+<span class="fn">timestamps</span> {
+    <span class="kw">stage</span>(<span class="str">'Debug Stage'</span>) {
+        <span class="kw">steps</span> {
+            <span class="fn">sh</span> <span class="str">'''
+                date && echo "Start build"
+                mvn clean package
+                date && echo "End build"
+            '''</span>
+        }
+    }
+}
+
+<span class="cmt">// Xem Pipeline timing trong Blue Ocean hoặc Stage View</span>
+<span class="cmt">// Mỗi stage hiển thị duration riêng → dễ phát hiện bottleneck</span></pre>
+  </div>
+
+  <h3>✅ Checklist cuối — Jenkins Production Ready</h3>
+  <ul class="checklist">
+    <li><div class="ck">✓</div> Jenkins chạy sau reverse proxy (Nginx/Traefik) với HTTPS</li>
+    <li><div class="ck">✓</div> Controller executor = 0, build chạy trên dedicated agents</li>
+    <li><div class="ck">✓</div> JCasC (jenkins.yaml) được version control trong Git</li>
+    <li><div class="ck">✓</div> buildDiscarder configured — giữ tối đa 30 builds</li>
+    <li><div class="ck">✓</div> Tất cả secrets được lưu trong Credentials, không hardcode</li>
+    <li><div class="ck">✓</div> Matrix Authorization bật với RBAC phân quyền rõ ràng</li>
+    <li><div class="ck">✓</div> Backup jenkins_home định kỳ (volume backup hoặc ThinBackup plugin)</li>
+    <li><div class="ck">✓</div> Shared Libraries được dùng để tái sử dụng pipeline code</li>
+    <li><div class="ck">✓</div> Multibranch Pipeline — auto-discover branches và PRs</li>
+    <li><div class="ck">✓</div> Slack/email notification cho failed builds</li>
+    <li><div class="ck">✓</div> Pipeline timeout được set (options { timeout(time: 30...) })</li>
+    <li><div class="ck">✓</div> Test reports được publish (JUnit, JaCoCo, HTML Report)</li>
+  </ul>
+
+  <div class="callout good" style="margin-top:28px">
+    <div class="callout-label">🎉 Bạn đã master Jenkins!</div>
+    Với hướng dẫn này, bạn đã nắm toàn bộ Jenkins từ cài đặt, cấu hình, viết Jenkinsfile, Shared Libraries, đến deploy và bảo mật. Jenkins rất mạnh nhưng cũng rất linh hoạt — hãy bắt đầu đơn giản rồi mở rộng dần. Chúc mừng! 🚀
+  </div>
+</section>
+
+</main>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const pct = Math.round((el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+  });
+
+  // Active sidebar via IntersectionObserver
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sb-link');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.sb-link[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.25 });
+  sections.forEach(s => obs.observe(s));
+
+  // Copy button
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Tabs
+  function switchTab(btn, paneId) {
+    const container = btn.closest('.tabs');
+    container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(paneId).classList.add('active');
+  }
+</script>
+</body>
+</html>
