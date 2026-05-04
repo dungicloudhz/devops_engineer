@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitLab CI/CD + Kubernetes — Hướng dẫn Java Backend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08090d;
+      --bg2: #0e1018;
+      --surface: #131520;
+      --surface2: #1a1d2e;
+      --surface3: #21253a;
+      --border: #252840;
+      --border2: #2f3350;
+      --accent: #7c6af8;
+      --accent-lt: #a99dfa;
+      --amber: #f5a623;
+      --green: #3ecf8e;
+      --red: #f06b6b;
+      --sky: #38bdf8;
+      --text: #dde1f5;
+      --muted: #6b7094;
+      --muted2: #8b90b8;
+      --nav-w: 276px;
+      --radius: 10px;
+      --font-body: 'Instrument Sans', sans-serif;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    html { scroll-behavior: smooth; font-size: 15px }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.75 }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px }
+    ::-webkit-scrollbar-track { background: transparent }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: var(--nav-w); min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0;
+      overflow-y: auto; z-index: 200; display: flex; flex-direction: column; transition: transform .3s ease;
+    }
+    .sb-header { padding: 24px 20px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(124,106,248,.06) 0%, transparent 100%) }
+    .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px }
+    .sb-orb {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent) 0%, #a55af4 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 800; color: #fff; font-family: var(--font-mono);
+      letter-spacing: -.05em; box-shadow: 0 4px 18px rgba(124,106,248,.35);
+    }
+    .sb-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -.02em }
+    .sb-ver {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted);
+      font-family: var(--font-mono); background: var(--surface2); padding: 3px 8px;
+      border-radius: 5px; border: 1px solid var(--border)
+    }
+    .sb-ver .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .sb-progress { padding: 14px 20px 10px; border-bottom: 1px solid var(--border) }
+    .sb-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px }
+    .sb-progress-bar { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden }
+    .sb-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a55af4); border-radius: 99px; width: 0%; transition: width .4s ease }
+
+    .sb-section { padding: 18px 14px 6px }
+    .sb-section-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 0 6px; margin-bottom: 5px }
+    .sb-link {
+      display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px;
+      text-decoration: none; color: var(--muted2); font-size: 13px; transition: all .18s;
+      cursor: pointer; margin-bottom: 1px; position: relative;
+    }
+    .sb-link:hover { background: var(--surface); color: var(--text) }
+    .sb-link.active { background: rgba(124,106,248,.12); color: var(--accent-lt) }
+    .sb-link.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 2px; background: var(--accent); border-radius: 1px
+    }
+    .sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0 }
+    .sb-badge {
+      margin-left: auto; font-size: 10px; background: rgba(124,106,248,.18);
+      color: var(--accent-lt); padding: 1px 7px; border-radius: 99px; font-family: var(--font-mono)
+    }
+    .sb-badge.green { background: rgba(62,207,142,.15); color: var(--green) }
+    .sb-badge.amber { background: rgba(245,166,35,.15); color: var(--amber) }
+    .sb-footer { margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: var(--font-mono) }
+
+    /* MAIN */
+    main { margin-left: var(--nav-w); flex: 1; padding: 0; max-width: 900px }
+    .section { padding: 60px 64px; border-bottom: 1px solid var(--border); scroll-margin-top: 20px; animation: fadeUp .5s ease both }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--accent-lt); font-weight: 600; font-family: var(--font-mono); margin-bottom: 14px
+    }
+    .section-tag::before { content: ''; width: 22px; height: 1px; background: currentColor }
+
+    h1 { font-family: var(--font-head); font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 20px }
+    h1 .grad { background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 60%, #a55af4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent }
+    h2 { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; color: var(--text) }
+    h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 28px 0 10px; display: flex; align-items: center; gap: 8px }
+    p { color: #9fa3c4; margin-bottom: 14px }
+
+    /* CALLOUTS */
+    .callout { border-left: 3px solid var(--accent); padding: 14px 18px; background: rgba(124,106,248,.07); border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 13.5px; color: #bfc3e0 }
+    .callout-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; font-family: var(--font-mono) }
+    .callout.warn { border-color: var(--amber); background: rgba(245,166,35,.07) }
+    .callout.warn .callout-label { color: var(--amber) }
+    .callout.good { border-color: var(--green); background: rgba(62,207,142,.07) }
+    .callout.good .callout-label { color: var(--green) }
+    .callout.err { border-color: var(--red); background: rgba(240,107,107,.07) }
+    .callout.err .callout-label { color: var(--red) }
+    .callout.sky { border-color: var(--sky); background: rgba(56,189,248,.07) }
+    .callout.sky .callout-label { color: var(--sky) }
+
+    /* CARDS */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0 }
+    .cards.col3 { grid-template-columns: 1fr 1fr 1fr }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: border-color .2s, transform .2s, box-shadow .2s; cursor: default }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,248,.12) }
+    .card-ico { font-size: 22px; margin-bottom: 10px }
+    .card-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: var(--text) }
+    .card-desc { font-size: 13px; color: var(--muted2); line-height: 1.55 }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--radius); border: 1px solid var(--border) }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+    th { text-align: left; padding: 11px 16px; background: var(--surface2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; border-bottom: 1px solid var(--border) }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #bbbdd6; vertical-align: top }
+    tr:last-child td { border-bottom: none }
+    tr:hover td { background: rgba(255,255,255,.02) }
+    td strong { color: var(--text) }
+
+    .tag-new { background: rgba(62,207,142,.15); color: var(--green); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono) }
+    .tag-core { background: rgba(124,106,248,.15); color: var(--accent-lt); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono) }
+    .tag-pro { background: rgba(245,166,35,.15); color: var(--amber); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono) }
+
+    /* STEPS */
+    .steps { margin: 20px 0 }
+    .step { display: flex; gap: 18px; margin-bottom: 24px; align-items: flex-start }
+    .step-num {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #a55af4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0; color: #fff;
+      font-family: var(--font-mono); box-shadow: 0 4px 14px rgba(124,106,248,.3)
+    }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 5px }
+    .step-desc { font-size: 13.5px; color: var(--muted2) }
+
+    /* FEAT LIST */
+    .feat-list { list-style: none; margin: 10px 0 }
+    .feat-list li { padding: 9px 0 9px 22px; position: relative; font-size: 14px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.6) }
+    .feat-list li:last-child { border: none }
+    .feat-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent) }
+    .feat-list li strong { color: var(--text) }
+
+    /* CODE BLOCK */
+    .code-wrap { background: #07080d; border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; overflow: hidden }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border) }
+    .code-dots { display: flex; gap: 6px }
+    .code-dot { width: 10px; height: 10px; border-radius: 50% }
+    .code-dot:nth-child(1) { background: #ff5f57 }
+    .code-dot:nth-child(2) { background: #febc2e }
+    .code-dot:nth-child(3) { background: #28c840 }
+    .code-lang { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .05em }
+    .copy-btn { font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 5px; cursor: pointer; transition: all .18s }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent) }
+    .copy-btn.copied { color: var(--green); border-color: var(--green) }
+    pre { padding: 20px 22px; font-family: var(--font-mono); font-size: 13px; line-height: 1.75; overflow-x: auto; color: #9fa3c4 }
+    .kw { color: var(--accent-lt) } .str { color: var(--green) } .cmt { color: var(--muted); font-style: italic }
+    .num { color: var(--amber) } .fn { color: #7dd3fc } .cls { color: #f0abfc } .prop { color: #93c5fd }
+
+    /* FILE TREE */
+    .file-tree { background: #07080d; border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; font-family: var(--font-mono); font-size: 13px; line-height: 1.9; margin: 16px 0; overflow-x: auto }
+    .ft-head { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px }
+    .ft-row { display: flex; align-items: baseline }
+    .ft-pre { color: var(--muted); white-space: pre; flex-shrink: 0 }
+    .ft-dir { color: #7dd3fc; font-weight: 500 } .ft-file { color: #c4c9e0 }
+    .ft-yml { color: var(--accent-lt) } .ft-json { color: #fb923c }
+    .ft-comment { color: var(--muted); margin-left: 10px; font-size: 12px }
+
+    /* FLOW */
+    .flow { display: flex; align-items: center; margin: 20px 0; overflow-x: auto; padding: 4px 0; flex-wrap: wrap; gap: 8px }
+    .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 12px; font-family: var(--font-mono); color: var(--text); white-space: nowrap; flex-shrink: 0; text-align: center; transition: border-color .2s }
+    .flow-node:hover { border-color: var(--accent) }
+    .flow-node.hl { background: rgba(124,106,248,.12); border-color: rgba(124,106,248,.4); color: var(--accent-lt) }
+    .flow-node.gn { background: rgba(62,207,142,.1); border-color: rgba(62,207,142,.35); color: var(--green) }
+    .flow-node.am { background: rgba(245,166,35,.1); border-color: rgba(245,166,35,.3); color: var(--amber) }
+    .flow-node.sk { background: rgba(56,189,248,.1); border-color: rgba(56,189,248,.3); color: var(--sky) }
+    .flow-sub { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: var(--font-body) }
+    .flow-arr { color: var(--border2); font-size: 18px; padding: 0 4px; flex-shrink: 0 }
+
+    /* CONCEPT GRID */
+    .concept-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 18px 0 }
+    .concept { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden; transition: all .2s }
+    .concept::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--c, var(--accent)) }
+    .concept:hover { border-color: var(--border2); transform: translateY(-1px) }
+    .concept-icon { font-size: 24px; margin-bottom: 8px; display: block }
+    .concept-name { font-family: var(--font-head); font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 3px }
+    .concept-type { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: .07em; margin-bottom: 8px }
+    .concept-desc { font-size: 12.5px; color: var(--muted2); line-height: 1.55 }
+
+    /* PIPELINE VISUAL */
+    .pipeline { display: flex; align-items: stretch; gap: 0; margin: 20px 0; overflow-x: auto; padding-bottom: 4px }
+    .pipe-stage { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; min-width: 130px; flex-shrink: 0 }
+    .pipe-stage + .pipe-stage { margin-left: 8px }
+    .pipe-stage-name { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-family: var(--font-mono) }
+    .pipe-job { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 12px; font-family: var(--font-mono); color: var(--muted2); margin-bottom: 5px; display: flex; align-items: center; gap: 6px }
+    .pipe-job:last-child { margin-bottom: 0 }
+    .pipe-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0 }
+    .pipe-dot.g { background: var(--green) }
+    .pipe-dot.a { background: var(--accent) }
+    .pipe-dot.am { background: var(--amber) }
+    .pipe-dot.sk { background: var(--sky) }
+    .pipe-arr { display: flex; align-items: center; color: var(--border2); font-size: 20px; padding: 0 2px; flex-shrink: 0; align-self: center }
+
+    /* MOBILE TOGGLE */
+    .mob-toggle { display: none; position: fixed; top: 14px; left: 14px; z-index: 300; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 18px }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 199 }
+
+    @media (max-width: 800px) {
+      :root { --nav-w: 260px }
+      main { margin-left: 0; padding: 0 }
+      #sidebar { transform: translateX(-100%) }
+      #sidebar.open { transform: translateX(0) }
+      #sidebar-overlay.open { display: block }
+      .mob-toggle { display: flex }
+      .section { padding: 44px 22px }
+      h1 { font-size: 34px }
+      .cards { grid-template-columns: 1fr }
+      .concept-grid { grid-template-columns: 1fr 1fr }
+    }
+  </style>
+</head>
+
+<body>
+<div class="mob-toggle" onclick="toggleSidebar()">☰</div>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">CI</div>
+      <div class="sb-title">GitLab CI/CD<br>+ K8s Guide</div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span> Java Backend · AWS EKS</div>
+  </div>
+
+  <div class="sb-progress">
+    <div class="sb-progress-label"><span>Tiến độ đọc</span><span id="pct">0%</span></div>
+    <div class="sb-progress-bar"><div class="sb-progress-fill" id="prog"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Tổng quan</div>
+    <a class="sb-link" href="#overview"><span class="sb-icon">🗺</span> Overview & Kiến trúc</a>
+    <a class="sb-link" href="#concepts"><span class="sb-icon">🧠</span> Core Concepts</a>
+    <a class="sb-link" href="#project-setup"><span class="sb-icon">📁</span> Cấu trúc Project</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">GitLab CI/CD</div>
+    <a class="sb-link" href="#gitlab-basics"><span class="sb-icon">⚙️</span> .gitlab-ci.yml cơ bản<span class="sb-badge">core</span></a>
+    <a class="sb-link" href="#stages"><span class="sb-icon">🔄</span> Stages & Jobs</a>
+    <a class="sb-link" href="#variables"><span class="sb-icon">🔑</span> Variables & Secrets</a>
+    <a class="sb-link" href="#docker-build"><span class="sb-icon">🐳</span> Docker Build & Push</a>
+    <a class="sb-link" href="#cache"><span class="sb-icon">⚡</span> Cache & Artifacts</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Kubernetes</div>
+    <a class="sb-link" href="#k8s-basics"><span class="sb-icon">☸️</span> K8s Manifests<span class="sb-badge">core</span></a>
+    <a class="sb-link" href="#helm"><span class="sb-icon">⛵</span> Helm Chart</a>
+    <a class="sb-link" href="#deploy-job"><span class="sb-icon">🚀</span> Deploy Job</a>
+    <a class="sb-link" href="#eks-setup"><span class="sb-icon">☁️</span> AWS EKS Setup</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Nâng cao</div>
+    <a class="sb-link" href="#envs"><span class="sb-icon">🌍</span> Multi-Environment</a>
+    <a class="sb-link" href="#rollback"><span class="sb-icon">⏪</span> Rollback Strategy</a>
+    <a class="sb-link" href="#monitoring"><span class="sb-icon">📊</span> Health & Monitoring</a>
+    <a class="sb-link" href="#tips"><span class="sb-icon">💡</span> Tips & Pitfalls<span class="sb-badge amber">important</span></a>
+  </div>
+
+  <div class="sb-footer">gitlab-cicd-k8s-java · v1.0<br>© 2026 MB Ageas Life Engineering</div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- OVERVIEW -->
+  <section class="section" id="overview">
+    <div class="section-tag">01 — Overview</div>
+    <h1><span class="grad">GitLab CI/CD</span><br>+ Kubernetes<br>Java Backend</h1>
+    <p>Hướng dẫn chi tiết thiết lập full pipeline CI/CD từ code commit đến production deployment trên Kubernetes (AWS EKS), dành cho Java/Spring Boot microservices.</p>
+
+    <div class="callout sky">
+      <div class="callout-label">🎯 Stack</div>
+      Java 17 + Spring Boot 3 · Maven/Gradle · Docker · GitLab CI/CD · Kubernetes · Helm · AWS EKS · ECR
+    </div>
+
+    <h3>🔁 Flow tổng quát</h3>
+    <div class="flow">
+      <div class="flow-node hl">Git Push<div class="flow-sub">feature branch</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node">Test<div class="flow-sub">Unit + Integration</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node">Build<div class="flow-sub">Maven + Docker</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node am">Push Image<div class="flow-sub">ECR / Registry</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node gn">Deploy Dev<div class="flow-sub">auto</div></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node sk">Deploy Prod<div class="flow-sub">manual gate</div></div>
+    </div>
+
+    <h3>🏗 Kiến trúc tổng thể</h3>
+    <div class="pipeline">
+      <div class="pipe-stage">
+        <div class="pipe-stage-name">Test</div>
+        <div class="pipe-job"><span class="pipe-dot g"></span>unit-test</div>
+        <div class="pipe-job"><span class="pipe-dot g"></span>lint</div>
+        <div class="pipe-job"><span class="pipe-dot g"></span>sonar-scan</div>
+      </div>
+      <div class="pipe-arr">›</div>
+      <div class="pipe-stage">
+        <div class="pipe-stage-name">Build</div>
+        <div class="pipe-job"><span class="pipe-dot a"></span>maven-build</div>
+        <div class="pipe-job"><span class="pipe-dot a"></span>docker-build</div>
+      </div>
+      <div class="pipe-arr">›</div>
+      <div class="pipe-stage">
+        <div class="pipe-stage-name">Publish</div>
+        <div class="pipe-job"><span class="pipe-dot sk"></span>push-ecr</div>
+        <div class="pipe-job"><span class="pipe-dot sk"></span>tag-image</div>
+      </div>
+      <div class="pipe-arr">›</div>
+      <div class="pipe-stage">
+        <div class="pipe-stage-name">Deploy Dev</div>
+        <div class="pipe-job"><span class="pipe-dot g"></span>helm-upgrade</div>
+        <div class="pipe-job"><span class="pipe-dot g"></span>smoke-test</div>
+      </div>
+      <div class="pipe-arr">›</div>
+      <div class="pipe-stage">
+        <div class="pipe-stage-name">Deploy Prod</div>
+        <div class="pipe-job"><span class="pipe-dot am"></span>manual-gate</div>
+        <div class="pipe-job"><span class="pipe-dot g"></span>helm-upgrade</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">⚡</div>
+        <div class="card-title">GitLab Runner</div>
+        <div class="card-desc">Executor chạy jobs. Dùng Docker executor hoặc Kubernetes executor tùy môi trường. Self-hosted hoặc GitLab.com shared runners.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🐳</div>
+        <div class="card-title">Docker Image</div>
+        <div class="card-desc">Mỗi service đóng gói thành Docker image, push lên ECR (AWS) hoặc GitLab Container Registry. Tag theo commit SHA.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">☸️</div>
+        <div class="card-title">Kubernetes</div>
+        <div class="card-desc">Orchestrator deploy và manage containers. Dùng Deployment, Service, ConfigMap, Secret, HPA để scale và config.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">⛵</div>
+        <div class="card-title">Helm Chart</div>
+        <div class="card-desc">Package manager cho K8s manifests. Templating theo environment (dev/staging/prod) với values.yaml riêng cho từng env.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CORE CONCEPTS -->
+  <section class="section" id="concepts">
+    <div class="section-tag">02 — Concepts</div>
+    <h2>🧠 Core Concepts</h2>
+    <p>Trước khi setup, cần hiểu rõ các thành phần chính trong pipeline.</p>
+
+    <div class="concept-grid">
+      <div class="concept" style="--c: var(--accent)">
+        <span class="concept-icon">⚙️</span>
+        <div class="concept-name">.gitlab-ci.yml</div>
+        <div class="concept-type">PIPELINE CONFIG</div>
+        <div class="concept-desc">File cấu hình pipeline, đặt ở root repo. Định nghĩa stages, jobs, rules, conditions.</div>
+      </div>
+      <div class="concept" style="--c: var(--green)">
+        <span class="concept-icon">🏃</span>
+        <div class="concept-name">GitLab Runner</div>
+        <div class="concept-type">JOB EXECUTOR</div>
+        <div class="concept-desc">Agent cài trên server/K8s pod, nhận và thực thi jobs từ GitLab CI. Hỗ trợ nhiều executor types.</div>
+      </div>
+      <div class="concept" style="--c: var(--amber)">
+        <span class="concept-icon">🔤</span>
+        <div class="concept-name">CI/CD Variables</div>
+        <div class="concept-type">SECRETS & CONFIG</div>
+        <div class="concept-desc">Biến môi trường được inject vào jobs. Có thể set ở Group, Project, hoặc Job level. Masked để bảo vệ secrets.</div>
+      </div>
+      <div class="concept" style="--c: var(--sky)">
+        <span class="concept-icon">☸️</span>
+        <div class="concept-name">Deployment</div>
+        <div class="concept-type">K8S RESOURCE</div>
+        <div class="concept-desc">K8s resource quản lý replicas của pod. Hỗ trợ rolling update, rollback, và health check tự động.</div>
+      </div>
+      <div class="concept" style="--c: var(--red)">
+        <span class="concept-icon">🔑</span>
+        <div class="concept-name">K8s Secret</div>
+        <div class="concept-type">SENSITIVE DATA</div>
+        <div class="concept-desc">Lưu sensitive data như DB password, API keys dưới dạng base64. Mount vào pod qua env vars hoặc volume.</div>
+      </div>
+      <div class="concept" style="--c: #f0abfc">
+        <span class="concept-icon">⛵</span>
+        <div class="concept-name">Helm Release</div>
+        <div class="concept-type">DEPLOYMENT UNIT</div>
+        <div class="concept-desc">Một lần apply Helm chart với specific values. Tracking history, dễ rollback về version trước.</div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Lưu ý quan trọng</div>
+      Không bao giờ hardcode secrets trong <code>.gitlab-ci.yml</code> hoặc Helm values. Luôn dùng GitLab CI/CD Variables (Masked + Protected) hoặc AWS Secrets Manager.
+    </div>
+  </section>
+
+  <!-- PROJECT SETUP -->
+  <section class="section" id="project-setup">
+    <div class="section-tag">03 — Project Structure</div>
+    <h2>📁 Cấu trúc Project</h2>
+    <p>Cấu trúc chuẩn cho một Java microservice với đầy đủ CI/CD và K8s configuration.</p>
+
+    <div class="file-tree">
+      <div class="ft-head">my-service/ — Spring Boot Microservice</div>
+      <div class="ft-row"><span class="ft-pre">├── </span><span class="ft-file">.gitlab-ci.yml</span><span class="ft-comment">← Pipeline definition</span></div>
+      <div class="ft-row"><span class="ft-pre">├── </span><span class="ft-file">Dockerfile</span><span class="ft-comment">← Container build</span></div>
+      <div class="ft-row"><span class="ft-pre">├── </span><span class="ft-file">pom.xml</span><span class="ft-comment">← Maven dependencies</span></div>
+      <div class="ft-row"><span class="ft-pre">├── </span><span class="ft-dir">src/</span></div>
+      <div class="ft-row"><span class="ft-pre">│   ├── </span><span class="ft-dir">main/java/</span><span class="ft-comment">← Application code</span></div>
+      <div class="ft-row"><span class="ft-pre">│   └── </span><span class="ft-dir">test/java/</span><span class="ft-comment">← Unit & integration tests</span></div>
+      <div class="ft-row"><span class="ft-pre">├── </span><span class="ft-dir">helm/</span><span class="ft-comment">← Helm chart</span></div>
+      <div class="ft-row"><span class="ft-pre">│   ├── </span><span class="ft-yml">Chart.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│   ├── </span><span class="ft-yml">values.yaml</span><span class="ft-comment">← Default values</span></div>
+      <div class="ft-row"><span class="ft-pre">│   ├── </span><span class="ft-yml">values-dev.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│   ├── </span><span class="ft-yml">values-staging.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│   ├── </span><span class="ft-yml">values-prod.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│   └── </span><span class="ft-dir">templates/</span></div>
+      <div class="ft-row"><span class="ft-pre">│       ├── </span><span class="ft-yml">deployment.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│       ├── </span><span class="ft-yml">service.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│       ├── </span><span class="ft-yml">configmap.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│       ├── </span><span class="ft-yml">secret.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│       ├── </span><span class="ft-yml">hpa.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">│       └── </span><span class="ft-yml">ingress.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">└── </span><span class="ft-dir">k8s/</span><span class="ft-comment">← Raw manifests (optional)</span></div>
+      <div class="ft-row"><span class="ft-pre">    ├── </span><span class="ft-yml">namespace.yaml</span></div>
+      <div class="ft-row"><span class="ft-pre">    └── </span><span class="ft-yml">serviceaccount.yaml</span></div>
+    </div>
+  </section>
+
+  <!-- GITLAB BASICS -->
+  <section class="section" id="gitlab-basics">
+    <div class="section-tag">04 — GitLab CI</div>
+    <h2>⚙️ .gitlab-ci.yml Cơ bản</h2>
+    <p>File <code>.gitlab-ci.yml</code> là trái tim của pipeline. Đây là cấu trúc đầy đủ cho một Java service.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · .gitlab-ci.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># ── Global config ──────────────────────────────</span>
+<span class="kw">image</span>: <span class="str">maven:3.9-eclipse-temurin-17</span>
+
+<span class="kw">variables</span>:
+  MAVEN_OPTS: <span class="str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"</span>
+  IMAGE_NAME: <span class="str">"$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CI_PROJECT_NAME"</span>
+  IMAGE_TAG: <span class="str">"$CI_COMMIT_SHORT_SHA"</span>
+  DOCKER_DRIVER: <span class="str">overlay2</span>
+
+<span class="kw">stages</span>:
+  - <span class="str">test</span>
+  - <span class="str">build</span>
+  - <span class="str">publish</span>
+  - <span class="str">deploy-dev</span>
+  - <span class="str">deploy-prod</span>
+
+<span class="cmt"># ── Cache Maven deps ──────────────────────────</span>
+<span class="kw">cache</span>:
+  <span class="kw">key</span>: <span class="str">"$CI_COMMIT_REF_SLUG-maven"</span>
+  <span class="kw">paths</span>:
+    - .m2/repository
+  <span class="kw">policy</span>: pull-push</pre>
+    </div>
+  </section>
+
+  <!-- STAGES & JOBS -->
+  <section class="section" id="stages">
+    <div class="section-tag">05 — Stages & Jobs</div>
+    <h2>🔄 Stages & Jobs Chi Tiết</h2>
+
+    <h3>🧪 Stage: test</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · test stage</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">unit-test</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">script</span>:
+    - <span class="str">mvn test -B --no-transfer-progress</span>
+  <span class="kw">artifacts</span>:
+    <span class="kw">when</span>: always
+    <span class="kw">reports</span>:
+      <span class="kw">junit</span>:
+        - target/surefire-reports/TEST-*.xml
+    <span class="kw">paths</span>:
+      - target/surefire-reports/
+    <span class="kw">expire_in</span>: <span class="str">7 days</span>
+  <span class="kw">coverage</span>: <span class="str">'/Total.*?([0-9]{1,3})%/'</span>
+  <span class="kw">rules</span>:
+    - <span class="kw">if</span>: <span class="str">'$CI_PIPELINE_SOURCE == "merge_request_event"'</span>
+    - <span class="kw">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span>
+
+<span class="fn">integration-test</span>:
+  <span class="kw">stage</span>: test
+  <span class="kw">services</span>:
+    - <span class="kw">name</span>: <span class="str">postgres:15-alpine</span>
+      <span class="kw">alias</span>: postgres
+  <span class="kw">variables</span>:
+    POSTGRES_DB: <span class="str">testdb</span>
+    POSTGRES_USER: <span class="str">test</span>
+    POSTGRES_PASSWORD: <span class="str">test</span>
+    SPRING_DATASOURCE_URL: <span class="str">"jdbc:postgresql://postgres:5432/testdb"</span>
+  <span class="kw">script</span>:
+    - <span class="str">mvn verify -P integration-test -B --no-transfer-progress</span></pre>
+    </div>
+
+    <h3>🔨 Stage: build (Maven + Docker)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · build stage</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">maven-build</span>:
+  <span class="kw">stage</span>: build
+  <span class="kw">script</span>:
+    - <span class="str">mvn package -DskipTests -B --no-transfer-progress</span>
+  <span class="kw">artifacts</span>:
+    <span class="kw">paths</span>:
+      - target/*.jar
+    <span class="kw">expire_in</span>: <span class="str">1 hour</span>
+  <span class="kw">rules</span>:
+    - <span class="kw">if</span>: <span class="str">'$CI_COMMIT_BRANCH =~ /^(main|develop|release\/.*)$/'</span>
+
+<span class="fn">docker-build</span>:
+  <span class="kw">stage</span>: build
+  <span class="kw">image</span>: docker:24
+  <span class="kw">services</span>:
+    - docker:24-dind
+  <span class="kw">needs</span>: [<span class="str">maven-build</span>]
+  <span class="kw">script</span>:
+    - <span class="str">docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest .</span>
+    - <span class="str">docker save $IMAGE_NAME:$IMAGE_TAG | gzip > image.tar.gz</span>
+  <span class="kw">artifacts</span>:
+    <span class="kw">paths</span>:
+      - image.tar.gz
+    <span class="kw">expire_in</span>: <span class="str">1 hour</span></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Best practice</div>
+      Dùng <code>needs:</code> thay vì để pipeline chờ toàn bộ stage. Điều này cho phép jobs chạy song song và giảm thời gian pipeline.
+    </div>
+  </section>
+
+  <!-- VARIABLES & SECRETS -->
+  <section class="section" id="variables">
+    <div class="section-tag">06 — Variables</div>
+    <h2>🔑 Variables & Secrets</h2>
+    <p>Setup CI/CD Variables trong GitLab UI: <strong>Settings → CI/CD → Variables</strong></p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Variable</th><th>Mô tả</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>AWS_ACCOUNT_ID</strong></td><td>AWS Account ID để build ECR URL</td><td><span class="tag-core">masked</span></td></tr>
+          <tr><td><strong>AWS_REGION</strong></td><td>Region ECR (vd: ap-southeast-1)</td><td><span class="tag-new">plain</span></td></tr>
+          <tr><td><strong>AWS_ACCESS_KEY_ID</strong></td><td>IAM credentials để push ECR</td><td><span class="tag-core">masked</span></td></tr>
+          <tr><td><strong>AWS_SECRET_ACCESS_KEY</strong></td><td>IAM secret key</td><td><span class="tag-core">masked</span></td></tr>
+          <tr><td><strong>KUBE_CONFIG</strong></td><td>Base64 encoded kubeconfig file</td><td><span class="tag-core">masked</span></td></tr>
+          <tr><td><strong>HELM_RELEASE_NAME</strong></td><td>Tên Helm release (vd: my-service)</td><td><span class="tag-new">plain</span></td></tr>
+          <tr><td><strong>SONAR_TOKEN</strong></td><td>Token SonarQube để scan code</td><td><span class="tag-core">masked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Protected Variables</div>
+      Variables có checkbox <strong>Protected</strong> chỉ available trong protected branches (main, release/*). Dùng cho prod credentials để tránh leak qua feature branches.
+    </div>
+
+    <h3>🏷 Predefined Variables hữu ích</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · built-in variables</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Các biến GitLab tự cung cấp</span>
+<span class="prop">$CI_COMMIT_SHORT_SHA</span>    <span class="cmt"># 8 chars commit hash → dùng làm image tag</span>
+<span class="prop">$CI_COMMIT_BRANCH</span>       <span class="cmt"># tên branch hiện tại</span>
+<span class="prop">$CI_COMMIT_REF_SLUG</span>     <span class="cmt"># branch name đã sanitize (lowercase, no slash)</span>
+<span class="prop">$CI_PROJECT_NAME</span>        <span class="cmt"># tên repo</span>
+<span class="prop">$CI_PIPELINE_SOURCE</span>     <span class="cmt"># push / merge_request_event / schedule / web</span>
+<span class="prop">$CI_ENVIRONMENT_NAME</span>    <span class="cmt"># tên environment khi dùng environment: keyword</span>
+<span class="prop">$CI_REGISTRY_IMAGE</span>      <span class="cmt"># GitLab Container Registry URL của project</span></pre>
+    </div>
+  </section>
+
+  <!-- DOCKER BUILD -->
+  <section class="section" id="docker-build">
+    <div class="section-tag">07 — Docker</div>
+    <h2>🐳 Dockerfile & Build Tối ưu</h2>
+    <p>Dockerfile multi-stage cho Java Spring Boot để image nhỏ gọn và build nhanh hơn.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">Dockerfile · multi-stage build</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># ── Stage 1: Build ─────────────────────────────</span>
+<span class="kw">FROM</span> <span class="str">maven:3.9-eclipse-temurin-17-alpine</span> <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Cache dependencies layer riêng</span>
+<span class="kw">COPY</span> pom.xml .
+<span class="kw">RUN</span> mvn dependency:go-offline -B
+
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> mvn package -DskipTests -B
+
+<span class="cmt"># ── Stage 2: Extract layers (Spring Boot) ──────</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:17-jre-alpine</span> <span class="kw">AS</span> extractor
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=builder /app/target/*.jar app.jar
+<span class="kw">RUN</span> java -Djarmode=layertools -jar app.jar extract
+
+<span class="cmt"># ── Stage 3: Runtime ───────────────────────────</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:17-jre-alpine</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Non-root user for security</span>
+<span class="kw">RUN</span> addgroup -S appgroup && adduser -S appuser -G appgroup
+<span class="kw">USER</span> appuser
+
+<span class="cmt"># Copy layers (ordered từ ít thay đổi → nhiều thay đổi)</span>
+<span class="kw">COPY</span> --from=extractor /app/dependencies/ ./
+<span class="kw">COPY</span> --from=extractor /app/spring-boot-loader/ ./
+<span class="kw">COPY</span> --from=extractor /app/snapshot-dependencies/ ./
+<span class="kw">COPY</span> --from=extractor /app/application/ ./
+
+<span class="kw">EXPOSE</span> <span class="num">8080</span>
+<span class="kw">ENTRYPOINT</span> [<span class="str">"java"</span>, <span class="str">"org.springframework.boot.loader.JarLauncher"</span>]</pre>
+    </div>
+
+    <h3>📤 Push lên AWS ECR</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · publish stage</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">push-ecr</span>:
+  <span class="kw">stage</span>: publish
+  <span class="kw">image</span>:
+    <span class="kw">name</span>: <span class="str">amazon/aws-cli:latest</span>
+    <span class="kw">entrypoint</span>: [<span class="str">""</span>]
+  <span class="kw">services</span>:
+    - docker:24-dind
+  <span class="kw">before_script</span>:
+    - <span class="str">yum install -y docker</span>
+    - <span class="str">aws ecr get-login-password --region $AWS_REGION |</span>
+        <span class="str">docker login --username AWS --password-stdin</span>
+        <span class="str">$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com</span>
+  <span class="kw">script</span>:
+    <span class="cmt"># Load image từ artifact</span>
+    - <span class="str">docker load < image.tar.gz</span>
+    <span class="cmt"># Ensure ECR repo exists</span>
+    - <span class="str">aws ecr describe-repositories --repository-names $CI_PROJECT_NAME</span>
+        <span class="str">|| aws ecr create-repository --repository-name $CI_PROJECT_NAME</span>
+    <span class="cmt"># Push với 2 tags: commit SHA + branch slug</span>
+    - <span class="str">docker push $IMAGE_NAME:$IMAGE_TAG</span>
+    - <span class="str">docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:$CI_COMMIT_REF_SLUG</span>
+    - <span class="str">docker push $IMAGE_NAME:$CI_COMMIT_REF_SLUG</span>
+  <span class="kw">needs</span>: [<span class="str">docker-build</span>]</pre>
+    </div>
+
+    <div class="callout sky">
+      <div class="callout-label">💡 GitLab Container Registry</div>
+      Nếu không dùng AWS ECR, GitLab tích hợp sẵn Container Registry. Dùng <code>$CI_REGISTRY</code>, <code>$CI_REGISTRY_USER</code>, <code>$CI_REGISTRY_PASSWORD</code> để login và push trực tiếp.
+    </div>
+  </section>
+
+  <!-- CACHE -->
+  <section class="section" id="cache">
+    <div class="section-tag">08 — Cache</div>
+    <h2>⚡ Cache & Artifacts</h2>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">📦</div>
+        <div class="card-title">Cache</div>
+        <div class="card-desc">Lưu files giữa các pipeline runs khác nhau. Dùng cho Maven <code>.m2/repository</code>, Node <code>node_modules</code>. Tăng tốc build đáng kể.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📎</div>
+        <div class="card-title">Artifacts</div>
+        <div class="card-desc">Pass files giữa các jobs trong cùng pipeline. Dùng để truyền <code>.jar</code> từ build → publish, hoặc test reports cho GitLab UI.</div>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · cache strategy</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Global cache config</span>
+<span class="kw">cache</span>:
+  <span class="kw">key</span>:
+    <span class="kw">files</span>:
+      - pom.xml         <span class="cmt"># Cache key thay đổi khi pom.xml thay đổi</span>
+    <span class="kw">prefix</span>: <span class="str">maven-v1</span>
+  <span class="kw">paths</span>:
+    - .m2/repository/
+  <span class="kw">policy</span>: pull-push   <span class="cmt"># download rồi upload lại nếu có thay đổi</span>
+
+<span class="cmt"># Job chỉ pull (không cần update cache)</span>
+<span class="fn">unit-test</span>:
+  <span class="kw">cache</span>:
+    <span class="kw">policy</span>: pull      <span class="cmt"># nhanh hơn vì không upload</span>
+
+<span class="cmt"># Job update cache (chạy 1 lần duy nhất)</span>
+<span class="fn">maven-build</span>:
+  <span class="kw">cache</span>:
+    <span class="kw">policy</span>: push      <span class="cmt"># chỉ update, không download</span></pre>
+    </div>
+  </section>
+
+  <!-- K8S BASICS -->
+  <section class="section" id="k8s-basics">
+    <div class="section-tag">09 — Kubernetes</div>
+    <h2>☸️ Kubernetes Manifests</h2>
+    <p>Các K8s resources cần thiết cho một Java Spring Boot service.</p>
+
+    <h3>📦 Deployment</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · deployment.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: apps/v1
+<span class="kw">kind</span>: Deployment
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: my-service
+  <span class="kw">namespace</span>: production
+  <span class="kw">labels</span>:
+    <span class="kw">app</span>: my-service
+<span class="kw">spec</span>:
+  <span class="kw">replicas</span>: <span class="num">3</span>
+  <span class="kw">selector</span>:
+    <span class="kw">matchLabels</span>:
+      <span class="kw">app</span>: my-service
+  <span class="kw">strategy</span>:
+    <span class="kw">type</span>: RollingUpdate
+    <span class="kw">rollingUpdate</span>:
+      <span class="kw">maxSurge</span>: <span class="num">1</span>        <span class="cmt"># tối đa 1 pod mới thêm</span>
+      <span class="kw">maxUnavailable</span>: <span class="num">0</span>  <span class="cmt"># không pod nào down trong update</span>
+  <span class="kw">template</span>:
+    <span class="kw">metadata</span>:
+      <span class="kw">labels</span>:
+        <span class="kw">app</span>: my-service
+    <span class="kw">spec</span>:
+      <span class="kw">containers</span>:
+        - <span class="kw">name</span>: my-service
+          <span class="kw">image</span>: <span class="str">123456789.dkr.ecr.ap-southeast-1.amazonaws.com/my-service:abc12345</span>
+          <span class="kw">ports</span>:
+            - <span class="kw">containerPort</span>: <span class="num">8080</span>
+          <span class="kw">env</span>:
+            - <span class="kw">name</span>: SPRING_PROFILES_ACTIVE
+              <span class="kw">value</span>: <span class="str">production</span>
+            - <span class="kw">name</span>: DB_PASSWORD
+              <span class="kw">valueFrom</span>:
+                <span class="kw">secretKeyRef</span>:
+                  <span class="kw">name</span>: my-service-secret
+                  <span class="kw">key</span>: db-password
+          <span class="kw">resources</span>:
+            <span class="kw">requests</span>:
+              <span class="kw">memory</span>: <span class="str">"512Mi"</span>
+              <span class="kw">cpu</span>: <span class="str">"250m"</span>
+            <span class="kw">limits</span>:
+              <span class="kw">memory</span>: <span class="str">"1Gi"</span>
+              <span class="kw">cpu</span>: <span class="str">"500m"</span>
+          <span class="kw">livenessProbe</span>:
+            <span class="kw">httpGet</span>:
+              <span class="kw">path</span>: /actuator/health/liveness
+              <span class="kw">port</span>: <span class="num">8080</span>
+            <span class="kw">initialDelaySeconds</span>: <span class="num">60</span>
+            <span class="kw">periodSeconds</span>: <span class="num">15</span>
+          <span class="kw">readinessProbe</span>:
+            <span class="kw">httpGet</span>:
+              <span class="kw">path</span>: /actuator/health/readiness
+              <span class="kw">port</span>: <span class="num">8080</span>
+            <span class="kw">initialDelaySeconds</span>: <span class="num">30</span>
+            <span class="kw">periodSeconds</span>: <span class="num">10</span></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Luôn có Liveness + Readiness Probe</div>
+      <strong>Liveness</strong>: K8s restart pod nếu app bị hang. <strong>Readiness</strong>: K8s không route traffic đến pod chưa sẵn sàng. Spring Boot Actuator cung cấp cả 2 endpoints này sẵn.
+    </div>
+
+    <h3>🔗 Service & ConfigMap</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · service.yaml + configmap.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt">--- # Service</span>
+<span class="kw">apiVersion</span>: v1
+<span class="kw">kind</span>: Service
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: my-service
+  <span class="kw">namespace</span>: production
+<span class="kw">spec</span>:
+  <span class="kw">selector</span>:
+    <span class="kw">app</span>: my-service
+  <span class="kw">ports</span>:
+    - <span class="kw">protocol</span>: TCP
+      <span class="kw">port</span>: <span class="num">80</span>
+      <span class="kw">targetPort</span>: <span class="num">8080</span>
+  <span class="kw">type</span>: ClusterIP
+
+<span class="cmt">--- # ConfigMap</span>
+<span class="kw">apiVersion</span>: v1
+<span class="kw">kind</span>: ConfigMap
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: my-service-config
+  <span class="kw">namespace</span>: production
+<span class="kw">data</span>:
+  SPRING_PROFILES_ACTIVE: <span class="str">"production"</span>
+  SERVER_PORT: <span class="str">"8080"</span>
+  KAFKA_BOOTSTRAP_SERVERS: <span class="str">"kafka:9092"</span>
+  LOG_LEVEL: <span class="str">"INFO"</span></pre>
+    </div>
+  </section>
+
+  <!-- HELM -->
+  <section class="section" id="helm">
+    <div class="section-tag">10 — Helm</div>
+    <h2>⛵ Helm Chart</h2>
+    <p>Helm cho phép template hoá K8s manifests và deploy theo environment khác nhau dễ dàng.</p>
+
+    <h3>📄 Chart.yaml</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · helm/Chart.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: v2
+<span class="kw">name</span>: my-service
+<span class="kw">description</span>: <span class="str">A Spring Boot microservice Helm chart</span>
+<span class="kw">type</span>: application
+<span class="kw">version</span>: <span class="str">"1.0.0"</span>
+<span class="kw">appVersion</span>: <span class="str">"latest"</span></pre>
+    </div>
+
+    <h3>⚙️ values.yaml</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · helm/values.yaml (defaults)</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">replicaCount</span>: <span class="num">1</span>
+
+<span class="kw">image</span>:
+  <span class="kw">repository</span>: <span class="str">""</span>   <span class="cmt"># override khi deploy</span>
+  <span class="kw">tag</span>: <span class="str">"latest"</span>
+  <span class="kw">pullPolicy</span>: Always
+
+<span class="kw">service</span>:
+  <span class="kw">type</span>: ClusterIP
+  <span class="kw">port</span>: <span class="num">80</span>
+  <span class="kw">targetPort</span>: <span class="num">8080</span>
+
+<span class="kw">resources</span>:
+  <span class="kw">requests</span>:
+    <span class="kw">memory</span>: <span class="str">"256Mi"</span>
+    <span class="kw">cpu</span>: <span class="str">"100m"</span>
+  <span class="kw">limits</span>:
+    <span class="kw">memory</span>: <span class="str">"512Mi"</span>
+    <span class="kw">cpu</span>: <span class="str">"300m"</span>
+
+<span class="kw">autoscaling</span>:
+  <span class="kw">enabled</span>: <span class="str">false</span>
+  <span class="kw">minReplicas</span>: <span class="num">1</span>
+  <span class="kw">maxReplicas</span>: <span class="num">5</span>
+  <span class="kw">targetCPUUtilizationPercentage</span>: <span class="num">70</span>
+
+<span class="kw">env</span>:
+  <span class="kw">SPRING_PROFILES_ACTIVE</span>: <span class="str">default</span>
+
+<span class="kw">probe</span>:
+  <span class="kw">liveness</span>:
+    <span class="kw">path</span>: <span class="str">/actuator/health/liveness</span>
+    <span class="kw">initialDelaySeconds</span>: <span class="num">60</span>
+  <span class="kw">readiness</span>:
+    <span class="kw">path</span>: <span class="str">/actuator/health/readiness</span>
+    <span class="kw">initialDelaySeconds</span>: <span class="num">30</span></pre>
+    </div>
+
+    <h3>🌍 values-prod.yaml (override)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · helm/values-prod.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">replicaCount</span>: <span class="num">3</span>
+
+<span class="kw">resources</span>:
+  <span class="kw">requests</span>:
+    <span class="kw">memory</span>: <span class="str">"512Mi"</span>
+    <span class="kw">cpu</span>: <span class="str">"250m"</span>
+  <span class="kw">limits</span>:
+    <span class="kw">memory</span>: <span class="str">"1Gi"</span>
+    <span class="kw">cpu</span>: <span class="str">"500m"</span>
+
+<span class="kw">autoscaling</span>:
+  <span class="kw">enabled</span>: <span class="str">true</span>
+  <span class="kw">minReplicas</span>: <span class="num">3</span>
+  <span class="kw">maxReplicas</span>: <span class="num">10</span>
+
+<span class="kw">env</span>:
+  <span class="kw">SPRING_PROFILES_ACTIVE</span>: <span class="str">production</span>
+  <span class="kw">LOG_LEVEL</span>: <span class="str">WARN</span></pre>
+    </div>
+
+    <h3>🏗 Template Deployment (helm/templates/deployment.yaml)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · Helm template</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: apps/v1
+<span class="kw">kind</span>: Deployment
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: {{ <span class="fn">include</span> <span class="str">"my-service.fullname"</span> . }}
+  <span class="kw">labels</span>: {{ <span class="fn">include</span> <span class="str">"my-service.labels"</span> . | nindent 4 }}
+<span class="kw">spec</span>:
+  {{- <span class="kw">if</span> not .Values.autoscaling.enabled }}
+  <span class="kw">replicas</span>: {{ .Values.replicaCount }}
+  {{- <span class="kw">end</span> }}
+  <span class="kw">template</span>:
+    <span class="kw">spec</span>:
+      <span class="kw">containers</span>:
+        - <span class="kw">name</span>: {{ .Chart.Name }}
+          <span class="kw">image</span>: <span class="str">"{{ .Values.image.repository }}:{{ .Values.image.tag }}"</span>
+          <span class="kw">imagePullPolicy</span>: {{ .Values.image.pullPolicy }}
+          <span class="kw">resources</span>:
+            {{- <span class="fn">toYaml</span> .Values.resources | nindent 12 }}
+          <span class="kw">env</span>:
+          {{- <span class="kw">range</span> $key, $val := .Values.env }}
+            - <span class="kw">name</span>: {{ $key }}
+              <span class="kw">value</span>: {{ $val | quote }}
+          {{- <span class="kw">end</span> }}</pre>
+    </div>
+  </section>
+
+  <!-- DEPLOY JOB -->
+  <section class="section" id="deploy-job">
+    <div class="section-tag">11 — Deploy Job</div>
+    <h2>🚀 Deploy Job trong CI/CD</h2>
+    <p>Job deploy dùng <code>kubectl</code> + <code>helm</code> để apply lên K8s cluster.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · deploy stages đầy đủ</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># ── Shared deploy template ──────────────────────</span>
+.<span class="fn">deploy-template</span>: &deploy-template
+  <span class="kw">image</span>:
+    <span class="kw">name</span>: <span class="str">alpine/helm:3.14.0</span>
+    <span class="kw">entrypoint</span>: [<span class="str">""</span>]
+  <span class="kw">before_script</span>:
+    - <span class="str">apk add --no-cache curl python3 py3-pip</span>
+    - <span class="str">pip install awscli --quiet</span>
+    <span class="cmt"># Setup kubectl từ KUBE_CONFIG variable</span>
+    - <span class="str">mkdir -p ~/.kube</span>
+    - <span class="str">echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config</span>
+    - <span class="str">chmod 600 ~/.kube/config</span>
+    <span class="cmt"># Login ECR để K8s pull image</span>
+    - <span class="str">aws ecr get-login-password --region $AWS_REGION |</span>
+        <span class="str">helm registry login --username AWS --password-stdin</span>
+        <span class="str">$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com</span>
+
+<span class="cmt"># ── Deploy Dev (tự động trên branch develop) ────</span>
+<span class="fn">deploy-dev</span>:
+  <span class="kw">stage</span>: deploy-dev
+  <<: *deploy-template
+  <span class="kw">environment</span>:
+    <span class="kw">name</span>: development
+    <span class="kw">url</span>: <span class="str">https://dev.my-service.internal</span>
+  <span class="kw">script</span>:
+    - <span class="str">helm upgrade --install $HELM_RELEASE_NAME ./helm</span>
+      <span class="str">--namespace dev</span>
+      <span class="str">--create-namespace</span>
+      <span class="str">--values ./helm/values.yaml</span>
+      <span class="str">--values ./helm/values-dev.yaml</span>
+      <span class="str">--set image.repository=$IMAGE_NAME</span>
+      <span class="str">--set image.tag=$IMAGE_TAG</span>
+      <span class="str">--atomic</span>         <span class="cmt"># rollback tự động nếu fail</span>
+      <span class="str">--timeout 5m</span>
+      <span class="str">--wait</span>
+  <span class="kw">rules</span>:
+    - <span class="kw">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "develop"'</span>
+
+<span class="cmt"># ── Deploy Prod (manual approval) ───────────────</span>
+<span class="fn">deploy-prod</span>:
+  <span class="kw">stage</span>: deploy-prod
+  <<: *deploy-template
+  <span class="kw">environment</span>:
+    <span class="kw">name</span>: production
+    <span class="kw">url</span>: <span class="str">https://my-service.internal</span>
+  <span class="kw">script</span>:
+    - <span class="str">helm upgrade --install $HELM_RELEASE_NAME ./helm</span>
+      <span class="str">--namespace production</span>
+      <span class="str">--values ./helm/values.yaml</span>
+      <span class="str">--values ./helm/values-prod.yaml</span>
+      <span class="str">--set image.repository=$IMAGE_NAME</span>
+      <span class="str">--set image.tag=$IMAGE_TAG</span>
+      <span class="str">--atomic</span>
+      <span class="str">--timeout 10m</span>
+      <span class="str">--wait</span>
+  <span class="kw">when</span>: manual          <span class="cmt"># ← cần bấm tay trong GitLab UI</span>
+  <span class="kw">rules</span>:
+    - <span class="kw">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ --atomic flag</div>
+      Flag <code>--atomic</code> của Helm sẽ tự động rollback về version trước nếu deployment thất bại (pods không healthy trong timeout). Rất quan trọng cho production.
+    </div>
+  </section>
+
+  <!-- EKS SETUP -->
+  <section class="section" id="eks-setup">
+    <div class="section-tag">12 — AWS EKS</div>
+    <h2>☁️ AWS EKS Setup</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Tạo IAM User cho CI/CD</div>
+          <div class="step-desc">Tạo IAM User với policy cho phép push ECR và describe EKS. Không dùng root account.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Cấu hình aws-auth ConfigMap</div>
+          <div class="step-desc">Cho phép IAM User access K8s cluster bằng cách thêm vào <code>aws-auth</code> ConfigMap trong namespace <code>kube-system</code>.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Export KUBE_CONFIG</div>
+          <div class="step-desc">Chạy <code>aws eks update-kubeconfig</code> rồi base64 encode file <code>~/.kube/config</code>, lưu vào GitLab CI Variable.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Tạo ECR Repository</div>
+          <div class="step-desc">Tạo ECR repo cho từng service. Configure lifecycle policy để xóa old images tự động.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">Shell · setup commands</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># 1. Update kubeconfig</span>
+aws eks update-kubeconfig \
+  --region ap-southeast-1 \
+  --name my-eks-cluster
+
+<span class="cmt"># 2. Export KUBE_CONFIG (paste vào GitLab Variable)</span>
+cat ~/.kube/config | base64 -w 0
+
+<span class="cmt"># 3. Thêm IAM vào aws-auth</span>
+kubectl edit configmap aws-auth -n kube-system
+<span class="cmt"># Thêm vào mapUsers:</span>
+<span class="cmt"># - userarn: arn:aws:iam::123456789:user/gitlab-ci</span>
+<span class="cmt">#   username: gitlab-ci</span>
+<span class="cmt">#   groups: ["system:masters"]  # hoặc role cụ thể hơn</span>
+
+<span class="cmt"># 4. Tạo ECR repo</span>
+aws ecr create-repository \
+  --repository-name my-service \
+  --region ap-southeast-1
+
+<span class="cmt"># 5. Set ECR lifecycle policy (giữ 10 images mới nhất)</span>
+aws ecr put-lifecycle-policy \
+  --repository-name my-service \
+  --lifecycle-policy-text '{"rules":[{"rulePriority":1,"selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},"action":{"type":"expire"}}]}'</pre>
+    </div>
+  </section>
+
+  <!-- MULTI-ENVIRONMENT -->
+  <section class="section" id="envs">
+    <div class="section-tag">13 — Environments</div>
+    <h2>🌍 Multi-Environment Strategy</h2>
+    <p>Strategy branch → environment phổ biến cho microservices production.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Branch</th><th>Environment</th><th>Trigger</th><th>Namespace</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>feature/*</strong></td><td>—</td><td>Test + Build only</td><td>—</td></tr>
+          <tr><td><strong>develop</strong></td><td>Development</td><td>Auto deploy</td><td>dev</td></tr>
+          <tr><td><strong>release/*</strong></td><td>Staging</td><td>Auto deploy</td><td>staging</td></tr>
+          <tr><td><strong>main</strong></td><td>Production</td><td><span class="tag-pro">Manual gate</span></td><td>production</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · rules-based environment routing</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">deploy-staging</span>:
+  <span class="kw">stage</span>: deploy-staging
+  <span class="kw">environment</span>:
+    <span class="kw">name</span>: staging
+    <span class="kw">url</span>: <span class="str">https://staging.my-service.internal</span>
+  <span class="kw">variables</span>:
+    DEPLOY_NAMESPACE: <span class="str">staging</span>
+    VALUES_FILE: <span class="str">values-staging.yaml</span>
+  <span class="kw">script</span>:
+    - <span class="str">helm upgrade --install $HELM_RELEASE_NAME ./helm</span>
+      <span class="str">--namespace $DEPLOY_NAMESPACE</span>
+      <span class="str">--values ./helm/values.yaml</span>
+      <span class="str">--values ./helm/$VALUES_FILE</span>
+      <span class="str">--set image.tag=$IMAGE_TAG</span>
+  <span class="kw">rules</span>:
+    - <span class="kw">if</span>: <span class="str">'$CI_COMMIT_BRANCH =~ /^release\//'</span></pre>
+    </div>
+  </section>
+
+  <!-- ROLLBACK -->
+  <section class="section" id="rollback">
+    <div class="section-tag">14 — Rollback</div>
+    <h2>⏪ Rollback Strategy</h2>
+
+    <div class="callout err">
+      <div class="callout-label">🔴 Khi nào cần rollback?</div>
+      Deployment fail (pods crash loop), health check fail, business metrics tụt đột ngột sau deploy mới.
+    </div>
+
+    <h3>1. Helm Rollback (nhanh nhất)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">Shell · helm rollback</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Xem lịch sử releases</span>
+helm history my-service -n production
+
+<span class="cmt"># Rollback về revision trước</span>
+helm rollback my-service -n production
+
+<span class="cmt"># Rollback về revision cụ thể</span>
+helm rollback my-service <span class="num">3</span> -n production</pre>
+    </div>
+
+    <h3>2. Rollback Job trong CI</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · rollback job</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">rollback-prod</span>:
+  <span class="kw">stage</span>: deploy-prod
+  <span class="kw">image</span>: <span class="str">alpine/helm:3.14.0</span>
+  <span class="kw">environment</span>:
+    <span class="kw">name</span>: production
+    <span class="kw">action</span>: stop    <span class="cmt"># GitLab environment action</span>
+  <span class="kw">script</span>:
+    - <span class="str">echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config</span>
+    - <span class="str">helm rollback $HELM_RELEASE_NAME -n production</span>
+    - <span class="str">kubectl rollout status deployment/$HELM_RELEASE_NAME -n production</span>
+  <span class="kw">when</span>: manual
+  <span class="kw">rules</span>:
+    - <span class="kw">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ GitLab Environment Rollback</div>
+      GitLab UI → Deployments → Environments → Production → có nút Rollback built-in, re-trigger pipeline với commit hash cũ hơn.
+    </div>
+  </section>
+
+  <!-- MONITORING -->
+  <section class="section" id="monitoring">
+    <div class="section-tag">15 — Monitoring</div>
+    <h2>📊 Health Check & Monitoring</h2>
+
+    <h3>🩺 Spring Boot Actuator Setup</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · application.yml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">management</span>:
+  <span class="kw">endpoints</span>:
+    <span class="kw">web</span>:
+      <span class="kw">exposure</span>:
+        <span class="kw">include</span>: <span class="str">health,info,metrics,prometheus</span>
+  <span class="kw">endpoint</span>:
+    <span class="kw">health</span>:
+      <span class="kw">probes</span>:
+        <span class="kw">enabled</span>: <span class="str">true</span>    <span class="cmt"># enable /liveness /readiness</span>
+      <span class="kw">show-details</span>: <span class="str">always</span>
+  <span class="kw">health</span>:
+    <span class="kw">livenessState</span>:
+      <span class="kw">enabled</span>: <span class="str">true</span>
+    <span class="kw">readinessState</span>:
+      <span class="kw">enabled</span>: <span class="str">true</span></pre>
+    </div>
+
+    <h3>🔍 Smoke Test sau Deploy</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">YAML · smoke-test job</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">smoke-test</span>:
+  <span class="kw">stage</span>: deploy-dev
+  <span class="kw">image</span>: <span class="str">curlimages/curl:latest</span>
+  <span class="kw">needs</span>: [<span class="str">deploy-dev</span>]
+  <span class="kw">script</span>:
+    <span class="cmt"># Chờ service up (retry 10 lần)</span>
+    - <span class="str">for i in $(seq 1 10); do</span>
+    -   <span class="str">curl -f http://my-service.dev.svc.cluster.local/actuator/health</span>
+    -   <span class="str">&& echo "✅ Service healthy" && break</span>
+    -   <span class="str">|| echo "⏳ Waiting... ($i/10)" && sleep 15</span>
+    - <span class="str">done</span>
+    <span class="cmt"># Test endpoint chính</span>
+    - <span class="str">curl -f http://my-service.dev.svc.cluster.local/api/v1/ping</span></pre>
+    </div>
+
+    <div class="cards col3">
+      <div class="card">
+        <div class="card-ico">📈</div>
+        <div class="card-title">Prometheus</div>
+        <div class="card-desc">Scrape metrics từ <code>/actuator/prometheus</code>. Setup ServiceMonitor nếu dùng kube-prometheus-stack.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📊</div>
+        <div class="card-title">Grafana</div>
+        <div class="card-desc">Dashboard JVM metrics, HTTP request rate, error rate, latency (p50, p95, p99). Alert khi anomaly.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔔</div>
+        <div class="card-title">GitLab Alert</div>
+        <div class="card-desc">GitLab tích hợp alert policies, notify qua email/Slack khi pipeline fail hoặc deploy thất bại.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIPS -->
+  <section class="section" id="tips">
+    <div class="section-tag">16 — Tips & Pitfalls</div>
+    <h2>💡 Tips, Tricks & Common Pitfalls</h2>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Pitfall #1 — Image tag "latest"</div>
+      Không bao giờ dùng <code>:latest</code> trong production. Dùng commit SHA để mỗi deploy có tag duy nhất, có thể trace và rollback chính xác.
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Pitfall #2 — initialDelaySeconds quá thấp</div>
+      Spring Boot khởi động chậm (30-60s khi load beans, Liquibase migrations...). Set <code>initialDelaySeconds</code> đủ cao hoặc dùng <code>startupProbe</code> để tránh K8s restart pod liên tục.
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Pitfall #3 — Không set resource limits</div>
+      Pods không có resource limits có thể eat toàn bộ node resources, ảnh hưởng các services khác. Luôn set cả <code>requests</code> và <code>limits</code>.
+    </div>
+
+    <div class="callout err">
+      <div class="callout-label">🔴 Pitfall #4 — Secrets trong logs</div>
+      Tránh <code>echo $SECRET_VAR</code> trong script. GitLab mask variables nhưng nếu secret bị fragment thì vẫn có thể lộ. Dùng file thay vì env var cho sensitive data dài.
+    </div>
+
+    <h3>✅ Best Practices tổng hợp</h3>
+    <ul class="feat-list">
+      <li><strong>Tag image bằng $CI_COMMIT_SHORT_SHA</strong> — traceability từ image → commit</li>
+      <li><strong>Dùng needs: []</strong> — giảm pipeline time bằng cách chạy jobs song song thay vì tuần tự theo stage</li>
+      <li><strong>--atomic trong helm upgrade</strong> — auto rollback nếu deployment fail</li>
+      <li><strong>Separate kubeconfig per environment</strong> — dev/staging/prod dùng kubeconfig riêng, không share</li>
+      <li><strong>Protected + Masked variables</strong> cho prod secrets — không accessible từ non-protected branches</li>
+      <li><strong>Cache key theo pom.xml checksum</strong> — tự invalidate khi deps thay đổi</li>
+      <li><strong>artifacts: expire_in</strong> — không để artifacts tích tụ tốn storage</li>
+      <li><strong>Limit Docker layer cache</strong> — COPY pom.xml trước rồi mvn dependency:go-offline để tận dụng Docker layer cache</li>
+      <li><strong>Non-root user trong Docker</strong> — security best practice</li>
+      <li><strong>startupProbe</strong> cho Spring Boot — tốt hơn initialDelaySeconds cứng nhắc</li>
+    </ul>
+
+    <h3>🛠 Debugging Commands</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <div class="code-lang">Shell · debugging K8s deploy</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Xem trạng thái pods</span>
+kubectl get pods -n production -l app=my-service
+
+<span class="cmt"># Xem logs pod (follow)</span>
+kubectl logs -f deployment/my-service -n production
+
+<span class="cmt"># Describe pod để xem events (crash reason)</span>
+kubectl describe pod <pod-name> -n production
+
+<span class="cmt"># Xem rollout status</span>
+kubectl rollout status deployment/my-service -n production
+
+<span class="cmt"># Xem lịch sử Helm</span>
+helm history my-service -n production
+
+<span class="cmt"># Xem values đang dùng</span>
+helm get values my-service -n production
+
+<span class="cmt"># Dry-run helm upgrade (không apply thật)</span>
+helm upgrade --dry-run my-service ./helm \
+  --set image.tag=abc12345 -n production
+
+<span class="cmt"># Port-forward để test locally</span>
+kubectl port-forward svc/my-service 8080:80 -n production</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Progress bar
+  const prog = document.getElementById('prog');
+  const pct = document.getElementById('pct');
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('main');
+    const scrollTop = window.scrollY;
+    const docH = el.scrollHeight - window.innerHeight;
+    const p = Math.min(100, Math.round(scrollTop / docH * 100));
+    prog.style.width = p + '%';
+    pct.textContent = p + '%';
+  });
+
+  // Active sidebar link
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.sb-link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.sb-link[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+
+  // Copy button
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Mobile sidebar
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
+  }
+</script>
+</body>
+</html>ß
