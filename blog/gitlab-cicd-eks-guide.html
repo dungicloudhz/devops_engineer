@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitLab CI/CD × EKS — Hướng dẫn toàn diện</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════════ */
+    :root {
+      --bg: #08090d;
+      --bg2: #0e1018;
+      --surface: #131520;
+      --surface2: #1a1d2e;
+      --surface3: #21253a;
+      --border: #252840;
+      --border2: #2f3350;
+      --accent: #7c6af8;
+      --accent-lt: #a99dfa;
+      --amber: #f5a623;
+      --green: #3ecf8e;
+      --red: #f06b6b;
+      --text: #dde1f5;
+      --muted: #6b7094;
+      --muted2: #8b90b8;
+      --nav-w: 272px;
+      --radius: 10px;
+      --font-body: 'Instrument Sans', sans-serif;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.75; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* ═══════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════ */
+    #sidebar {
+      width: var(--nav-w); min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border); position: fixed;
+      top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 200;
+      display: flex; flex-direction: column; transition: transform .3s ease;
+    }
+    .sb-header {
+      padding: 24px 20px 18px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(124,106,248,.06) 0%, transparent 100%);
+    }
+    .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .sb-orb {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #e8722e 0%, #fc4a1a 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; box-shadow: 0 4px 18px rgba(232,114,46,.35);
+    }
+    .sb-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+    .sb-ver {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 11px;
+      color: var(--muted); font-family: var(--font-mono); background: var(--surface2);
+      padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);
+    }
+    .sb-ver .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .sb-progress { padding: 14px 20px 10px; border-bottom: 1px solid var(--border); }
+    .sb-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .sb-progress-bar { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .sb-progress-fill { height: 100%; background: linear-gradient(90deg, #e8722e, #fc4a1a); border-radius: 99px; width: 0%; transition: width .4s ease; }
+
+    .sb-section { padding: 18px 14px 6px; }
+    .sb-section-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 0 6px; margin-bottom: 5px; }
+    .sb-link {
+      display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+      border-radius: 8px; text-decoration: none; color: var(--muted2); font-size: 13px;
+      transition: all .18s; cursor: pointer; margin-bottom: 1px; position: relative;
+    }
+    .sb-link:hover { background: var(--surface); color: var(--text); }
+    .sb-link.active { background: rgba(232,114,46,.12); color: #f0a06a; }
+    .sb-link.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 2px; background: #e8722e; border-radius: 1px;
+    }
+    .sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+    .sb-badge {
+      margin-left: auto; font-size: 10px; background: rgba(232,114,46,.18);
+      color: #f0a06a; padding: 1px 7px; border-radius: 99px; font-family: var(--font-mono);
+    }
+    .sb-footer { margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+    /* ═══════════════════════════════════════════════
+       MAIN
+    ═══════════════════════════════════════════════ */
+    main { margin-left: var(--nav-w); flex: 1; padding: 0; max-width: 900px; }
+    .section { padding: 60px 64px; border-bottom: 1px solid var(--border); scroll-margin-top: 20px; animation: fadeUp .5s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 7px; font-size: 11px;
+      letter-spacing: .1em; text-transform: uppercase; color: #f0a06a;
+      font-weight: 600; font-family: var(--font-mono); margin-bottom: 14px;
+    }
+    .section-tag::before { content: ''; width: 22px; height: 1px; background: currentColor; }
+
+    h1 { font-family: var(--font-head); font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 20px; }
+    h1 .grad { background: linear-gradient(135deg, #fff 0%, #f0a06a 60%, #fc4a1a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h2 { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; color: var(--text); }
+    h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
+    p { color: #9fa3c4; margin-bottom: 14px; }
+
+    /* CALLOUTS */
+    .callout { border-left: 3px solid #e8722e; padding: 14px 18px; background: rgba(232,114,46,.07); border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 13.5px; color: #bfc3e0; }
+    .callout-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #f0a06a; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .callout.warn { border-color: var(--amber); background: rgba(245,166,35,.07); }
+    .callout.warn .callout-label { color: var(--amber); }
+    .callout.good { border-color: var(--green); background: rgba(62,207,142,.07); }
+    .callout.good .callout-label { color: var(--green); }
+    .callout.err { border-color: var(--red); background: rgba(240,107,107,.07); }
+    .callout.err .callout-label { color: var(--red); }
+    .callout.info { border-color: #7c6af8; background: rgba(124,106,248,.07); }
+    .callout.info .callout-label { color: var(--accent-lt); }
+
+    /* CARDS */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+    .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: border-color .2s, transform .2s, box-shadow .2s; cursor: default; }
+    .card:hover { border-color: #e8722e; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,114,46,.12); }
+    .card-ico { font-size: 22px; margin-bottom: 10px; }
+    .card-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: var(--text); }
+    .card-desc { font-size: 13px; color: var(--muted2); line-height: 1.55; }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th { text-align: left; padding: 11px 16px; background: var(--surface2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #bbbdd6; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    td strong { color: var(--text); }
+
+    /* TAGS */
+    .tag { padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono); }
+    .tag-new { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-warn { background: rgba(245,166,35,.15); color: var(--amber); }
+    .tag-info { background: rgba(124,106,248,.15); color: var(--accent-lt); }
+    .tag-err { background: rgba(240,107,107,.15); color: var(--red); }
+
+    /* STEPS */
+    .steps { margin: 20px 0; }
+    .step { display: flex; gap: 18px; margin-bottom: 24px; align-items: flex-start; }
+    .step-num {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #e8722e, #fc4a1a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0; color: #fff;
+      font-family: var(--font-mono); box-shadow: 0 4px 14px rgba(232,114,46,.3);
+    }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .step-desc { font-size: 13.5px; color: var(--muted2); }
+
+    /* FEAT LIST */
+    .feat-list { list-style: none; margin: 10px 0; }
+    .feat-list li { padding: 9px 0 9px 22px; position: relative; font-size: 14px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.6); }
+    .feat-list li:last-child { border: none; }
+    .feat-list li::before { content: '▸'; position: absolute; left: 0; color: #e8722e; }
+    .feat-list li strong { color: var(--text); }
+
+    /* CODE BLOCK */
+    .code-wrap { background: #07080d; border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; overflow: hidden; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot:nth-child(1) { background: #ff5f57; }
+    .code-dot:nth-child(2) { background: #febc2e; }
+    .code-dot:nth-child(3) { background: #28c840; }
+    .code-lang { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .05em; }
+    .copy-btn { font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 5px; cursor: pointer; transition: all .18s; }
+    .copy-btn:hover { color: var(--text); border-color: #e8722e; }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    pre { padding: 20px 22px; font-family: var(--font-mono); font-size: 13px; line-height: 1.75; overflow-x: auto; color: #9fa3c4; }
+    .kw { color: var(--accent-lt); }
+    .str { color: var(--green); }
+    .cmt { color: var(--muted); font-style: italic; }
+    .num { color: var(--amber); }
+    .fn { color: #7dd3fc; }
+    .cls { color: #f0abfc; }
+    .prop { color: #93c5fd; }
+    .op { color: #f0a06a; }
+
+    /* PIPELINE VISUAL */
+    .pipeline { display: flex; align-items: center; gap: 0; margin: 20px 0; flex-wrap: wrap; }
+    .pipeline-stage {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 18px; min-width: 100px; position: relative; transition: all .2s;
+    }
+    .pipeline-stage:hover { border-color: #e8722e; box-shadow: 0 4px 18px rgba(232,114,46,.15); }
+    .pipeline-arrow { color: var(--muted); font-size: 18px; margin: 0 4px; flex-shrink: 0; }
+    .ps-ico { font-size: 20px; }
+    .ps-name { font-size: 11px; font-weight: 700; color: var(--text); text-align: center; }
+    .ps-tag { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+    .ps-ok { border-color: var(--green); background: rgba(62,207,142,.05); }
+    .ps-ok .ps-name { color: var(--green); }
+
+    /* ARCH DIAGRAM */
+    .arch-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 28px; margin: 20px 0; position: relative; overflow: hidden;
+    }
+    .arch-box::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #e8722e, #fc4a1a, transparent);
+    }
+    .arch-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .arch-node {
+      background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px;
+      padding: 12px 16px; text-align: center; min-width: 110px; transition: all .2s;
+    }
+    .arch-node:hover { border-color: #e8722e; transform: translateY(-2px); }
+    .arch-node-ico { font-size: 20px; margin-bottom: 4px; }
+    .arch-node-name { font-size: 11px; font-weight: 600; color: var(--text); }
+    .arch-node-sub { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+    .arch-conn { display: flex; justify-content: center; margin: 4px 0; color: var(--muted); font-size: 18px; }
+    .arch-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); text-align: center; margin: -6px 0 4px; }
+
+    /* HERO BADGE ROW */
+    .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0; }
+    .hero-badge {
+      display: flex; align-items: center; gap: 7px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 99px; padding: 6px 14px;
+      font-size: 12px; color: var(--muted2); font-family: var(--font-mono);
+    }
+    .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+    /* TIMELINE */
+    .timeline { margin: 20px 0; }
+    .tl-item { display: flex; gap: 16px; margin-bottom: 20px; }
+    .tl-line { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: #e8722e; flex-shrink: 0; margin-top: 4px; box-shadow: 0 0 0 3px rgba(232,114,46,.2); }
+    .tl-tail { flex: 1; width: 1px; background: var(--border); margin-top: 4px; }
+    .tl-content { flex: 1; padding-bottom: 8px; }
+    .tl-title { font-weight: 600; color: var(--text); font-size: 14px; margin-bottom: 4px; }
+    .tl-desc { font-size: 13px; color: var(--muted2); }
+
+    /* ENV TABS */
+    .tab-bar { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; background: var(--surface2); border: none; color: var(--muted2); cursor: pointer; transition: all .18s; font-family: var(--font-body); border-right: 1px solid var(--border); }
+    .tab-btn:last-child { border-right: none; }
+    .tab-btn.active { background: rgba(232,114,46,.15); color: #f0a06a; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      #sidebar { transform: translateX(-100%); }
+      main { margin-left: 0; }
+      .section { padding: 40px 24px; }
+      h1 { font-size: 32px; }
+      .cards { grid-template-columns: 1fr; }
+      .cards.col3 { grid-template-columns: 1fr; }
+      .pipeline { flex-direction: column; }
+      .pipeline-arrow { transform: rotate(90deg); }
+    }
+
+    /* HAMBURGER */
+    #ham { display: none; position: fixed; top: 14px; right: 16px; z-index: 300; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 18px; color: var(--text); }
+    @media (max-width: 768px) { #ham { display: block; } #sidebar.open { transform: translateX(0); } }
+  </style>
+</head>
+
+<body>
+
+<button id="ham" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">🦊</div>
+      <div class="sb-title">GitLab CI × EKS</div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span>GitLab 17 · EKS 1.30</div>
+  </div>
+
+  <div class="sb-progress">
+    <div class="sb-progress-label"><span>Tiến độ đọc</span><span id="pct">0%</span></div>
+    <div class="sb-progress-bar"><div class="sb-progress-fill" id="prog"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Bắt đầu</div>
+    <a class="sb-link active" onclick="scrollTo('intro')"><span class="sb-icon">🏠</span>Tổng quan</a>
+    <a class="sb-link" onclick="scrollTo('concepts')"><span class="sb-icon">💡</span>Concepts cơ bản</a>
+    <a class="sb-link" onclick="scrollTo('arch')"><span class="sb-icon">🏗️</span>Kiến trúc hệ thống</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Thiết lập</div>
+    <a class="sb-link" onclick="scrollTo('eks-setup')"><span class="sb-icon">☸️</span>Cài đặt EKS<span class="sb-badge">AWS</span></a>
+    <a class="sb-link" onclick="scrollTo('gitlab-setup')"><span class="sb-icon">🦊</span>Cài đặt GitLab Runner</a>
+    <a class="sb-link" onclick="scrollTo('iam-ecr')"><span class="sb-icon">🔑</span>IAM & ECR</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Pipeline</div>
+    <a class="sb-link" onclick="scrollTo('pipeline-basic')"><span class="sb-icon">⚙️</span>Pipeline cơ bản</a>
+    <a class="sb-link" onclick="scrollTo('stages')"><span class="sb-icon">🔄</span>Stages chi tiết</a>
+    <a class="sb-link" onclick="scrollTo('helm')"><span class="sb-icon">⛵</span>Deploy với Helm</a>
+    <a class="sb-link" onclick="scrollTo('envs')"><span class="sb-icon">🌿</span>Môi trường đa nhánh</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Nâng cao</div>
+    <a class="sb-link" onclick="scrollTo('secrets')"><span class="sb-icon">🔐</span>Secrets & Config<span class="sb-badge">NEW</span></a>
+    <a class="sb-link" onclick="scrollTo('rollback')"><span class="sb-icon">↩️</span>Rollback & Canary</a>
+    <a class="sb-link" onclick="scrollTo('monitoring')"><span class="sb-icon">📊</span>Monitoring & Alert</a>
+    <a class="sb-link" onclick="scrollTo('tips')"><span class="sb-icon">✨</span>Best Practices</a>
+  </div>
+
+  <div class="sb-footer">GitLab CI × EKS Guide · 2025</div>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main>
+
+  <!-- ── INTRO ── -->
+  <section class="section" id="intro">
+    <div class="section-tag">Giới thiệu · 01</div>
+    <h1><span class="grad">GitLab CI/CD<br>kết hợp EKS</span></h1>
+    <p>Hướng dẫn toàn diện để thiết lập pipeline CI/CD với GitLab và triển khai ứng dụng lên Amazon Elastic Kubernetes Service (EKS) — từ cấu hình cơ bản đến production-grade deployment với Helm, canary releases, và observability.</p>
+
+    <div class="badge-row">
+      <div class="hero-badge"><span class="dot"></span>GitLab 17.x</div>
+      <div class="hero-badge"><span class="dot"></span>EKS 1.30+</div>
+      <div class="hero-badge"><span class="dot"></span>Helm 3.x</div>
+      <div class="hero-badge"><span class="dot"></span>Docker BuildKit</div>
+      <div class="hero-badge"><span class="dot"></span>IRSA / OIDC</div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">ℹ️ Prerequisites</div>
+      Bạn cần có: AWS Account với quyền EKS/ECR/IAM, GitLab account (Self-hosted hoặc GitLab.com), và đã cài sẵn <code>kubectl</code>, <code>eksctl</code>, <code>helm</code>, <code>aws-cli</code> trên máy local.
+    </div>
+
+    <div class="pipeline">
+      <div class="pipeline-stage ps-ok"><div class="ps-ico">📝</div><div class="ps-name">Commit</div><div class="ps-tag">git push</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage ps-ok"><div class="ps-ico">🧪</div><div class="ps-name">Test</div><div class="ps-tag">unit + lint</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage"><div class="ps-ico">🐳</div><div class="ps-name">Build</div><div class="ps-tag">docker + ECR</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage"><div class="ps-ico">🔍</div><div class="ps-name">Scan</div><div class="ps-tag">Trivy / SAST</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage"><div class="ps-ico">⛵</div><div class="ps-name">Deploy</div><div class="ps-tag">Helm → EKS</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage"><div class="ps-ico">✅</div><div class="ps-name">Verify</div><div class="ps-tag">smoke test</div></div>
+    </div>
+  </section>
+
+  <!-- ── CONCEPTS ── -->
+  <section class="section" id="concepts">
+    <div class="section-tag">Khái niệm · 02</div>
+    <h2>💡 Concepts cơ bản</h2>
+    <p>Hiểu rõ các thành phần trước khi bắt đầu giúp bạn debug và tùy chỉnh pipeline nhanh hơn nhiều.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">🦊</div>
+        <div class="card-title">GitLab CI/CD</div>
+        <div class="card-desc">File <code>.gitlab-ci.yml</code> định nghĩa toàn bộ pipeline. GitLab Runner nhận job, thực thi trong Docker container hoặc Kubernetes pod, rồi báo cáo kết quả về GitLab.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">☸️</div>
+        <div class="card-title">Amazon EKS</div>
+        <div class="card-desc">Managed Kubernetes service của AWS. EKS quản lý control plane (API server, etcd), bạn chỉ cần lo worker nodes qua Node Groups hoặc Fargate.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📦</div>
+        <div class="card-title">Amazon ECR</div>
+        <div class="card-desc">Elastic Container Registry — private Docker registry của AWS. GitLab CI build image, push lên ECR, rồi EKS pull về khi deploy.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">⛵</div>
+        <div class="card-title">Helm Charts</div>
+        <div class="card-desc">Package manager cho Kubernetes. Helm cho phép template hóa manifest YAML, quản lý version, rollback dễ dàng với <code>helm rollback</code>.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔑</div>
+        <div class="card-title">IRSA (IAM Roles for SA)</div>
+        <div class="card-desc">Cơ chế best practice để cấp quyền AWS cho pod trong EKS mà không cần access key cứng. GitLab Runner pod dùng IAM role để push ECR, deploy EKS.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🌿</div>
+        <div class="card-title">GitLab Environments</div>
+        <div class="card-desc">Mỗi nhánh <code>dev</code>, <code>staging</code>, <code>main</code> map tới một environment. Cho phép track deployment history, rollback UI, và protected deployments.</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Thành phần</th><th>Vai trò</th><th>Managed by</th></tr>
+        <tr><td><strong>GitLab Runner</strong></td><td>Thực thi CI jobs trong container/pod</td><td>Bạn (self-managed) hoặc GitLab SaaS</td></tr>
+        <tr><td><strong>ECR Repository</strong></td><td>Lưu trữ Docker images</td><td>AWS</td></tr>
+        <tr><td><strong>EKS Cluster</strong></td><td>Chạy workload Kubernetes</td><td>AWS (control plane) + Bạn (nodes)</td></tr>
+        <tr><td><strong>Helm Release</strong></td><td>Quản lý deploy + versioning</td><td>Bạn (qua GitLab CI)</td></tr>
+        <tr><td><strong>OIDC Provider</strong></td><td>Xác thực GitLab ↔ AWS không cần secret</td><td>AWS IAM</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── ARCH ── -->
+  <section class="section" id="arch">
+    <div class="section-tag">Kiến trúc · 03</div>
+    <h2>🏗️ Kiến trúc hệ thống</h2>
+    <p>Luồng dữ liệu từ developer commit code đến lúc ứng dụng chạy trên EKS production.</p>
+
+    <div class="arch-box">
+      <div class="arch-row">
+        <div class="arch-node">
+          <div class="arch-node-ico">👨‍💻</div>
+          <div class="arch-node-name">Developer</div>
+          <div class="arch-node-sub">git push</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--muted);font-size:20px;margin:0 4px">→</div>
+        <div class="arch-node">
+          <div class="arch-node-ico">🦊</div>
+          <div class="arch-node-name">GitLab</div>
+          <div class="arch-node-sub">Trigger pipeline</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--muted);font-size:20px;margin:0 4px">→</div>
+        <div class="arch-node">
+          <div class="arch-node-ico">🏃</div>
+          <div class="arch-node-name">GitLab Runner</div>
+          <div class="arch-node-sub">K8s executor</div>
+        </div>
+      </div>
+      <div class="arch-conn">↓</div>
+      <div class="arch-label">Build & Push</div>
+      <div class="arch-row">
+        <div class="arch-node">
+          <div class="arch-node-ico">🐳</div>
+          <div class="arch-node-name">Docker Build</div>
+          <div class="arch-node-sub">BuildKit</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--muted);font-size:20px;margin:0 4px">→</div>
+        <div class="arch-node">
+          <div class="arch-node-ico">📦</div>
+          <div class="arch-node-name">Amazon ECR</div>
+          <div class="arch-node-sub">Image registry</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--muted);font-size:20px;margin:0 4px">→</div>
+        <div class="arch-node">
+          <div class="arch-node-ico">⛵</div>
+          <div class="arch-node-name">Helm Deploy</div>
+          <div class="arch-node-sub">helm upgrade</div>
+        </div>
+      </div>
+      <div class="arch-conn">↓</div>
+      <div class="arch-label">Kubernetes Apply</div>
+      <div class="arch-row">
+        <div class="arch-node">
+          <div class="arch-node-ico">☸️</div>
+          <div class="arch-node-name">EKS Cluster</div>
+          <div class="arch-node-sub">dev / staging / prod</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--muted);font-size:20px;margin:0 4px">→</div>
+        <div class="arch-node">
+          <div class="arch-node-ico">📊</div>
+          <div class="arch-node-name">CloudWatch</div>
+          <div class="arch-node-sub">Logs & Metrics</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--muted);font-size:20px;margin:0 4px">→</div>
+        <div class="arch-node">
+          <div class="arch-node-ico">🔔</div>
+          <div class="arch-node-name">Alerting</div>
+          <div class="arch-node-sub">SNS / Slack</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EKS SETUP ── -->
+  <section class="section" id="eks-setup">
+    <div class="section-tag">Thiết lập · 04</div>
+    <h2>☸️ Cài đặt EKS Cluster</h2>
+    <p>Tạo EKS cluster bằng <code>eksctl</code> — công cụ CLI chính thức, đơn giản nhất để bootstrap EKS.</p>
+
+    <h3>📄 Tạo cluster config file</h3>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">cluster.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># cluster.yaml</span>
+<span class="kw">apiVersion</span>: <span class="str">eksctl.io/v1alpha5</span>
+<span class="kw">kind</span>: <span class="str">ClusterConfig</span>
+
+<span class="kw">metadata</span>:
+  <span class="prop">name</span>: <span class="str">my-app-cluster</span>
+  <span class="prop">region</span>: <span class="str">ap-southeast-1</span>    <span class="cmt"># Singapore</span>
+  <span class="prop">version</span>: <span class="str">"1.30"</span>
+
+<span class="kw">iam</span>:
+  <span class="prop">withOIDC</span>: <span class="num">true</span>               <span class="cmt"># Bắt buộc cho IRSA</span>
+
+<span class="kw">managedNodeGroups</span>:
+  - <span class="prop">name</span>: <span class="str">workers</span>
+    <span class="prop">instanceType</span>: <span class="str">t3.medium</span>
+    <span class="prop">minSize</span>: <span class="num">2</span>
+    <span class="prop">maxSize</span>: <span class="num">6</span>
+    <span class="prop">desiredCapacity</span>: <span class="num">3</span>
+    <span class="prop">amiFamily</span>: <span class="str">AmazonLinux2</span>
+    <span class="prop">privateNetworking</span>: <span class="num">true</span>  <span class="cmt"># Nodes ở private subnet</span>
+    <span class="prop">labels</span>:
+      <span class="prop">role</span>: <span class="str">worker</span>
+    <span class="prop">tags</span>:
+      <span class="prop">Environment</span>: <span class="str">production</span>
+      <span class="prop">Team</span>: <span class="str">platform</span>
+
+<span class="kw">addons</span>:
+  - <span class="prop">name</span>: <span class="str">vpc-cni</span>
+  - <span class="prop">name</span>: <span class="str">coredns</span>
+  - <span class="prop">name</span>: <span class="str">kube-proxy</span>
+  - <span class="prop">name</span>: <span class="str">aws-ebs-csi-driver</span>
+
+<span class="kw">cloudWatch</span>:
+  <span class="prop">clusterLogging</span>:
+    <span class="prop">enableTypes</span>: [<span class="str">"api"</span>, <span class="str">"audit"</span>, <span class="str">"authenticator"</span>]</pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Tạo cluster</div>
+          <div class="step-desc">Chạy lệnh bên dưới — quá trình mất khoảng 15-20 phút để AWS provision đầy đủ.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Tạo cluster từ config file</span>
+<span class="fn">eksctl</span> create cluster -f cluster.yaml
+
+<span class="cmt"># Xác nhận cluster đã sẵn sàng</span>
+<span class="fn">kubectl</span> get nodes
+<span class="fn">kubectl</span> get pods -A</pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Cài đặt AWS Load Balancer Controller</div>
+          <div class="step-desc">Cần thiết để expose service ra ngoài qua ALB/NLB.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Thêm Helm repo của EKS</span>
+<span class="fn">helm</span> repo add eks https://aws.github.io/eks-charts
+<span class="fn">helm</span> repo update
+
+<span class="cmt"># Cài AWS Load Balancer Controller</span>
+<span class="fn">helm</span> install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=my-app-cluster \
+  --set serviceAccount.create=<span class="num">false</span> \
+  --set serviceAccount.name=aws-load-balancer-controller</pre>
+    </div>
+  </section>
+
+  <!-- ── GITLAB RUNNER ── -->
+  <section class="section" id="gitlab-setup">
+    <div class="section-tag">Thiết lập · 05</div>
+    <h2>🏃 Cài đặt GitLab Runner trên EKS</h2>
+    <p>Chạy GitLab Runner ngay trong EKS cluster bằng Helm chart chính thức. Runner sẽ tạo pod riêng cho mỗi CI job.</p>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Tại sao deploy Runner vào EKS?</div>
+      Runner chạy trong cluster → có thể dùng IRSA để lấy AWS credentials tự động, không cần access key cứng. Mỗi job chạy trong pod isolated, sau khi xong pod tự xóa.
+    </div>
+
+    <h3>🔑 Lấy Registration Token từ GitLab</h3>
+    <p>Vào <strong>GitLab → Project → Settings → CI/CD → Runners → New project runner</strong>. Chọn tag (ví dụ: <code>eks</code>), copy Registration Token.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash · Cài GitLab Runner qua Helm</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Thêm GitLab Helm repo</span>
+<span class="fn">helm</span> repo add gitlab https://charts.gitlab.io
+<span class="fn">helm</span> repo update
+
+<span class="cmt"># Tạo namespace cho runner</span>
+<span class="fn">kubectl</span> create namespace gitlab-runner
+
+<span class="cmt"># Cài đặt runner</span>
+<span class="fn">helm</span> install gitlab-runner gitlab/gitlab-runner \
+  --namespace gitlab-runner \
+  --set gitlabUrl=https://gitlab.com \
+  --set runnerRegistrationToken=<span class="str">YOUR_TOKEN_HERE</span> \
+  --set runners.tags=<span class="str">"eks,docker,kubernetes"</span> \
+  --set runners.privileged=<span class="num">true</span> \
+  --set rbac.create=<span class="num">true</span> \
+  --set runners.executor=<span class="str">kubernetes</span></pre>
+    </div>
+
+    <h3>⚙️ Tuỳ chỉnh Runner với values.yaml</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">runner-values.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">gitlabUrl</span>: <span class="str">https://gitlab.com</span>
+
+<span class="kw">runners</span>:
+  <span class="prop">executor</span>: <span class="str">kubernetes</span>
+  <span class="prop">tags</span>: <span class="str">"eks,aws"</span>
+  <span class="prop">privileged</span>: <span class="num">true</span>        <span class="cmt"># Cần cho Docker-in-Docker</span>
+
+  <span class="prop">kubernetes</span>:
+    <span class="prop">namespace</span>: <span class="str">gitlab-runner</span>
+    <span class="prop">image</span>: <span class="str">alpine:3.18</span>
+    <span class="prop">cpuLimit</span>: <span class="str">"2"</span>
+    <span class="prop">memoryLimit</span>: <span class="str">2Gi</span>
+    <span class="prop">cpuRequests</span>: <span class="str">"500m"</span>
+    <span class="prop">memoryRequests</span>: <span class="str">512Mi</span>
+    <span class="prop">serviceAccountName</span>: <span class="str">gitlab-runner</span>  <span class="cmt"># SA có IRSA</span>
+
+    <span class="prop">volumes</span>:
+      - <span class="prop">name</span>: <span class="str">docker-sock</span>
+        <span class="prop">hostPath</span>:
+          <span class="prop">path</span>: <span class="str">/var/run/docker.sock</span>
+
+<span class="kw">rbac</span>:
+  <span class="prop">create</span>: <span class="num">true</span>
+  <span class="prop">clusterWideAccess</span>: <span class="num">false</span>
+
+<span class="kw">metrics</span>:
+  <span class="prop">enabled</span>: <span class="num">true</span>   <span class="cmt"># Expose Prometheus metrics</span></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Cài với file values</span>
+<span class="fn">helm</span> upgrade --install gitlab-runner gitlab/gitlab-runner \
+  --namespace gitlab-runner \
+  -f runner-values.yaml
+
+<span class="cmt"># Kiểm tra runner pod đã Running chưa</span>
+<span class="fn">kubectl</span> get pods -n gitlab-runner</pre>
+    </div>
+  </section>
+
+  <!-- ── IAM & ECR ── -->
+  <section class="section" id="iam-ecr">
+    <div class="section-tag">Thiết lập · 06</div>
+    <h2>🔑 IAM & ECR — Xác thực không cần Secret Key</h2>
+    <p>Sử dụng IRSA (IAM Roles for Service Accounts) thay vì hardcode <code>AWS_ACCESS_KEY_ID</code>. An toàn hơn và không cần rotate key thủ công.</p>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Đừng hardcode AWS credentials</div>
+      Không bao giờ đặt <code>AWS_ACCESS_KEY_ID</code> và <code>AWS_SECRET_ACCESS_KEY</code> trực tiếp trong <code>.gitlab-ci.yml</code>. Dùng IRSA hoặc GitLab CI Variables (masked + protected).
+    </div>
+
+    <h3>1️⃣ Tạo ECR Repository</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash · AWS CLI</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Tạo ECR repo cho app</span>
+<span class="fn">aws</span> ecr create-repository \
+  --repository-name my-app \
+  --region ap-southeast-1 \
+  --image-scanning-configuration scanOnPush=<span class="num">true</span> \
+  --encryption-configuration encryptionType=AES256
+
+<span class="cmt"># Lấy ECR URL</span>
+<span class="fn">aws</span> ecr describe-repositories \
+  --repository-names my-app \
+  --query <span class="str">'repositories[0].repositoryUri'</span> \
+  --output text</pre>
+    </div>
+
+    <h3>2️⃣ Tạo IAM Role cho GitLab Runner (IRSA)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash · eksctl</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Tạo IAM service account với IRSA</span>
+<span class="fn">eksctl</span> create iamserviceaccount \
+  --name gitlab-runner \
+  --namespace gitlab-runner \
+  --cluster my-app-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser \
+  --attach-policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy \
+  --approve \
+  --override-existing-serviceaccounts</pre>
+    </div>
+
+    <h3>3️⃣ Thiết lập GitLab CI Variables</h3>
+    <p>Vào <strong>GitLab → Project → Settings → CI/CD → Variables</strong> và thêm các biến sau:</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Variable</th><th>Giá trị mẫu</th><th>Masked</th><th>Protected</th></tr>
+        <tr><td><code>AWS_REGION</code></td><td><code>ap-southeast-1</code></td><td>—</td><td>—</td></tr>
+        <tr><td><code>AWS_ACCOUNT_ID</code></td><td><code>123456789012</code></td><td>✅</td><td>—</td></tr>
+        <tr><td><code>ECR_REGISTRY</code></td><td><code>123456789012.dkr.ecr.ap-southeast-1.amazonaws.com</code></td><td>—</td><td>—</td></tr>
+        <tr><td><code>ECR_REPOSITORY</code></td><td><code>my-app</code></td><td>—</td><td>—</td></tr>
+        <tr><td><code>EKS_CLUSTER_NAME</code></td><td><code>my-app-cluster</code></td><td>—</td><td>—</td></tr>
+        <tr><td><code>KUBE_NAMESPACE_PROD</code></td><td><code>production</code></td><td>—</td><td>✅</td></tr>
+      </table>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Tip: Dùng GitLab OIDC với AWS</div>
+      GitLab 15.7+ hỗ trợ native OIDC federation với AWS. Cho phép CI job lấy AWS credentials tạm thời qua <code>id_token</code> mà không cần access key nào. Xem phần "Nâng cao" phía dưới để biết thêm.
+    </div>
+  </section>
+
+  <!-- ── PIPELINE BASIC ── -->
+  <section class="section" id="pipeline-basic">
+    <div class="section-tag">Pipeline · 07</div>
+    <h2>⚙️ Pipeline .gitlab-ci.yml cơ bản</h2>
+    <p>File <code>.gitlab-ci.yml</code> đặt ở root của repo. Đây là bộ khung đầy đủ cho một pipeline production-ready.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">.gitlab-ci.yml · Full pipeline</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># ─────────────────────────────────────────
+# GitLab CI/CD Pipeline for EKS Deployment
+# ─────────────────────────────────────────</span>
+
+<span class="kw">image</span>: <span class="str">docker:24-dind</span>
+
+<span class="kw">variables</span>:
+  <span class="prop">DOCKER_TLS_CERTDIR</span>: <span class="str">"/certs"</span>
+  <span class="prop">DOCKER_DRIVER</span>: <span class="str">overlay2</span>
+  <span class="prop">IMAGE_TAG</span>: <span class="str">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA</span>
+  <span class="prop">HELM_RELEASE_NAME</span>: <span class="str">my-app</span>
+  <span class="prop">HELM_CHART_PATH</span>: <span class="str">./charts/my-app</span>
+
+<span class="kw">stages</span>:
+  - <span class="str">test</span>
+  - <span class="str">build</span>
+  - <span class="str">scan</span>
+  - <span class="str">deploy-dev</span>
+  - <span class="str">deploy-staging</span>
+  - <span class="str">deploy-prod</span>
+
+<span class="cmt"># ── Shared config ──────────────────────────</span>
+<span class="kw">.aws-auth</span>: <span class="op">&amp;aws-auth</span>
+  <span class="kw">before_script</span>:
+    - <span class="fn">aws</span> ecr get-login-password --region $AWS_REGION |
+      docker login --username AWS --password-stdin $ECR_REGISTRY
+    - <span class="fn">aws</span> eks update-kubeconfig
+        --name $EKS_CLUSTER_NAME
+        --region $AWS_REGION
+
+<span class="cmt"># ── Stage: TEST ────────────────────────────</span>
+<span class="kw">unit-test</span>:
+  <span class="prop">stage</span>: <span class="str">test</span>
+  <span class="prop">image</span>: <span class="str">node:20-alpine</span>
+  <span class="prop">tags</span>: [<span class="str">eks</span>]
+  <span class="prop">cache</span>:
+    <span class="prop">key</span>: <span class="str">$CI_COMMIT_REF_SLUG</span>
+    <span class="prop">paths</span>: [<span class="str">node_modules/</span>]
+  <span class="prop">script</span>:
+    - <span class="fn">npm</span> ci
+    - <span class="fn">npm</span> run lint
+    - <span class="fn">npm</span> test -- --coverage
+  <span class="prop">coverage</span>: <span class="str">'/Lines\s*:\s*(\d+\.?\d*)%/'</span>
+  <span class="prop">artifacts</span>:
+    <span class="prop">reports</span>:
+      <span class="prop">coverage_report</span>:
+        <span class="prop">coverage_format</span>: <span class="str">cobertura</span>
+        <span class="prop">path</span>: <span class="str">coverage/cobertura-coverage.xml</span>
+
+<span class="cmt"># ── Stage: BUILD ───────────────────────────</span>
+<span class="kw">build-image</span>:
+  <span class="prop">stage</span>: <span class="str">build</span>
+  <span class="prop">tags</span>: [<span class="str">eks</span>]
+  <span class="op">&lt;&lt;</span>: <span class="op">*aws-auth</span>
+  <span class="prop">services</span>: [<span class="str">docker:24-dind</span>]
+  <span class="prop">script</span>:
+    - <span class="kw">export</span> FULL_IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$CI_COMMIT_SHA
+    - docker build
+        --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        --tag $FULL_IMAGE
+        --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        --build-arg VCS_REF=$CI_COMMIT_SHA .
+    - docker push $FULL_IMAGE
+    - docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  <span class="prop">only</span>: [<span class="str">main</span>, <span class="str">develop</span>, <span class="str">staging</span>]
+
+<span class="cmt"># ── Stage: SCAN ────────────────────────────</span>
+<span class="kw">trivy-scan</span>:
+  <span class="prop">stage</span>: <span class="str">scan</span>
+  <span class="prop">image</span>: <span class="str">aquasec/trivy:latest</span>
+  <span class="prop">tags</span>: [<span class="str">eks</span>]
+  <span class="prop">script</span>:
+    - <span class="fn">trivy</span> image
+        --exit-code 1
+        --severity HIGH,CRITICAL
+        --no-progress
+        $ECR_REGISTRY/$ECR_REPOSITORY:$CI_COMMIT_SHA
+  <span class="prop">allow_failure</span>: <span class="num">false</span>
+
+<span class="cmt"># ── Stage: DEPLOY DEV ──────────────────────</span>
+<span class="kw">deploy-dev</span>:
+  <span class="prop">stage</span>: <span class="str">deploy-dev</span>
+  <span class="prop">image</span>: <span class="str">alpine/helm:3.14.0</span>
+  <span class="prop">tags</span>: [<span class="str">eks</span>]
+  <span class="op">&lt;&lt;</span>: <span class="op">*aws-auth</span>
+  <span class="prop">environment</span>:
+    <span class="prop">name</span>: <span class="str">dev</span>
+    <span class="prop">url</span>: <span class="str">https://dev.myapp.com</span>
+  <span class="prop">script</span>:
+    - <span class="fn">helm</span> upgrade --install $HELM_RELEASE_NAME $HELM_CHART_PATH
+        --namespace dev --create-namespace
+        --set image.repository=$ECR_REGISTRY/$ECR_REPOSITORY
+        --set image.tag=$CI_COMMIT_SHA
+        --set ingress.host=dev.myapp.com
+        --values charts/values-dev.yaml
+        --wait --timeout 5m
+  <span class="prop">only</span>: [<span class="str">develop</span>]</pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">ℹ️ YAML Anchors</div>
+      Dòng <code>&amp;aws-auth</code> và <code>&lt;&lt;: *aws-auth</code> là YAML anchor — giúp tái sử dụng <code>before_script</code> không cần copy-paste. Rất hữu ích cho multi-stage pipeline.
+    </div>
+  </section>
+
+  <!-- ── STAGES ── -->
+  <section class="section" id="stages">
+    <div class="section-tag">Pipeline · 08</div>
+    <h2>🔄 Giải thích từng Stage</h2>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-tail"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">🧪 Test — Unit test & Lint</div>
+          <div class="tl-desc">Chạy mọi commit. Dùng cache <code>node_modules</code> để tăng tốc. Coverage report upload lên GitLab để hiển thị trên MR. Nếu fail → pipeline dừng ngay, không build.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-tail"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">🐳 Build — Docker image & push ECR</div>
+          <div class="tl-desc">Dùng <code>--cache-from latest</code> để tận dụng Docker layer cache → giảm build time 50-70%. Tag image bằng <code>$CI_COMMIT_SHA</code> để traceable 100%.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-tail"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">🔍 Scan — Trivy vulnerability scan</div>
+          <div class="tl-desc">Scan image trước khi deploy. Exit code 1 nếu có lỗ hổng HIGH/CRITICAL. Có thể thêm <code>--ignore-unfixed</code> để chỉ report lỗ đã có fix.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-tail"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">⛵ Deploy — Helm upgrade/install</div>
+          <div class="tl-desc"><code>helm upgrade --install</code> là idempotent — an toàn gọi nhiều lần. Flag <code>--wait</code> đảm bảo pipeline chỉ pass khi pods thực sự Running, không phải chỉ khi manifest apply xong.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">✅ Verify — Smoke test sau deploy</div>
+          <div class="tl-desc">Gọi health endpoint của app, xác nhận đúng version vừa deploy. Nếu fail → trigger rollback tự động.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>🎛️ Job control nâng cao</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">.gitlab-ci.yml · Rules thay vì only/except</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">deploy-prod</span>:
+  <span class="prop">stage</span>: <span class="str">deploy-prod</span>
+  <span class="prop">rules</span>:
+    <span class="cmt"># Chỉ chạy trên branch main</span>
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span>
+      <span class="prop">when</span>: <span class="str">manual</span>       <span class="cmt"># Cần approval thủ công</span>
+    <span class="cmt"># Không chạy nếu commit message có [skip prod]</span>
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_MESSAGE =~ /\[skip prod\]/'</span>
+      <span class="prop">when</span>: <span class="str">never</span>
+  <span class="prop">environment</span>:
+    <span class="prop">name</span>: <span class="str">production</span>
+    <span class="prop">url</span>: <span class="str">https://myapp.com</span>
+    <span class="prop">deployment_tier</span>: <span class="str">production</span>
+  <span class="prop">allow_failure</span>: <span class="num">false</span></pre>
+    </div>
+  </section>
+
+  <!-- ── HELM ── -->
+  <section class="section" id="helm">
+    <div class="section-tag">Pipeline · 09</div>
+    <h2>⛵ Deploy với Helm Charts</h2>
+    <p>Helm giúp quản lý Kubernetes manifest dưới dạng template. Cùng một chart, khác nhau chỉ ở <code>values.yaml</code> cho từng môi trường.</p>
+
+    <h3>📁 Cấu trúc Helm chart</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">Directory structure</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre>charts/my-app/
+├── Chart.yaml
+├── values.yaml          <span class="cmt"># Default values</span>
+├── values-dev.yaml      <span class="cmt"># Override cho dev</span>
+├── values-staging.yaml  <span class="cmt"># Override cho staging</span>
+├── values-prod.yaml     <span class="cmt"># Override cho production</span>
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── hpa.yaml         <span class="cmt"># HorizontalPodAutoscaler</span>
+    ├── configmap.yaml
+    └── _helpers.tpl</pre>
+    </div>
+
+    <h3>📄 Chart.yaml</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">charts/my-app/Chart.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: <span class="str">v2</span>
+<span class="kw">name</span>: <span class="str">my-app</span>
+<span class="kw">description</span>: <span class="str">My application Helm chart</span>
+<span class="kw">type</span>: <span class="str">application</span>
+<span class="kw">version</span>: <span class="str">0.1.0</span>
+<span class="kw">appVersion</span>: <span class="str">"1.0.0"</span></pre>
+    </div>
+
+    <h3>📄 deployment.yaml template</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">templates/deployment.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: <span class="str">apps/v1</span>
+<span class="kw">kind</span>: <span class="str">Deployment</span>
+<span class="kw">metadata</span>:
+  <span class="prop">name</span>: {{ <span class="fn">include</span> <span class="str">"my-app.fullname"</span> . }}
+  <span class="prop">labels</span>: {{- <span class="fn">include</span> <span class="str">"my-app.labels"</span> . | nindent 4 }}
+<span class="kw">spec</span>:
+  <span class="prop">replicas</span>: {{ <span class="fn">.Values.replicaCount</span> }}
+  <span class="prop">selector</span>:
+    <span class="prop">matchLabels</span>: {{- <span class="fn">include</span> <span class="str">"my-app.selectorLabels"</span> . | nindent 6 }}
+  <span class="prop">template</span>:
+    <span class="prop">spec</span>:
+      <span class="prop">containers</span>:
+        - <span class="prop">name</span>: {{ <span class="fn">.Chart.Name</span> }}
+          <span class="prop">image</span>: <span class="str">"{{ .Values.image.repository }}:{{ .Values.image.tag }}"</span>
+          <span class="prop">imagePullPolicy</span>: {{ <span class="fn">.Values.image.pullPolicy</span> }}
+          <span class="prop">ports</span>:
+            - <span class="prop">containerPort</span>: {{ <span class="fn">.Values.service.port</span> }}
+          <span class="prop">resources</span>:
+            {{- <span class="fn">toYaml</span> .Values.resources | nindent 12 }}
+          <span class="prop">livenessProbe</span>:
+            <span class="prop">httpGet</span>:
+              <span class="prop">path</span>: <span class="str">/health</span>
+              <span class="prop">port</span>: {{ <span class="fn">.Values.service.port</span> }}
+            <span class="prop">initialDelaySeconds</span>: <span class="num">30</span>
+          <span class="prop">readinessProbe</span>:
+            <span class="prop">httpGet</span>:
+              <span class="prop">path</span>: <span class="str">/ready</span>
+              <span class="prop">port</span>: {{ <span class="fn">.Values.service.port</span> }}</pre>
+    </div>
+
+    <h3>📄 values-prod.yaml</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">values-prod.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">replicaCount</span>: <span class="num">3</span>
+
+<span class="kw">image</span>:
+  <span class="prop">pullPolicy</span>: <span class="str">IfNotPresent</span>
+
+<span class="kw">resources</span>:
+  <span class="prop">requests</span>:
+    <span class="prop">cpu</span>: <span class="str">200m</span>
+    <span class="prop">memory</span>: <span class="str">256Mi</span>
+  <span class="prop">limits</span>:
+    <span class="prop">cpu</span>: <span class="str">500m</span>
+    <span class="prop">memory</span>: <span class="str">512Mi</span>
+
+<span class="kw">autoscaling</span>:
+  <span class="prop">enabled</span>: <span class="num">true</span>
+  <span class="prop">minReplicas</span>: <span class="num">3</span>
+  <span class="prop">maxReplicas</span>: <span class="num">10</span>
+  <span class="prop">targetCPUUtilizationPercentage</span>: <span class="num">70</span>
+
+<span class="kw">ingress</span>:
+  <span class="prop">enabled</span>: <span class="num">true</span>
+  <span class="prop">host</span>: <span class="str">myapp.com</span>
+  <span class="prop">tls</span>: <span class="num">true</span>
+
+<span class="kw">podDisruptionBudget</span>:
+  <span class="prop">enabled</span>: <span class="num">true</span>
+  <span class="prop">minAvailable</span>: <span class="num">2</span></pre>
+    </div>
+  </section>
+
+  <!-- ── ENVS ── -->
+  <section class="section" id="envs">
+    <div class="section-tag">Pipeline · 10</div>
+    <h2>🌿 Chiến lược đa môi trường</h2>
+    <p>Mỗi nhánh Git map tới một môi trường khác nhau. GitLab Environments giúp track deployment history và protect môi trường production.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Branch</th><th>Environment</th><th>EKS Namespace</th><th>Trigger</th><th>Approval</th></tr>
+        <tr><td><code>feature/*</code></td><td>—</td><td>—</td><td>Test only</td><td>—</td></tr>
+        <tr><td><code>develop</code></td><td>dev <span class="tag tag-new">auto</span></td><td><code>dev</code></td><td>Auto on push</td><td>—</td></tr>
+        <tr><td><code>staging</code></td><td>staging <span class="tag tag-info">semi</span></td><td><code>staging</code></td><td>Auto on push</td><td>—</td></tr>
+        <tr><td><code>main</code></td><td>production <span class="tag tag-warn">manual</span></td><td><code>production</code></td><td>Manual trigger</td><td>Required</td></tr>
+      </table>
+    </div>
+
+    <h3>🔀 Pipeline đầy đủ cho 3 môi trường</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">.gitlab-ci.yml · Multi-env</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Template job deploy tái sử dụng</span>
+<span class="kw">.deploy-template</span>: <span class="op">&amp;deploy-template</span>
+  <span class="prop">image</span>: <span class="str">dtzar/helm-kubectl:3.14</span>
+  <span class="prop">tags</span>: [<span class="str">eks</span>]
+  <span class="prop">before_script</span>:
+    - <span class="fn">aws</span> eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+    - <span class="fn">aws</span> ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+  <span class="prop">script</span>:
+    - <span class="fn">helm</span> upgrade --install my-app ./charts/my-app
+        --namespace $DEPLOY_NAMESPACE
+        --create-namespace
+        --set image.tag=$CI_COMMIT_SHA
+        --set image.repository=$ECR_REGISTRY/$ECR_REPOSITORY
+        -f ./charts/my-app/values-$DEPLOY_ENV.yaml
+        --wait --timeout 10m
+        --atomic    <span class="cmt"># Auto rollback nếu deploy fail</span>
+
+<span class="kw">deploy-dev</span>:
+  <span class="op">&lt;&lt;</span>: <span class="op">*deploy-template</span>
+  <span class="prop">stage</span>: <span class="str">deploy-dev</span>
+  <span class="prop">variables</span>:
+    <span class="prop">DEPLOY_ENV</span>: <span class="str">dev</span>
+    <span class="prop">DEPLOY_NAMESPACE</span>: <span class="str">dev</span>
+  <span class="prop">environment</span>: { <span class="prop">name</span>: <span class="str">dev</span>, <span class="prop">url</span>: <span class="str">https://dev.myapp.com</span> }
+  <span class="prop">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "develop"'</span>
+
+<span class="kw">deploy-staging</span>:
+  <span class="op">&lt;&lt;</span>: <span class="op">*deploy-template</span>
+  <span class="prop">stage</span>: <span class="str">deploy-staging</span>
+  <span class="prop">variables</span>:
+    <span class="prop">DEPLOY_ENV</span>: <span class="str">staging</span>
+    <span class="prop">DEPLOY_NAMESPACE</span>: <span class="str">staging</span>
+  <span class="prop">environment</span>: { <span class="prop">name</span>: <span class="str">staging</span>, <span class="prop">url</span>: <span class="str">https://staging.myapp.com</span> }
+  <span class="prop">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "staging"'</span>
+
+<span class="kw">deploy-prod</span>:
+  <span class="op">&lt;&lt;</span>: <span class="op">*deploy-template</span>
+  <span class="prop">stage</span>: <span class="str">deploy-prod</span>
+  <span class="prop">variables</span>:
+    <span class="prop">DEPLOY_ENV</span>: <span class="str">prod</span>
+    <span class="prop">DEPLOY_NAMESPACE</span>: <span class="str">production</span>
+  <span class="prop">environment</span>: { <span class="prop">name</span>: <span class="str">production</span>, <span class="prop">url</span>: <span class="str">https://myapp.com</span> }
+  <span class="prop">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span>
+      <span class="prop">when</span>: <span class="str">manual</span></pre>
+    </div>
+  </section>
+
+  <!-- ── SECRETS ── -->
+  <section class="section" id="secrets">
+    <div class="section-tag">Nâng cao · 11</div>
+    <h2>🔐 Secrets & Configuration Management</h2>
+    <p>Không bao giờ lưu secrets trong code. Dùng AWS Secrets Manager + External Secrets Operator để inject secret vào Kubernetes tự động.</p>
+
+    <div class="cards col3">
+      <div class="card">
+        <div class="card-ico">🔐</div>
+        <div class="card-title">AWS Secrets Manager</div>
+        <div class="card-desc">Lưu trữ secrets tập trung, có versioning, auto-rotation. Tích hợp tốt với EKS qua External Secrets Operator.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">⚙️</div>
+        <div class="card-title">External Secrets Operator</div>
+        <div class="card-desc">Sync secret từ AWS Secrets Manager / SSM Parameter Store vào Kubernetes Secret tự động. Không cần copy secret thủ công.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🗝️</div>
+        <div class="card-title">GitLab CI Variables</div>
+        <div class="card-desc">Non-sensitive config (URLs, region, cluster name) đặt trong GitLab Variables. Sensitive data dùng AWS Secrets Manager.</div>
+      </div>
+    </div>
+
+    <h3>📦 Cài External Secrets Operator</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">helm</span> repo add external-secrets https://charts.external-secrets.io
+<span class="fn">helm</span> install external-secrets external-secrets/external-secrets \
+  -n external-secrets --create-namespace</pre>
+    </div>
+
+    <h3>📄 ExternalSecret manifest</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">external-secret.yaml</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: <span class="str">external-secrets.io/v1beta1</span>
+<span class="kw">kind</span>: <span class="str">ExternalSecret</span>
+<span class="kw">metadata</span>:
+  <span class="prop">name</span>: <span class="str">my-app-secrets</span>
+  <span class="prop">namespace</span>: <span class="str">production</span>
+<span class="kw">spec</span>:
+  <span class="prop">refreshInterval</span>: <span class="str">1h</span>          <span class="cmt"># Sync mỗi 1 giờ</span>
+  <span class="prop">secretStoreRef</span>:
+    <span class="prop">name</span>: <span class="str">aws-secretsmanager</span>
+    <span class="prop">kind</span>: <span class="str">ClusterSecretStore</span>
+  <span class="prop">target</span>:
+    <span class="prop">name</span>: <span class="str">my-app-secrets</span>         <span class="cmt"># Kubernetes Secret tạo ra</span>
+    <span class="prop">creationPolicy</span>: <span class="str">Owner</span>
+  <span class="prop">data</span>:
+    - <span class="prop">secretKey</span>: <span class="str">DATABASE_URL</span>
+      <span class="prop">remoteRef</span>:
+        <span class="prop">key</span>: <span class="str">production/my-app/database</span>
+        <span class="prop">property</span>: <span class="str">url</span>
+    - <span class="prop">secretKey</span>: <span class="str">REDIS_PASSWORD</span>
+      <span class="prop">remoteRef</span>:
+        <span class="prop">key</span>: <span class="str">production/my-app/redis</span>
+        <span class="prop">property</span>: <span class="str">password</span></pre>
+    </div>
+
+    <h3>🔓 GitLab OIDC với AWS (không cần access key)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">.gitlab-ci.yml · OIDC Auth</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">assume-role-job</span>:
+  <span class="prop">id_tokens</span>:
+    <span class="prop">GITLAB_OIDC_TOKEN</span>:
+      <span class="prop">aud</span>: <span class="str">https://gitlab.com</span>
+  <span class="prop">script</span>:
+    - <span class="kw">export</span> $(printf <span class="str">"AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"</span>
+      $(aws sts assume-role-with-web-identity
+        --role-arn arn:aws:iam::$AWS_ACCOUNT_ID:role/GitLabCIRole
+        --role-session-name GitLabCI
+        --web-identity-token $GITLAB_OIDC_TOKEN
+        --query <span class="str">'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'</span>
+        --output text))
+    - <span class="fn">aws</span> sts get-caller-identity   <span class="cmt"># Xác nhận đã auth thành công</span></pre>
+    </div>
+  </section>
+
+  <!-- ── ROLLBACK ── -->
+  <section class="section" id="rollback">
+    <div class="section-tag">Nâng cao · 12</div>
+    <h2>↩️ Rollback & Canary Deployment</h2>
+
+    <h3>⚡ Rollback nhanh với Helm</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash · Rollback commands</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cmt"># Xem lịch sử release</span>
+<span class="fn">helm</span> history my-app -n production
+
+<span class="cmt"># Rollback về revision trước</span>
+<span class="fn">helm</span> rollback my-app -n production
+
+<span class="cmt"># Rollback về revision cụ thể</span>
+<span class="fn">helm</span> rollback my-app <span class="num">3</span> -n production --wait</pre>
+    </div>
+
+    <h3>🐦 Rollback tự động trong pipeline</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">.gitlab-ci.yml · Auto rollback</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">deploy-prod</span>:
+  <span class="prop">script</span>:
+    <span class="cmt"># --atomic: nếu deploy fail, Helm tự rollback</span>
+    - <span class="fn">helm</span> upgrade --install my-app ./charts/my-app
+        --namespace production
+        --set image.tag=$CI_COMMIT_SHA
+        --values ./charts/my-app/values-prod.yaml
+        --wait --timeout 10m
+        <span class="op">--atomic</span>
+    <span class="cmt"># Smoke test sau deploy</span>
+    - <span class="kw">export</span> APP_URL=https://myapp.com
+    - <span class="fn">curl</span> -f $APP_URL/health || (<span class="fn">helm</span> rollback my-app -n production && exit 1)
+
+<span class="kw">rollback-prod</span>:
+  <span class="prop">stage</span>: <span class="str">deploy-prod</span>
+  <span class="prop">when</span>: <span class="str">manual</span>       <span class="cmt"># Trigger thủ công khi cần</span>
+  <span class="prop">script</span>:
+    - <span class="fn">helm</span> rollback my-app -n production --wait
+  <span class="prop">environment</span>:
+    <span class="prop">name</span>: <span class="str">production</span>
+    <span class="prop">action</span>: <span class="str">stop</span>
+  <span class="prop">rules</span>:
+    - <span class="prop">if</span>: <span class="str">'$CI_COMMIT_BRANCH == "main"'</span></pre>
+    </div>
+
+    <h3>🕊️ Canary Deployment với Argo Rollouts</h3>
+    <div class="callout info">
+      <div class="callout-label">ℹ️ Argo Rollouts</div>
+      Thay <code>Deployment</code> bằng <code>Rollout</code> của Argo để có canary, blue/green native trong Kubernetes. Kết hợp với GitLab pipeline để progressive delivery.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">rollout.yaml · Canary strategy</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">apiVersion</span>: <span class="str">argoproj.io/v1alpha1</span>
+<span class="kw">kind</span>: <span class="str">Rollout</span>
+<span class="kw">metadata</span>:
+  <span class="prop">name</span>: <span class="str">my-app</span>
+<span class="kw">spec</span>:
+  <span class="prop">strategy</span>:
+    <span class="prop">canary</span>:
+      <span class="prop">steps</span>:
+        - <span class="prop">setWeight</span>: <span class="num">10</span>       <span class="cmt"># 10% traffic → canary</span>
+        - <span class="prop">pause</span>: { <span class="prop">duration</span>: <span class="str">5m</span> }
+        - <span class="prop">setWeight</span>: <span class="num">30</span>
+        - <span class="prop">pause</span>: { <span class="prop">duration</span>: <span class="str">10m</span> }
+        - <span class="prop">setWeight</span>: <span class="num">60</span>
+        - <span class="prop">pause</span>: { <span class="prop">duration</span>: <span class="str">5m</span> }
+        - <span class="prop">setWeight</span>: <span class="num">100</span>     <span class="cmt"># Full rollout</span></pre>
+    </div>
+  </section>
+
+  <!-- ── MONITORING ── -->
+  <section class="section" id="monitoring">
+    <div class="section-tag">Nâng cao · 13</div>
+    <h2>📊 Monitoring & Observability</h2>
+    <p>Sau khi deploy thành công, cần đảm bảo hệ thống đang hoạt động đúng. Stack phổ biến nhất là Prometheus + Grafana + Loki.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">📈</div>
+        <div class="card-title">Prometheus + Grafana</div>
+        <div class="card-desc">Collect metrics từ pods, nodes, và app. Grafana dashboard visualize real-time. Cài qua <code>kube-prometheus-stack</code> Helm chart.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📋</div>
+        <div class="card-title">AWS CloudWatch</div>
+        <div class="card-desc">Container Insights cho EKS logs và metrics tích hợp native với AWS. Không cần cài thêm agent nếu đã enable khi tạo cluster.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔔</div>
+        <div class="card-title">Alerting</div>
+        <div class="card-desc">AlertManager gửi alert qua Slack/PagerDuty khi có sự cố. Tích hợp với GitLab để tạo incident tự động.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔍</div>
+        <div class="card-title">Distributed Tracing</div>
+        <div class="card-desc">AWS X-Ray hoặc Jaeger trace request xuyên suốt microservices. Tìm bottleneck và debug latency issues dễ dàng.</div>
+      </div>
+    </div>
+
+    <h3>🛠️ Cài kube-prometheus-stack</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">bash</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="fn">helm</span> repo add prometheus-community https://prometheus-community.github.io/helm-charts
+<span class="fn">helm</span> install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace \
+  --set grafana.adminPassword=<span class="str">MySecurePass</span> \
+  --set prometheus.prometheusSpec.retention=<span class="str">30d</span>
+
+<span class="cmt"># Port-forward Grafana để xem local</span>
+<span class="fn">kubectl</span> port-forward svc/monitoring-grafana 3000:80 -n monitoring</pre>
+    </div>
+
+    <h3>📊 Pipeline deployment metric trong GitLab</h3>
+    <div class="callout good">
+      <div class="callout-label">✅ GitLab → Kubernetes Integration</div>
+      GitLab có thể kết nối với EKS cluster để hiển thị deployment status, pod logs, và metrics ngay trong GitLab UI. Vào <strong>Project → Operate → Kubernetes clusters</strong> để thêm cluster.
+    </div>
+  </section>
+
+  <!-- ── TIPS ── -->
+  <section class="section" id="tips">
+    <div class="section-tag">Best Practices · 14</div>
+    <h2>✨ Best Practices & Tips</h2>
+
+    <ul class="feat-list">
+      <li><strong>Dùng --atomic trong helm upgrade</strong> — Tự động rollback nếu deployment không healthy trong timeout. Tránh trạng thái stuck giữa chừng.</li>
+      <li><strong>Tag image bằng $CI_COMMIT_SHA</strong> — Luôn traceable, biết chính xác code nào đang chạy. Không bao giờ dùng <code>latest</code> trên production.</li>
+      <li><strong>Không dùng :latest tag cho base image</strong> — Pin version cụ thể (<code>node:20.11-alpine</code>) để build reproducible, tránh surprise.</li>
+      <li><strong>Cache node_modules / pip packages</strong> — Dùng GitLab CI cache key theo <code>$CI_COMMIT_REF_SLUG</code> kết hợp lock file hash để tăng tốc 3-5x.</li>
+      <li><strong>Dùng Multi-stage Dockerfile</strong> — Builder stage riêng, final image chỉ có runtime artifacts. Giảm image size 70-80%, bề mặt tấn công nhỏ hơn.</li>
+      <li><strong>Set resource requests và limits</strong> — Không để Kubernetes tự đoán. Requests đảm bảo scheduling, limits tránh noisy neighbor.</li>
+      <li><strong>Luôn có readinessProbe và livenessProbe</strong> — Kubernetes cần biết khi nào pod ready nhận traffic và khi nào cần restart.</li>
+      <li><strong>Namespace riêng cho mỗi môi trường</strong> — Cách ly dev/staging/prod bằng namespace. Kết hợp với RBAC để phân quyền rõ ràng.</li>
+      <li><strong>Protected branches + Protected environments</strong> — Chỉ Maintainer mới được deploy production. Kết hợp với required approvals.</li>
+      <li><strong>Lưu pipeline artifacts có expiry</strong> — Test reports, coverage files: expire sau 1 tuần. Image artifacts không lưu trong GitLab, dùng ECR.</li>
+    </ul>
+
+    <div class="callout err">
+      <div class="callout-label">❌ Anti-patterns cần tránh</div>
+      <strong>Không</strong> hardcode credentials trong <code>.gitlab-ci.yml</code> dù là secrets hay không. <strong>Không</strong> chạy production deploy tự động không cần approval. <strong>Không</strong> bỏ qua security scan vì "sẽ sửa sau". <strong>Không</strong> dùng <code>privileged: true</code> cho runner production nếu không cần thiết.
+    </div>
+
+    <h3>🚀 Tối ưu build time</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Kỹ thuật</th><th>Tiết kiệm</th><th>Cách làm</th></tr>
+        <tr><td><strong>Docker layer cache</strong></td><td>50-70%</td><td><code>--cache-from latest</code></td></tr>
+        <tr><td><strong>GitLab CI cache</strong></td><td>30-60%</td><td>Cache <code>node_modules</code>, <code>.m2</code></td></tr>
+        <tr><td><strong>Parallel jobs</strong></td><td>40-60%</td><td><code>parallel: 4</code> cho test</td></tr>
+        <tr><td><strong>DAG pipeline</strong></td><td>20-40%</td><td><code>needs:</code> thay vì chờ stage</td></tr>
+        <tr><td><strong>Interruptible jobs</strong></td><td>—</td><td><code>interruptible: true</code> cho stale pipelines</td></tr>
+      </table>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <div class="code-lang">.gitlab-ci.yml · DAG + Parallel</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">test-unit</span>:
+  <span class="prop">stage</span>: <span class="str">test</span>
+  <span class="prop">parallel</span>: <span class="num">4</span>         <span class="cmt"># Chạy 4 pod song song</span>
+  <span class="prop">interruptible</span>: <span class="num">true</span>  <span class="cmt"># Cancel nếu có commit mới</span>
+
+<span class="kw">build-image</span>:
+  <span class="prop">stage</span>: <span class="str">build</span>
+  <span class="prop">needs</span>: [<span class="str">test-unit</span>]    <span class="cmt"># Không chờ hết stage test</span>
+
+<span class="kw">deploy-dev</span>:
+  <span class="prop">stage</span>: <span class="str">deploy-dev</span>
+  <span class="prop">needs</span>: [<span class="str">build-image</span>, <span class="str">trivy-scan</span>]  <span class="cmt"># DAG</span></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">🎉 Chúc mừng!</div>
+      Bạn đã có đầy đủ kiến thức để thiết lập CI/CD pipeline production-grade với GitLab và EKS. Bắt đầu từ <strong>cluster.yaml + runner values</strong>, sau đó dần dần thêm security scan, Helm, multi-env, và observability.
+    </div>
+  </section>
+
+</main>
+
+<script>
+  /* ── Scroll progress ── */
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = Math.round((doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100) || 0;
+    document.getElementById('prog').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+  });
+
+  /* ── Active nav ── */
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sb-link');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) cur = s.id; });
+    links.forEach(l => l.classList.remove('active'));
+    const active = document.querySelector(`.sb-link[onclick="scrollTo('${cur}')"]`);
+    if (active) active.classList.add('active');
+  });
+
+  /* ── Scroll to ── */
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  /* ── Copy code ── */
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
