@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infrastructure Guide — IP, Domain, Service Mapping & CI/CD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08090d;
+      --bg2: #0e1018;
+      --surface: #131520;
+      --surface2: #1a1d2e;
+      --surface3: #21253a;
+      --border: #252840;
+      --border2: #2f3350;
+      --accent: #7c6af8;
+      --accent-lt: #a99dfa;
+      --amber: #f5a623;
+      --green: #3ecf8e;
+      --red: #f06b6b;
+      --cyan: #3ecfcf;
+      --text: #dde1f5;
+      --muted: #6b7094;
+      --muted2: #8b90b8;
+      --nav-w: 272px;
+      --radius: 10px;
+      --font-body: 'Instrument Sans', sans-serif;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.75; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: var(--nav-w); min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0;
+      overflow-y: auto; z-index: 200; display: flex; flex-direction: column; transition: transform .3s ease;
+    }
+    .sb-header {
+      padding: 24px 20px 18px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(124,106,248,.06) 0%, transparent 100%);
+    }
+    .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .sb-orb {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent) 0%, #a55af4 100%);
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+      box-shadow: 0 4px 18px rgba(124,106,248,.35);
+    }
+    .sb-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+    .sb-ver {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted);
+      font-family: var(--font-mono); background: var(--surface2); padding: 3px 8px;
+      border-radius: 5px; border: 1px solid var(--border);
+    }
+    .sb-ver .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .sb-section { padding: 18px 14px 6px; }
+    .sb-section-label {
+      font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
+      font-weight: 600; padding: 0 6px; margin-bottom: 5px;
+    }
+    .sb-link {
+      display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px;
+      text-decoration: none; color: var(--muted2); font-size: 13px; transition: all .18s;
+      cursor: pointer; margin-bottom: 1px; position: relative;
+    }
+    .sb-link:hover { background: var(--surface); color: var(--text); }
+    .sb-link.active { background: rgba(124,106,248,.12); color: var(--accent-lt); }
+    .sb-link.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 2px; background: var(--accent); border-radius: 1px;
+    }
+    .sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+    .sb-badge {
+      margin-left: auto; font-size: 10px; background: rgba(124,106,248,.18);
+      color: var(--accent-lt); padding: 1px 7px; border-radius: 99px; font-family: var(--font-mono);
+    }
+    .sb-footer {
+      margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted); font-family: var(--font-mono);
+    }
+
+    /* MAIN */
+    main { margin-left: var(--nav-w); flex: 1; padding: 0; max-width: 900px; }
+    .section { padding: 60px 64px; border-bottom: 1px solid var(--border); scroll-margin-top: 20px; animation: fadeUp .5s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--accent-lt); font-weight: 600;
+      font-family: var(--font-mono); margin-bottom: 14px;
+    }
+    .section-tag::before { content: ''; width: 22px; height: 1px; background: currentColor; }
+
+    h1 { font-family: var(--font-head); font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 20px; }
+    h1 .grad { background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 60%, #a55af4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h2 { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; color: var(--text); }
+    h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
+    p { color: #9fa3c4; margin-bottom: 14px; }
+
+    /* CALLOUT */
+    .callout {
+      border-left: 3px solid var(--accent); padding: 14px 18px;
+      background: rgba(124,106,248,.07); border-radius: 0 8px 8px 0; margin: 18px 0;
+      font-size: 13.5px; color: #bfc3e0;
+    }
+    .callout-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .callout.warn { border-color: var(--amber); background: rgba(245,166,35,.07); }
+    .callout.warn .callout-label { color: var(--amber); }
+    .callout.good { border-color: var(--green); background: rgba(62,207,142,.07); }
+    .callout.good .callout-label { color: var(--green); }
+    .callout.err { border-color: var(--red); background: rgba(240,107,107,.07); }
+    .callout.err .callout-label { color: var(--red); }
+    .callout.info { border-color: var(--cyan); background: rgba(62,207,207,.07); }
+    .callout.info .callout-label { color: var(--cyan); }
+
+    /* CARDS */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+    .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; transition: border-color .2s, transform .2s, box-shadow .2s; cursor: default;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,248,.12); }
+    .card-ico { font-size: 22px; margin-bottom: 10px; }
+    .card-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: var(--text); }
+    .card-desc { font-size: 13px; color: var(--muted2); line-height: 1.55; }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th { text-align: left; padding: 11px 16px; background: var(--surface2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #bbbdd6; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    td strong { color: var(--text); }
+
+    /* TAGS */
+    .tag { padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono); }
+    .tag-new { background: rgba(62,207,142,.15); color: var(--green); }
+    .tag-warn { background: rgba(245,166,35,.15); color: var(--amber); }
+    .tag-api { background: rgba(124,106,248,.15); color: var(--accent-lt); }
+    .tag-err { background: rgba(240,107,107,.15); color: var(--red); }
+    .tag-info { background: rgba(62,207,207,.15); color: var(--cyan); }
+
+    /* STEPS */
+    .steps { margin: 20px 0; }
+    .step { display: flex; gap: 18px; margin-bottom: 24px; align-items: flex-start; }
+    .step-num {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #a55af4);
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+      font-weight: 700; flex-shrink: 0; color: #fff; font-family: var(--font-mono);
+      box-shadow: 0 4px 14px rgba(124,106,248,.3);
+    }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .step-desc { font-size: 13.5px; color: var(--muted2); }
+
+    /* FEAT LIST */
+    .feat-list { list-style: none; margin: 10px 0; }
+    .feat-list li { padding: 9px 0 9px 22px; position: relative; font-size: 14px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.6); }
+    .feat-list li:last-child { border: none; }
+    .feat-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+    .feat-list li strong { color: var(--text); }
+
+    /* CODE BLOCK */
+    .code-block {
+      background: #0b0c14; border: 1px solid var(--border); border-radius: var(--radius);
+      margin: 16px 0; overflow: hidden; font-size: 13px;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 16px; border-bottom: 1px solid var(--border); background: var(--surface2);
+    }
+    .code-lang { font-size: 11px; color: var(--muted); font-family: var(--font-mono); display: flex; align-items: center; gap: 7px; }
+    .code-dots { display: flex; gap: 5px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot.r { background: #f06b6b; }
+    .code-dot.y { background: var(--amber); }
+    .code-dot.g { background: var(--green); }
+    .code-copy {
+      font-size: 11px; color: var(--muted); font-family: var(--font-mono); background: none;
+      border: 1px solid var(--border); padding: 3px 10px; border-radius: 5px; cursor: pointer;
+      transition: all .15s;
+    }
+    .code-copy:hover { color: var(--text); border-color: var(--border2); }
+    pre { padding: 20px; overflow-x: auto; line-height: 1.7; }
+    code { font-family: var(--font-mono); color: #c9cde8; }
+    .hl-key { color: #a99dfa; }
+    .hl-str { color: #3ecf8e; }
+    .hl-cmt { color: #4a4f72; font-style: italic; }
+    .hl-num { color: #f5a623; }
+    .hl-kw { color: #f06b6b; }
+    .hl-fn { color: #3ecfcf; }
+
+    /* INLINE CODE */
+    code.inline {
+      font-family: var(--font-mono); font-size: 12.5px; background: var(--surface2);
+      border: 1px solid var(--border); padding: 1px 7px; border-radius: 5px; color: var(--accent-lt);
+    }
+
+    /* ARCHITECTURE DIAGRAM */
+    .arch-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 28px; margin: 20px 0; position: relative; overflow: hidden;
+    }
+    .arch-box::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .arch-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+    .arch-node {
+      background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 8px 14px; font-size: 12px; font-family: var(--font-mono); color: var(--text);
+      white-space: nowrap; text-align: center; min-width: 100px;
+    }
+    .arch-node.accent { border-color: var(--accent); color: var(--accent-lt); background: rgba(124,106,248,.08); }
+    .arch-node.green { border-color: var(--green); color: var(--green); background: rgba(62,207,142,.08); }
+    .arch-node.amber { border-color: var(--amber); color: var(--amber); background: rgba(245,166,35,.08); }
+    .arch-node.cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(62,207,207,.08); }
+    .arch-node.red { border-color: var(--red); color: var(--red); background: rgba(240,107,107,.08); }
+    .arch-arrow { color: var(--muted); font-size: 16px; }
+    .arch-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); text-align: center; margin: 4px 0; }
+
+    /* NETWORK MAP */
+    .net-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    .net-subnet {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; position: relative;
+    }
+    .net-subnet-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; font-family: var(--font-mono); }
+    .net-ip { font-size: 12px; font-family: var(--font-mono); color: var(--accent-lt); margin: 3px 0; }
+    .net-ip span { color: var(--muted2); }
+
+    /* PIPELINE FLOW */
+    .pipeline { display: flex; align-items: center; gap: 0; margin: 20px 0; flex-wrap: wrap; }
+    .pipe-stage {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; font-size: 12px; font-family: var(--font-mono); color: var(--muted2);
+      text-align: center; transition: all .2s; cursor: default; min-width: 90px;
+    }
+    .pipe-stage:hover { border-color: var(--accent); color: var(--accent-lt); }
+    .pipe-stage.ok { border-color: var(--green); color: var(--green); background: rgba(62,207,142,.06); }
+    .pipe-stage.run { border-color: var(--amber); color: var(--amber); background: rgba(245,166,35,.06); animation: runPulse 1.5s infinite; }
+    .pipe-arrow { color: var(--border2); font-size: 18px; padding: 0 4px; }
+    @keyframes runPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+    /* DIVIDER */
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); margin: 24px 0; }
+
+    /* HERO */
+    .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+      font-family: var(--font-mono); color: var(--muted2); background: var(--surface);
+      border: 1px solid var(--border); padding: 5px 12px; border-radius: 99px;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* RESPONSIVE */
+    #menu-btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 300; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 16px; color: var(--text); }
+    @media(max-width:768px) {
+      #menu-btn { display: block; }
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      main { margin-left: 0; }
+      .section { padding: 40px 24px; }
+      h1 { font-size: 34px; }
+      .cards { grid-template-columns: 1fr; }
+      .cards.col3 { grid-template-columns: 1fr; }
+      .net-grid { grid-template-columns: 1fr; }
+      .pipeline { flex-direction: column; align-items: flex-start; }
+      .pipe-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<button id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <div class="sb-orb">🌐</div>
+      <div class="sb-title">Infra Guide</div>
+    </div>
+    <div class="sb-ver"><span class="dot"></span> v2025 · DevOps</div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Network</div>
+    <a class="sb-link active" onclick="scrollTo('ip')"><span class="sb-icon">🔢</span> Quản lý IP</a>
+    <a class="sb-link" onclick="scrollTo('domain')"><span class="sb-icon">🌐</span> Domain & DNS</a>
+    <a class="sb-link" onclick="scrollTo('mapping')"><span class="sb-icon">🔗</span> Service Mapping</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Container & Infra</div>
+    <a class="sb-link" onclick="scrollTo('docker')"><span class="sb-icon">🐳</span> Docker Setup</a>
+    <a class="sb-link" onclick="scrollTo('compose')"><span class="sb-icon">📦</span> Docker Compose</a>
+    <a class="sb-link" onclick="scrollTo('nginx')"><span class="sb-icon">⚡</span> Nginx Reverse Proxy</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">CI/CD</div>
+    <a class="sb-link" onclick="scrollTo('gitlab')"><span class="sb-icon">🦊</span> GitLab CI/CD <span class="sb-badge">new</span></a>
+    <a class="sb-link" onclick="scrollTo('runner')"><span class="sb-icon">🏃</span> GitLab Runner</a>
+    <a class="sb-link" onclick="scrollTo('eks')"><span class="sb-icon">☸️</span> EKS Deployment</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Best Practices</div>
+    <a class="sb-link" onclick="scrollTo('secrets')"><span class="sb-icon">🔐</span> Secrets Management</a>
+    <a class="sb-link" onclick="scrollTo('monitoring')"><span class="sb-icon">📊</span> Monitoring</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Advanced</div>
+    <a class="sb-link" onclick="scrollTo('liquibase')"><span class="sb-icon">🔄</span> DB Migration</a>
+    <a class="sb-link" onclick="scrollTo('kafka')"><span class="sb-icon">🌊</span> Kafka Strategy</a>
+    <a class="sb-link" onclick="scrollTo('security')"><span class="sb-icon">🛡️</span> API Security</a>
+    <a class="sb-link" onclick="scrollTo('helm')"><span class="sb-icon">📦</span> Helm Charts</a>
+    <a class="sb-link" onclick="scrollTo('tracing')"><span class="sb-icon">🔎</span> Distributed Tracing</a>
+    <a class="sb-link" onclick="scrollTo('gitops')"><span class="sb-icon">⚙️</span> GitOps / ArgoCD</a>
+    <a class="sb-link" onclick="scrollTo('testing')"><span class="sb-icon">🧪</span> Testing Strategy</a>
+    <a class="sb-link" onclick="scrollTo('resilience')"><span class="sb-icon">💥</span> Resilience</a>
+  </div>
+
+  <div class="sb-footer">infra-guide · Hanoi · 2025</div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section class="section" id="hero">
+    <div class="section-tag">Infrastructure & DevOps</div>
+    <h1><span class="grad">Quản lý Hạ tầng</span><br>Hiệu quả & Thực chiến</h1>
+    <p>Hướng dẫn toàn diện về quản lý IP, domain, service mapping, container setup và CI/CD pipeline — dành riêng cho môi trường microservices trên AWS EKS.</p>
+    <div class="hero-badges">
+      <span class="hero-badge"><span class="dot" style="background:var(--green)"></span>Docker & Compose</span>
+      <span class="hero-badge"><span class="dot" style="background:var(--accent)"></span>GitLab CI/CD</span>
+      <span class="hero-badge"><span class="dot" style="background:var(--amber)"></span>Nginx Proxy</span>
+      <span class="hero-badge"><span class="dot" style="background:var(--cyan)"></span>AWS EKS</span>
+      <span class="hero-badge"><span class="dot" style="background:var(--red)"></span>Secrets Mgmt</span>
+    </div>
+  </section>
+
+  <!-- IP MANAGEMENT -->
+  <section class="section" id="ip">
+    <div class="section-tag">01 — Network</div>
+    <h2>🔢 Quản lý địa chỉ IP</h2>
+    <p>Chiến lược quy hoạch IP là nền tảng của mọi hệ thống. Làm sai từ đầu → đau khi scale.</p>
+
+    <h3>📐 CIDR Planning — Phân vùng subnet</h3>
+    <div class="net-grid">
+      <div class="net-subnet" style="border-color: rgba(124,106,248,.4)">
+        <div class="net-subnet-label">🏭 Production VPC</div>
+        <div class="net-ip">10.0.0.0/16</div>
+        <div class="net-ip" style="font-size:11px"><span>Public: </span>10.0.1.0/24</div>
+        <div class="net-ip" style="font-size:11px"><span>Private: </span>10.0.10.0/24</div>
+        <div class="net-ip" style="font-size:11px"><span>DB: </span>10.0.20.0/24</div>
+      </div>
+      <div class="net-subnet" style="border-color: rgba(62,207,142,.4)">
+        <div class="net-subnet-label">🧪 Staging VPC</div>
+        <div class="net-ip">10.1.0.0/16</div>
+        <div class="net-ip" style="font-size:11px"><span>Public: </span>10.1.1.0/24</div>
+        <div class="net-ip" style="font-size:11px"><span>Private: </span>10.1.10.0/24</div>
+        <div class="net-ip" style="font-size:11px"><span>DB: </span>10.1.20.0/24</div>
+      </div>
+      <div class="net-subnet" style="border-color: rgba(245,166,35,.4)">
+        <div class="net-subnet-label">💻 Dev VPC</div>
+        <div class="net-ip">10.2.0.0/16</div>
+        <div class="net-ip" style="font-size:11px"><span>Public: </span>10.2.1.0/24</div>
+        <div class="net-ip" style="font-size:11px"><span>Private: </span>10.2.10.0/24</div>
+        <div class="net-ip" style="font-size:11px"><span>DB: </span>10.2.20.0/24</div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">💡 Rule của thumb</div>
+      Dùng <strong>/16</strong> cho mỗi environment (65k IPs). Chia subnet /24 theo tier: public (ALB/NAT), private (app pods), database. Tránh overlap giữa các VPC nếu sau này cần VPC Peering.
+    </div>
+
+    <h3>🏷️ Naming Convention cho IP/Host</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Pattern</th><th>Ví dụ</th><th>Dùng khi</th></tr>
+        <tr><td><code class="inline">{env}-{service}-{index}</code></td><td><code class="inline">prod-rider-01</code></td><td>Bare metal / VM</td></tr>
+        <tr><td><code class="inline">{service}.{env}.internal</code></td><td><code class="inline">rider.prod.internal</code></td><td>DNS nội bộ Kubernetes</td></tr>
+        <tr><td><code class="inline">{service}.{namespace}.svc.cluster.local</code></td><td><code class="inline">rider-svc.default.svc.cluster.local</code></td><td>K8s Service DNS</td></tr>
+        <tr><td><code class="inline">10.{env}.{tier}.{host}</code></td><td><code class="inline">10.0.10.45</code></td><td>Static IP assignment</td></tr>
+      </table>
+    </div>
+
+    <h3>🔒 Security Group / Firewall Rules</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🛡️ security-group-rules.tf (Terraform)</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># ALB Security Group — chỉ accept 80/443 từ internet</span>
+resource <span class="hl-str">"aws_security_group"</span> <span class="hl-str">"alb_sg"</span> {
+  name   = <span class="hl-str">"prod-alb-sg"</span>
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = <span class="hl-num">443</span>
+    to_port     = <span class="hl-num">443</span>
+    protocol    = <span class="hl-str">"tcp"</span>
+    cidr_blocks = [<span class="hl-str">"0.0.0.0/0"</span>]
+  }
+  egress {
+    from_port   = <span class="hl-num">0</span>
+    to_port     = <span class="hl-num">0</span>
+    protocol    = <span class="hl-str">"-1"</span>
+    cidr_blocks = [<span class="hl-str">"0.0.0.0/0"</span>]
+  }
+}
+
+<span class="hl-cmt"># App Security Group — chỉ accept từ ALB</span>
+resource <span class="hl-str">"aws_security_group"</span> <span class="hl-str">"app_sg"</span> {
+  ingress {
+    from_port       = <span class="hl-num">8080</span>
+    to_port         = <span class="hl-num">8080</span>
+    protocol        = <span class="hl-str">"tcp"</span>
+    security_groups = [aws_security_group.alb_sg.id]
+  }
+}
+
+<span class="hl-cmt"># DB Security Group — chỉ accept từ App tier</span>
+resource <span class="hl-str">"aws_security_group"</span> <span class="hl-str">"db_sg"</span> {
+  ingress {
+    from_port       = <span class="hl-num">5432</span>
+    to_port         = <span class="hl-num">5432</span>
+    protocol        = <span class="hl-str">"tcp"</span>
+    security_groups = [aws_security_group.app_sg.id]
+  }
+}</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ AWS EKS — IP Exhaustion</div>
+      EKS CNI mặc định cấp <strong>1 IP/pod</strong> từ subnet. Với node <code class="inline">m5.large</code> tối đa 10 pods. Khi subnet chỉ còn vài IP free → pod pending. Fix: dùng prefix delegation hoặc tăng subnet size sớm.
+    </div>
+  </section>
+
+  <!-- DOMAIN -->
+  <section class="section" id="domain">
+    <div class="section-tag">02 — Domain</div>
+    <h2>🌐 Domain & DNS Management</h2>
+    <p>Chiến lược domain ảnh hưởng đến SSL cert, routing, và trải nghiệm developer khi debug.</p>
+
+    <h3>🗂️ Cấu trúc domain khuyến nghị</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">🌍</div>
+        <div class="card-title">Production</div>
+        <div class="card-desc"><code class="inline">api.company.com</code><br><code class="inline">app.company.com</code><br><code class="inline">admin.company.com</code></div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🧪</div>
+        <div class="card-title">Staging</div>
+        <div class="card-desc"><code class="inline">api.staging.company.com</code><br><code class="inline">app.staging.company.com</code></div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔧</div>
+        <div class="card-title">Internal Services</div>
+        <div class="card-desc"><code class="inline">grafana.internal.company.com</code><br><code class="inline">gitlab.internal.company.com</code></div>
+      </div>
+      <div class="card">
+        <div class="card-ico">💻</div>
+        <div class="card-title">Local Dev</div>
+        <div class="card-desc"><code class="inline">rider.local</code><br><code class="inline">gateway.local</code><br>via <code class="inline">/etc/hosts</code></div>
+      </div>
+    </div>
+
+    <h3>📝 /etc/hosts cho Local Development</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 /etc/hosts</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># === LOCAL DEV SERVICES ===</span>
+127.0.0.1   gateway.local
+127.0.0.1   rider-service.local
+127.0.0.1   term-life.local
+127.0.0.1   kafka-ui.local
+127.0.0.1   postgres.local
+
+<span class="hl-cmt"># === MOCK EXTERNAL SERVICES ===</span>
+127.0.0.1   ebao-mock.local
+127.0.0.1   sap-mock.local</code></pre>
+    </div>
+
+    <h3>🔄 AWS Route53 — Hosted Zone Setup</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☁️ route53.tf</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># Public hosted zone</span>
+resource <span class="hl-str">"aws_route53_zone"</span> <span class="hl-str">"public"</span> {
+  name = <span class="hl-str">"company.com"</span>
+}
+
+<span class="hl-cmt"># Private hosted zone cho internal services</span>
+resource <span class="hl-str">"aws_route53_zone"</span> <span class="hl-str">"private"</span> {
+  name = <span class="hl-str">"internal.company.com"</span>
+  vpc { vpc_id = aws_vpc.main.id }
+}
+
+<span class="hl-cmt"># A Record trỏ về ALB</span>
+resource <span class="hl-str">"aws_route53_record"</span> <span class="hl-str">"api"</span> {
+  zone_id = aws_route53_zone.public.zone_id
+  name    = <span class="hl-str">"api"</span>
+  type    = <span class="hl-str">"A"</span>
+  alias {
+    name    = aws_lb.main.dns_name
+    zone_id = aws_lb.main.zone_id
+    evaluate_target_health = <span class="hl-kw">true</span>
+  }
+}
+
+<span class="hl-cmt"># Wildcard cert cho *.company.com</span>
+resource <span class="hl-str">"aws_acm_certificate"</span> <span class="hl-str">"wildcard"</span> {
+  domain_name       = <span class="hl-str">"*.company.com"</span>
+  validation_method = <span class="hl-str">"DNS"</span>
+}</code></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Best Practice</div>
+      Dùng <strong>wildcard cert</strong> <code class="inline">*.company.com</code> thay vì cấp cert riêng từng service. 1 cert cover toàn bộ subdomains. Kết hợp với cert-manager trên K8s để auto-renew.
+    </div>
+  </section>
+
+  <!-- SERVICE MAPPING -->
+  <section class="section" id="mapping">
+    <div class="section-tag">03 — Architecture</div>
+    <h2>🔗 Service Mapping & Communication</h2>
+    <p>Cách các service "tìm thấy" nhau và giao tiếp hiệu quả — từ local đến production EKS.</p>
+
+    <h3>🏗️ Kiến trúc tổng thể</h3>
+    <div class="arch-box">
+      <div class="arch-label" style="color:var(--muted2);margin-bottom:12px">Internet → Load Balancer → Services</div>
+      <div class="arch-row">
+        <div class="arch-node cyan">Internet</div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓</div></div>
+      <div class="arch-row">
+        <div class="arch-node accent">AWS ALB / Nginx Ingress</div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓</div></div>
+      <div class="arch-row">
+        <div class="arch-node green">API Gateway :8080</div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓</div></div>
+      <div class="arch-row">
+        <div class="arch-node">Rider Svc :8081</div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node">Term Life :8082</div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node">UL Gen4 :8083</div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node">Auth Svc :8084</div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓</div></div>
+      <div class="arch-row">
+        <div class="arch-node amber">PostgreSQL :5432</div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node amber">Kafka :9092</div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node amber">Redis :6379</div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓</div></div>
+      <div class="arch-row">
+        <div class="arch-node red">eBao (external)</div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node red">SAP (external)</div>
+      </div>
+    </div>
+
+    <h3>☸️ Kubernetes Service Discovery</h3>
+    <p>Trong K8s, service tìm nhau qua DNS name <code class="inline">{svc-name}.{namespace}.svc.cluster.local</code>. Feign client config:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 application.yml — Feign Client URLs</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">feign</span>:
+  <span class="hl-key">clients</span>:
+    <span class="hl-key">rider-service</span>:
+      <span class="hl-cmt"># Local dev: dùng localhost</span>
+      <span class="hl-key">url</span>: <span class="hl-str">${RIDER_URL:http://localhost:8081}</span>
+    <span class="hl-key">term-life-service</span>:
+      <span class="hl-cmt"># Prod: DNS của K8s Service</span>
+      <span class="hl-key">url</span>: <span class="hl-str">${TERM_LIFE_URL:http://term-life-svc.default.svc.cluster.local:8082}</span>
+    <span class="hl-key">ebao-service</span>:
+      <span class="hl-key">url</span>: <span class="hl-str">${EBAO_URL:https://ebao.internal.company.com}</span>
+      <span class="hl-key">connectTimeout</span>: <span class="hl-num">5000</span>
+      <span class="hl-key">readTimeout</span>: <span class="hl-num">30000</span>
+
+<span class="hl-cmt"># Override per environment trong ConfigMap/Secret</span></code></pre>
+    </div>
+
+    <h3>🐳 Docker Network — Local Service Mapping</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🐳 docker-compose.yml — network config</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>networks:
+  <span class="hl-key">app-network</span>:
+    <span class="hl-key">driver</span>: bridge
+    <span class="hl-key">ipam</span>:
+      <span class="hl-key">config</span>:
+        - <span class="hl-key">subnet</span>: <span class="hl-str">"172.20.0.0/16"</span>
+
+services:
+  <span class="hl-key">rider-service</span>:
+    <span class="hl-key">networks</span>:
+      <span class="hl-key">app-network</span>:
+        <span class="hl-key">aliases</span>:
+          - <span class="hl-str">rider-service</span>  <span class="hl-cmt"># DNS name trong network</span>
+    <span class="hl-key">environment</span>:
+      <span class="hl-cmt"># Gọi postgres bằng service name, KHÔNG dùng localhost</span>
+      - <span class="hl-str">SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/rider_db</span>
+      - <span class="hl-str">KAFKA_BOOTSTRAP_SERVERS=kafka:9092</span>
+
+  <span class="hl-key">postgres</span>:
+    <span class="hl-key">networks</span>:
+      - <span class="hl-str">app-network</span>
+    <span class="hl-key">ports</span>:
+      - <span class="hl-str">"5432:5432"</span>  <span class="hl-cmt"># expose ra host để dev tool connect</span></code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Lỗi hay gặp</div>
+      <strong>Sai:</strong> <code class="inline">jdbc:postgresql://localhost:5432/db</code> trong container — localhost trong container là chính nó, không phải host machine.<br>
+      <strong>Đúng:</strong> <code class="inline">jdbc:postgresql://postgres:5432/db</code> — dùng service name của Docker Compose network.
+    </div>
+  </section>
+
+  <!-- DOCKER -->
+  <section class="section" id="docker">
+    <div class="section-tag">04 — Container</div>
+    <h2>🐳 Docker Setup Hiệu Quả</h2>
+    <p>Dockerfile chuẩn cho Spring Boot service — multi-stage build, non-root user, health check đầy đủ.</p>
+
+    <h3>📦 Multi-Stage Dockerfile — Spring Boot</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🐳 Dockerfile</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># Stage 1: Build</span>
+FROM maven:<span class="hl-str">3.9-eclipse-temurin-21</span> AS builder
+WORKDIR /app
+<span class="hl-cmt"># Copy pom.xml trước để cache layer dependency</span>
+COPY pom.xml .
+RUN mvn dependency:go-offline -q
+COPY src ./src
+RUN mvn package -DskipTests -q
+
+<span class="hl-cmt"># Stage 2: Runtime</span>
+FROM eclipse-temurin:<span class="hl-str">21-jre-alpine</span>
+WORKDIR /app
+
+<span class="hl-cmt"># Non-root user — security best practice</span>
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+<span class="hl-cmt"># Copy jar từ builder stage</span>
+COPY --from=builder /app/target/*.jar app.jar
+
+<span class="hl-cmt"># JVM options cho container (Java 21 auto-detect container CPU/memory)</span>
+ENV JAVA_OPTS="-XX:+UseContainerSupport \
+  -XX:MaxRAMPercentage=75.0 \
+  -Djava.security.egd=file:/dev/./urandom"
+
+<span class="hl-cmt"># Health check</span>
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</code></pre>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">⚡</div>
+        <div class="card-title">Layer Cache Optimization</div>
+        <div class="card-desc">Copy <code class="inline">pom.xml</code> trước, chạy <code class="inline">dependency:go-offline</code>, rồi mới copy source. Khi chỉ đổi code, layer deps được cache lại → build nhanh hơn 5-10x.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📉</div>
+        <div class="card-title">Image Size</div>
+        <div class="card-desc">Alpine JRE image chỉ ~200MB so với JDK ~600MB. Multi-stage loại bỏ Maven, source code, build artifacts khỏi image production.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔒</div>
+        <div class="card-title">Non-Root Security</div>
+        <div class="card-desc">Container chạy với user <code class="inline">appuser</code> thay vì root. Nếu container bị compromise, attacker không có root access vào host.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🧠</div>
+        <div class="card-title">Memory Config</div>
+        <div class="card-desc"><code class="inline">MaxRAMPercentage=75</code> giúp JVM tự điều chỉnh heap theo container limit, thay vì dùng toàn bộ RAM host.</div>
+      </div>
+    </div>
+
+    <h3>🚫 .dockerignore</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 .dockerignore</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>target/
+.git/
+.gitignore
+*.md
+.env
+.env.*
+docker-compose*.yml
+<span class="hl-cmt"># Không copy test files vào build context</span>
+src/test/</code></pre>
+    </div>
+  </section>
+
+  <!-- DOCKER COMPOSE -->
+  <section class="section" id="compose">
+    <div class="section-tag">05 — Compose</div>
+    <h2>📦 Docker Compose — Full Stack Local</h2>
+    <p>Setup hoàn chỉnh cho local dev environment với tất cả dependencies.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🐳 docker-compose.yml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>version: <span class="hl-str">'3.9'</span>
+
+<span class="hl-cmt"># Biến dùng chung — override bằng .env file</span>
+x-common-env: &common-env
+  SPRING_PROFILES_ACTIVE: docker
+  JAVA_OPTS: <span class="hl-str">"-XX:+UseContainerSupport -XX:MaxRAMPercentage=70"</span>
+
+services:
+  <span class="hl-cmt"># ── INFRASTRUCTURE ──────────────────────────</span>
+  postgres:
+    image: postgres:<span class="hl-str">16-alpine</span>
+    environment:
+      POSTGRES_USER: <span class="hl-str">${DB_USER:-appuser}</span>
+      POSTGRES_PASSWORD: <span class="hl-str">${DB_PASS:-secret}</span>
+      POSTGRES_MULTIPLE_DATABASES: <span class="hl-str">"rider_db,term_life_db,ul_db"</span>
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./scripts/init-multi-db.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - <span class="hl-str">"5432:5432"</span>
+    healthcheck:
+      test: [<span class="hl-str">"CMD-SHELL"</span>, <span class="hl-str">"pg_isready -U $$POSTGRES_USER"</span>]
+      interval: 10s
+      retries: 5
+    networks: [app-network]
+
+  kafka:
+    image: confluentinc/cp-kafka:<span class="hl-str">7.6.0</span>
+    environment:
+      KAFKA_KRAFT_MODE: <span class="hl-str">"true"</span>
+      KAFKA_NODE_ID: <span class="hl-num">1</span>
+      KAFKA_LISTENERS: <span class="hl-str">"PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092"</span>
+      KAFKA_ADVERTISED_LISTENERS: <span class="hl-str">"PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092"</span>
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: <span class="hl-str">"true"</span>
+    ports:
+      - <span class="hl-str">"29092:29092"</span>  <span class="hl-cmt"># localhost access</span>
+    networks: [app-network]
+
+  redis:
+    image: redis:<span class="hl-str">7-alpine</span>
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports: [<span class="hl-str">"6379:6379"</span>]
+    networks: [app-network]
+
+  <span class="hl-cmt"># ── APPLICATIONS ────────────────────────────</span>
+  rider-service:
+    build:
+      context: ./rider-service
+      dockerfile: Dockerfile
+      target: runtime
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:<span class="hl-num">5432</span>/rider_db
+      SPRING_DATASOURCE_USERNAME: <span class="hl-str">${DB_USER:-appuser}</span>
+      SPRING_DATASOURCE_PASSWORD: <span class="hl-str">${DB_PASS:-secret}</span>
+      KAFKA_BOOTSTRAP_SERVERS: kafka:<span class="hl-num">9092</span>
+      TERM_LIFE_URL: http://term-life-service:<span class="hl-num">8082</span>
+    ports: [<span class="hl-str">"8081:8080"</span>]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+    networks: [app-network]
+    restart: unless-stopped
+
+  <span class="hl-cmt"># ── TOOLING ─────────────────────────────────</span>
+  kafka-ui:
+    image: provectuslabs/kafka-ui:<span class="hl-str">latest</span>
+    environment:
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:<span class="hl-num">9092</span>
+    ports: [<span class="hl-str">"8090:8080"</span>]
+    networks: [app-network]
+
+volumes:
+  pg_data:
+
+networks:
+  app-network:
+    driver: bridge</code></pre>
+    </div>
+
+    <h3>📄 .env file template</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 .env (gitignored)</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># Database</span>
+DB_USER=appuser
+DB_PASS=your_local_password
+
+<span class="hl-cmt"># External services (mock URLs for local)</span>
+EBAO_URL=http://ebao-mock.local:9090
+SAP_URL=http://sap-mock.local:9091
+
+<span class="hl-cmt"># GitLab Registry (nếu pull private image)</span>
+REGISTRY_URL=registry.gitlab.com
+REGISTRY_USER=your-token-name
+REGISTRY_PASS=your-token-value</code></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Tips</div>
+      Commit file <code class="inline">.env.example</code> vào git với các key nhưng không có value thật. Mỗi dev tự copy sang <code class="inline">.env</code> và điền value local của mình.
+    </div>
+  </section>
+
+  <!-- NGINX -->
+  <section class="section" id="nginx">
+    <div class="section-tag">06 — Proxy</div>
+    <h2>⚡ Nginx Reverse Proxy</h2>
+    <p>Nginx làm API Gateway local — route traffic theo path hoặc subdomain đến đúng service.</p>
+
+    <h3>🔀 Path-based routing</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">⚡ nginx/conf.d/default.conf</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>upstream rider_backend {
+    server rider-service:<span class="hl-num">8080</span>;
+    keepalive <span class="hl-num">32</span>;
+}
+
+upstream term_life_backend {
+    server term-life-service:<span class="hl-num">8080</span>;
+    keepalive <span class="hl-num">32</span>;
+}
+
+server {
+    listen <span class="hl-num">80</span>;
+    server_name api.local;
+
+    <span class="hl-cmt"># Global timeout</span>
+    proxy_connect_timeout <span class="hl-num">10s</span>;
+    proxy_read_timeout    <span class="hl-num">60s</span>;
+    proxy_send_timeout    <span class="hl-num">60s</span>;
+
+    <span class="hl-cmt"># Pass real IP</span>
+    proxy_set_header X-Real-IP        $remote_addr;
+    proxy_set_header X-Forwarded-For  $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host             $host;
+
+    <span class="hl-cmt"># Route /api/rider/* → rider-service</span>
+    location /api/rider/ {
+        proxy_pass http://rider_backend;
+        rewrite ^/api/rider/(.*) /api/$1 break;
+    }
+
+    <span class="hl-cmt"># Route /api/term-life/* → term-life-service</span>
+    location /api/term-life/ {
+        proxy_pass http://term_life_backend;
+        rewrite ^/api/term-life/(.*) /api/$1 break;
+    }
+
+    <span class="hl-cmt"># Health check endpoint</span>
+    location /health {
+        access_log off;
+        return 200 <span class="hl-str">"OK\n"</span>;
+    }
+}</code></pre>
+    </div>
+
+    <h3>🔐 HTTPS với self-signed cert (local)</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🔑 Generate self-signed cert</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># Generate cert cho *.local</span>
+openssl req -x509 -nodes -days <span class="hl-num">365</span> -newkey rsa:<span class="hl-num">2048</span> \
+  -keyout certs/local.key \
+  -out certs/local.crt \
+  -subj <span class="hl-str">"/CN=*.local/O=Dev"</span> \
+  -addext <span class="hl-str">"subjectAltName=DNS:*.local,DNS:localhost"</span>
+
+<span class="hl-cmt"># Trust cert trên macOS</span>
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain certs/local.crt</code></pre>
+    </div>
+  </section>
+
+  <!-- GITLAB CI/CD -->
+  <section class="section" id="gitlab">
+    <div class="section-tag">07 — CI/CD</div>
+    <h2>🦊 GitLab CI/CD Pipeline</h2>
+    <p>Pipeline hoàn chỉnh từ build → test → push image → deploy lên EKS với environment separation rõ ràng.</p>
+
+    <h3>🔄 Pipeline Flow</h3>
+    <div class="pipeline">
+      <div class="pipe-stage ok">✓ validate</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ok">✓ test</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ok">✓ build</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ok">✓ push</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ok">✓ deploy:stg</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage" style="border-color:var(--accent);color:var(--accent-lt)">deploy:prod</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🦊 .gitlab-ci.yml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: <span class="hl-str">$CI_REGISTRY_IMAGE</span>
+  IMAGE_TAG: <span class="hl-str">$CI_COMMIT_SHA</span>
+  MAVEN_OPTS: <span class="hl-str">"-Dmaven.repo.local=$CI_PROJECT_DIR/.m2"</span>
+
+<span class="hl-cmt"># Cache Maven dependencies giữa các job</span>
+cache:
+  key: <span class="hl-str">"${CI_PROJECT_PATH}-maven"</span>
+  paths: [.m2/]
+
+stages:
+  - validate
+  - test
+  - build
+  - deploy
+
+<span class="hl-cmt"># ── VALIDATE ─────────────────────────────────</span>
+checkstyle:
+  stage: validate
+  image: maven:<span class="hl-str">3.9-eclipse-temurin-21</span>
+  script:
+    - mvn checkstyle:check -q
+  rules:
+    - if: <span class="hl-str">$CI_PIPELINE_SOURCE == "merge_request_event"</span>
+
+<span class="hl-cmt"># ── TEST ─────────────────────────────────────</span>
+unit-test:
+  stage: test
+  image: maven:<span class="hl-str">3.9-eclipse-temurin-21</span>
+  services:
+    - name: postgres:<span class="hl-str">16-alpine</span>
+      alias: postgres
+      variables:
+        POSTGRES_DB: test_db
+        POSTGRES_USER: test
+        POSTGRES_PASSWORD: test
+  variables:
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test_db
+    SPRING_DATASOURCE_USERNAME: test
+    SPRING_DATASOURCE_PASSWORD: test
+  script:
+    - mvn test -pl rider-service
+  artifacts:
+    reports:
+      junit: rider-service/target/surefire-reports/*.xml
+    paths: [rider-service/target/surefire-reports/]
+    expire_in: 7 days
+
+<span class="hl-cmt"># ── BUILD & PUSH IMAGE ────────────────────────</span>
+build-image:
+  stage: build
+  image: docker:24
+  services: [docker:24-dind]
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        --cache-from $IMAGE_NAME:latest \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        -t $IMAGE_NAME:$IMAGE_TAG \
+        -t $IMAGE_NAME:latest \
+        -f rider-service/Dockerfile \
+        rider-service/
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker push $IMAGE_NAME:latest
+  rules:
+    - if: <span class="hl-str">$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"</span>
+
+<span class="hl-cmt"># ── DEPLOY STAGING ───────────────────────────</span>
+deploy-staging:
+  stage: deploy
+  image: bitnami/kubectl:<span class="hl-str">latest</span>
+  environment:
+    name: staging
+    url: https://api.staging.company.com
+  before_script:
+    - kubectl config set-cluster eks --server=$K8S_SERVER --insecure-skip-tls-verify=true
+    - kubectl config set-credentials deployer --token=$K8S_TOKEN
+    - kubectl config set-context default --cluster=eks --user=deployer --namespace=staging
+    - kubectl config use-context default
+  script:
+    - kubectl set image deployment/rider-service rider=$IMAGE_NAME:$IMAGE_TAG
+    - kubectl rollout status deployment/rider-service --timeout=5m
+  rules:
+    - if: <span class="hl-str">$CI_COMMIT_BRANCH == "develop"</span>
+
+<span class="hl-cmt"># ── DEPLOY PRODUCTION ────────────────────────</span>
+deploy-production:
+  stage: deploy
+  extends: .deploy-staging  <span class="hl-cmt"># kế thừa config</span>
+  environment:
+    name: production
+    url: https://api.company.com
+  variables:
+    NAMESPACE: production
+  when: manual   <span class="hl-cmt"># bắt buộc manual trigger cho prod</span>
+  rules:
+    - if: <span class="hl-str">$CI_COMMIT_BRANCH == "main"</span></code></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Best Practices CI/CD</div>
+      <strong>1.</strong> Dùng <code class="inline">when: manual</code> cho production deploy — tránh deploy tự động lên prod.<br>
+      <strong>2.</strong> <code class="inline">--cache-from</code> giảm build time Docker bằng cách tận dụng layer cache từ image cũ.<br>
+      <strong>3.</strong> <code class="inline">kubectl rollout status --timeout=5m</code> để pipeline fail nếu deployment không healthy trong 5 phút.
+    </div>
+  </section>
+
+  <!-- GITLAB RUNNER -->
+  <section class="section" id="runner">
+    <div class="section-tag">08 — Runner</div>
+    <h2>🏃 GitLab Runner Setup</h2>
+    <p>Cài GitLab Runner trên máy riêng hoặc trong Kubernetes — mỗi cách có trade-off khác nhau.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">🐳</div>
+        <div class="card-title">Docker Executor</div>
+        <div class="card-desc">Mỗi job chạy trong container riêng. Isolation tốt. Cần Docker-in-Docker cho build image. Setup đơn giản nhất.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">☸️</div>
+        <div class="card-title">Kubernetes Executor</div>
+        <div class="card-desc">Runner tạo pod mới cho mỗi job. Auto-scale, không lo thiếu resource. Setup phức tạp hơn nhưng phù hợp production.</div>
+      </div>
+    </div>
+
+    <h3>🐳 Cài Runner bằng Docker Compose</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🐳 docker-compose.runner.yml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:<span class="hl-str">latest</span>
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  <span class="hl-cmt"># DinD</span>
+      - runner_config:/etc/gitlab-runner
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+
+volumes:
+  runner_config:</code></pre>
+    </div>
+
+    <h3>📝 Register Runner</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🖥️ Terminal — register runner</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt"># Register runner với GitLab instance</span>
+docker run --rm -v runner_config:/etc/gitlab-runner \
+  gitlab/gitlab-runner register \
+  --non-interactive \
+  --url <span class="hl-str">"https://gitlab.company.com"</span> \
+  --registration-token <span class="hl-str">"$RUNNER_TOKEN"</span> \
+  --executor <span class="hl-str">"docker"</span> \
+  --docker-image <span class="hl-str">"alpine:latest"</span> \
+  --docker-volumes <span class="hl-str">"/var/run/docker.sock:/var/run/docker.sock"</span> \
+  --docker-network-mode <span class="hl-str">"app-network"</span> \
+  --description <span class="hl-str">"docker-runner-01"</span> \
+  --tag-list <span class="hl-str">"docker,linux,amd64"</span> \
+  --run-untagged=<span class="hl-kw">true</span></code></pre>
+    </div>
+
+    <h3>⚙️ config.toml — Tùy chỉnh Runner</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 /etc/gitlab-runner/config.toml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>concurrent = <span class="hl-num">4</span>  <span class="hl-cmt"># số job chạy song song</span>
+check_interval = <span class="hl-num">3</span>
+
+[[runners]]
+  name = <span class="hl-str">"docker-runner-01"</span>
+  url = <span class="hl-str">"https://gitlab.company.com"</span>
+  token = <span class="hl-str">"xxx"</span>
+  executor = <span class="hl-str">"docker"</span>
+  [runners.custom_build_dir]
+
+  [runners.cache]
+    Type = <span class="hl-str">"s3"</span>          <span class="hl-cmt"># Cache lên S3 — share giữa runners</span>
+    Shared = <span class="hl-kw">true</span>
+    [runners.cache.s3]
+      ServerAddress = <span class="hl-str">"s3.amazonaws.com"</span>
+      BucketName = <span class="hl-str">"company-gitlab-cache"</span>
+      BucketLocation = <span class="hl-str">"ap-southeast-1"</span>
+
+  [runners.docker]
+    image = <span class="hl-str">"alpine:latest"</span>
+    privileged = <span class="hl-kw">false</span>         <span class="hl-cmt"># KHÔNG dùng privileged trừ khi cần DinD</span>
+    disable_cache = <span class="hl-kw">false</span>
+    volumes = [<span class="hl-str">"/cache"</span>, <span class="hl-str">"/var/run/docker.sock:/var/run/docker.sock"</span>]
+    shm_size = <span class="hl-num">268435456</span>      <span class="hl-cmt"># 256MB SHM cho postgres service</span>
+    pull_policy = [<span class="hl-str">"if-not-present"</span>]  <span class="hl-cmt"># tránh pull image mỗi lần</span></code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Lưu ý quan trọng</div>
+      Đừng đặt <code class="inline">privileged = true</code> trừ khi thực sự cần Docker-in-Docker. Thay vào đó, mount <code class="inline">/var/run/docker.sock</code> để dùng Docker daemon của host — an toàn hơn.
+    </div>
+  </section>
+
+  <!-- EKS DEPLOYMENT -->
+  <section class="section" id="eks">
+    <div class="section-tag">09 — Kubernetes</div>
+    <h2>☸️ EKS Deployment Setup</h2>
+    <p>Cấu hình K8s đầy đủ cho microservice — Deployment, Service, Ingress, ConfigMap, HPA.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☸️ k8s/rider-service/deployment.yaml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rider-service
+  namespace: production
+  labels:
+    app: rider-service
+    version: <span class="hl-str">"$IMAGE_TAG"</span>  <span class="hl-cmt"># replaced by CI/CD</span>
+spec:
+  replicas: <span class="hl-num">2</span>
+  selector:
+    matchLabels:
+      app: rider-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: <span class="hl-num">0</span>   <span class="hl-cmt"># zero downtime</span>
+      maxSurge: <span class="hl-num">1</span>
+  template:
+    metadata:
+      labels:
+        app: rider-service
+    spec:
+      <span class="hl-cmt"># Spread pods across AZs</span>
+      topologySpreadConstraints:
+        - maxSkew: <span class="hl-num">1</span>
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: rider-service
+      containers:
+        - name: rider
+          image: registry.gitlab.com/company/rider-service:latest
+          ports:
+            - containerPort: <span class="hl-num">8080</span>
+          envFrom:
+            - configMapRef:
+                name: rider-config
+            - secretRef:
+                name: rider-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rider-svc
+  namespace: production
+spec:
+  selector:
+    app: rider-service
+  ports:
+    - port: <span class="hl-num">80</span>
+      targetPort: <span class="hl-num">8080</span>
+---
+<span class="hl-cmt"># Auto-scaling dựa trên CPU</span>
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rider-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rider-service
+  minReplicas: <span class="hl-num">2</span>
+  maxReplicas: <span class="hl-num">10</span>
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: <span class="hl-num">70</span></code></pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">ℹ️ Readiness vs Liveness Probe</div>
+      <strong>Readiness:</strong> Pod ready nhận traffic chưa? Spring Boot dùng <code class="inline">/actuator/health/readiness</code> — K8s chỉ route traffic khi probe pass.<br>
+      <strong>Liveness:</strong> Pod có bị stuck/deadlock không? Nếu fail → K8s restart container. Dùng <code class="inline">/actuator/health/liveness</code>.
+    </div>
+  </section>
+
+  <!-- SECRETS -->
+  <section class="section" id="secrets">
+    <div class="section-tag">10 — Security</div>
+    <h2>🔐 Secrets Management</h2>
+    <p>Không bao giờ hardcode secret trong code hay commit lên git. Dùng các pattern sau theo môi trường.</p>
+
+    <div class="cards col3">
+      <div class="card">
+        <div class="card-ico">💻</div>
+        <div class="card-title">Local Dev</div>
+        <div class="card-desc"><code class="inline">.env</code> file (gitignored). Share qua vault/1Password với team.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🦊</div>
+        <div class="card-title">GitLab CI</div>
+        <div class="card-desc">GitLab CI/CD Variables (masked + protected). Inject vào job qua environment variables.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">☸️</div>
+        <div class="card-title">Kubernetes</div>
+        <div class="card-desc">K8s Secrets + AWS Secrets Manager via External Secrets Operator.</div>
+      </div>
+    </div>
+
+    <h3>🔑 K8s Secret + External Secrets Operator</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☸️ external-secret.yaml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: rider-secrets
+  namespace: production
+spec:
+  refreshInterval: 1h    <span class="hl-cmt"># sync lại từ AWS mỗi 1h</span>
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  target:
+    name: rider-secrets   <span class="hl-cmt"># tên K8s Secret được tạo</span>
+    creationPolicy: Owner
+  data:
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: prod/rider-service
+        property: db_password
+    - secretKey: EBAO_API_KEY
+      remoteRef:
+        key: prod/rider-service
+        property: ebao_api_key</code></pre>
+    </div>
+
+    <div class="callout err">
+      <div class="callout-label">🚫 Tuyệt đối không làm</div>
+      <strong>Không</strong> commit <code class="inline">.env</code>, <code class="inline">application-prod.yml</code> có chứa password/token vào git.<br>
+      <strong>Không</strong> dùng <code class="inline">echo $SECRET</code> trong CI script — secret sẽ xuất hiện trong log.<br>
+      <strong>Không</strong> dùng <code class="inline">privileged: true</code> trên K8s pod trừ khi bắt buộc.
+    </div>
+  </section>
+
+  <!-- MONITORING -->
+  <section class="section" id="monitoring">
+    <div class="section-tag">11 — Observability</div>
+    <h2>📊 Monitoring & Observability</h2>
+    <p>Ba trụ cột: Metrics (Prometheus/Grafana), Logs (EFK/Loki), Traces (Jaeger/Tempo).</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">📈</div>
+        <div class="card-title">Metrics — Spring Actuator</div>
+        <div class="card-desc">Thêm <code class="inline">micrometer-registry-prometheus</code> vào pom.xml. Prometheus scrape <code class="inline">/actuator/prometheus</code> mỗi 15s.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📋</div>
+        <div class="card-title">Logs — Structured JSON</div>
+        <div class="card-desc">Dùng logback JSON encoder. Loki/EFK collect logs từ stdout. Trace ID trong log giúp correlate với traces.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔍</div>
+        <div class="card-title">Traces — OpenTelemetry</div>
+        <div class="card-desc">Spring Boot 3.x tích hợp Micrometer Tracing. Trace request xuyên suốt các service qua <code class="inline">traceparent</code> header.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🚨</div>
+        <div class="card-title">Alerting</div>
+        <div class="card-desc">Grafana Alert → Slack/PagerDuty. Alert khi: error rate > 1%, p99 latency > 2s, pod restart count tăng.</div>
+      </div>
+    </div>
+
+    <h3>📦 application.yml — Actuator config</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 application.yml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: <span class="hl-kw">true</span>   <span class="hl-cmt"># /health/readiness + /health/liveness</span>
+  metrics:
+    export:
+      prometheus:
+        enabled: <span class="hl-kw">true</span>
+    tags:
+      application: <span class="hl-str">${spring.application.name}</span>
+      env: <span class="hl-str">${spring.profiles.active}</span>
+
+<span class="hl-cmt"># Structured logging với trace ID</span>
+logging:
+  pattern:
+    console: <span class="hl-str">"{\"time\":\"%d{ISO8601}\",\"level\":\"%p\",\"traceId\":\"%X{traceId}\",\"msg\":\"%m\"}%n"</span></code></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Quick Win</div>
+      Bắt đầu với <strong>Grafana Cloud free tier</strong> — có sẵn Prometheus, Loki, Tempo. Chỉ cần cài Grafana Agent trên EKS node là có full observability stack, không cần setup self-hosted phức tạp.
+    </div>
+  </section>
+
+  <!-- LIQUIBASE -->
+  <section class="section" id="liquibase">
+    <div class="section-tag">12 — Database</div>
+    <h2>🔄 Database Migration với Liquibase</h2>
+    <p>Quản lý schema thay đổi an toàn — có thể rollback, chạy được trên CI/CD, idempotent.</p>
+
+    <h3>📁 Cấu trúc thư mục</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📂 resources/db/changelog</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>src/main/resources/db/changelog/
+├── db.changelog-master.xml        <span class="hl-cmt"># entry point</span>
+├── migrations/
+│   ├── 2024/
+│   │   ├── 001-create-rider-table.xml
+│   │   ├── 002-add-ekyc-status.xml
+│   │   └── 003-create-indexes.xml
+│   └── 2025/
+│       ├── 001-add-version-column.xml
+│       └── 002-rename-columns.xml
+└── data/
+    └── R__reference-data.xml      <span class="hl-cmt"># Repeatable changeset</span></code></pre>
+    </div>
+
+    <h3>📝 master.xml — include theo năm</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 db.changelog-master.xml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>&lt;databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"&gt;
+  &lt;includeAll path="db/changelog/migrations/2024"
+             relativeToChangelogFile="false"/&gt;
+  &lt;includeAll path="db/changelog/migrations/2025"
+             relativeToChangelogFile="false"/&gt;
+&lt;/databaseChangeLog&gt;</code></pre>
+    </div>
+
+    <h3>📝 Changeset chuẩn với rollback</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 001-create-rider-table.xml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>&lt;changeSet id="<span class="hl-str">2025-001</span>" author="<span class="hl-str">quocanh</span>"
+           labels="<span class="hl-str">rider</span>" context="<span class="hl-str">prod,staging,dev</span>"&gt;
+
+  &lt;createTable tableName="rider_ekyc_record"&gt;
+    &lt;column name="id" type="BIGSERIAL"&gt;
+      &lt;constraints primaryKey="true" nullable="false"/&gt;
+    &lt;/column&gt;
+    &lt;column name="policy_number" type="VARCHAR(50)"&gt;
+      &lt;constraints nullable="false" unique="true"/&gt;
+    &lt;/column&gt;
+    &lt;column name="status" type="VARCHAR(20)" defaultValue="PENDING"/&gt;
+    &lt;column name="version" type="INTEGER" defaultValueNumeric="0"/&gt;  <span class="hl-cmt">&lt;!-- @Version --&gt;</span>
+    &lt;column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()"/&gt;
+    &lt;column name="updated_at" type="TIMESTAMP"/&gt;
+  &lt;/createTable&gt;
+
+  &lt;createIndex tableName="rider_ekyc_record" indexName="idx_ekyc_status_expire"&gt;
+    &lt;column name="status"/&gt;
+    &lt;column name="expire_date"/&gt;
+  &lt;/createIndex&gt;
+
+  <span class="hl-cmt">&lt;!-- LUÔN viết rollback --&gt;</span>
+  &lt;rollback&gt;
+    &lt;dropTable tableName="rider_ekyc_record"/&gt;
+  &lt;/rollback&gt;
+&lt;/changeSet&gt;</code></pre>
+    </div>
+
+    <h3>🚀 Tích hợp vào GitLab CI</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🦊 .gitlab-ci.yml — db-migrate job</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>db-migrate-staging:
+  stage: deploy
+  image: liquibase/liquibase:<span class="hl-str">4.27</span>
+  environment: staging
+  script:
+    <span class="hl-cmt"># Validate trước khi chạy</span>
+    - liquibase
+        --url=$DB_URL
+        --username=$DB_USER
+        --password=$DB_PASS
+        --changeLogFile=db/changelog/db.changelog-master.xml
+        validate
+    <span class="hl-cmt"># Xem diff (dry run)</span>
+    - liquibase status --verbose
+    <span class="hl-cmt"># Apply migration</span>
+    - liquibase update
+  rules:
+    - if: <span class="hl-str">$CI_COMMIT_BRANCH == "develop"</span>
+
+db-rollback:
+  stage: deploy
+  image: liquibase/liquibase:<span class="hl-str">4.27</span>
+  when: manual
+  script:
+    <span class="hl-cmt"># Rollback 1 changeset gần nhất</span>
+    - liquibase rollbackCount 1
+  rules:
+    - if: <span class="hl-str">$CI_COMMIT_BRANCH == "develop"</span></code></pre>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">⚠️</div>
+        <div class="card-title">Không được sửa changeset đã apply</div>
+        <div class="card-desc">Liquibase lưu checksum. Sửa changeset cũ → checksum mismatch → app không start. Luôn tạo changeset <em>mới</em> để alter.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🏷️</div>
+        <div class="card-title">Naming Convention</div>
+        <div class="card-desc">Format: <code class="inline">YYYY-NNN-description.xml</code>. ID changeset = <code class="inline">YYYY-NNN</code>. Không dùng timestamp vì conflict khi merge branch.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔁</div>
+        <div class="card-title">Repeatable Changeset</div>
+        <div class="card-desc">Prefix <code class="inline">R__</code> cho view/function/stored proc. Tự động re-run khi file thay đổi, không cần đổi ID.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🎭</div>
+        <div class="card-title">Context Separation</div>
+        <div class="card-desc">Dùng <code class="inline">context="prod"</code> cho migration chỉ chạy ở production. <code class="inline">context="dev"</code> cho seed data local.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KAFKA -->
+  <section class="section" id="kafka">
+    <div class="section-tag">13 — Messaging</div>
+    <h2>🌊 Kafka — Strategy & Configuration</h2>
+    <p>Topic design, partition strategy và consumer group config ảnh hưởng trực tiếp đến throughput và ordering guarantee.</p>
+
+    <h3>📐 Topic Naming Convention</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Pattern</th><th>Ví dụ</th><th>Mô tả</th></tr>
+        <tr><td><code class="inline">{domain}.{entity}.{event}</code></td><td><code class="inline">rider.ekyc.expired</code></td><td>Domain event — Kafka-native</td></tr>
+        <tr><td><code class="inline">{service}.{entity}.{action}</code></td><td><code class="inline">rider-svc.policy.submitted</code></td><td>Service event</td></tr>
+        <tr><td><code class="inline">{env}.{domain}.{event}</code></td><td><code class="inline">prod.rider.ekyc.expired</code></td><td>Multi-env trên 1 cluster</td></tr>
+        <tr><td><code class="inline">{service}.dlq</code></td><td><code class="inline">rider-svc.dlq</code></td><td>Dead Letter Queue</td></tr>
+      </table>
+    </div>
+
+    <h3>⚙️ Partition Strategy</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">🔑</div>
+        <div class="card-title">Dùng Partition Key đúng</div>
+        <div class="card-desc">Key = <code class="inline">policyNumber</code> hoặc <code class="inline">customerId</code> → tất cả event của 1 policy luôn vào cùng partition → đảm bảo ordering per-policy.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📊</div>
+        <div class="card-title">Số Partition</div>
+        <div class="card-desc">Partition = max consumer instances dự kiến. Bắt đầu với 6-12 partition. Tăng dễ, giảm không được — tính toán kỹ từ đầu.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">⏱️</div>
+        <div class="card-title">Retention Policy</div>
+        <div class="card-desc">Business event: <code class="inline">retention.ms=7d</code>. Audit log: <code class="inline">30d</code>. Temp/notification: <code class="inline">1d</code>.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🔁</div>
+        <div class="card-title">Replication Factor</div>
+        <div class="card-desc">Production: RF=3 (min.insync.replicas=2). Dev/staging: RF=1 để tiết kiệm.</div>
+      </div>
+    </div>
+
+    <h3>📄 Spring Boot Kafka Config</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 application.yml — Kafka consumer/producer</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>spring:
+  kafka:
+    bootstrap-servers: <span class="hl-str">${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}</span>
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: <span class="hl-str">all</span>          <span class="hl-cmt"># wait tất cả ISR ack → durability cao nhất</span>
+      retries: <span class="hl-num">3</span>
+      properties:
+        enable.idempotence: <span class="hl-kw">true</span>    <span class="hl-cmt"># exactly-once producer</span>
+        max.in.flight.requests.per.connection: <span class="hl-num">5</span>
+
+    consumer:
+      group-id: <span class="hl-str">${spring.application.name}</span>
+      auto-offset-reset: earliest
+      enable-auto-commit: <span class="hl-kw">false</span>   <span class="hl-cmt"># manual ack — dùng AckMode.MANUAL</span>
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "com.company.*"
+        max.poll.records: <span class="hl-num">50</span>       <span class="hl-cmt"># số record mỗi lần poll</span>
+        max.poll.interval.ms: <span class="hl-num">300000</span> <span class="hl-cmt"># 5 phút — tránh rebalance khi xử lý lâu</span>
+
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+      concurrency: <span class="hl-num">3</span>             <span class="hl-cmt"># 3 thread consumer / pod</span></code></pre>
+    </div>
+
+    <h3>🛡️ Dead Letter Topic Pattern</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☕ KafkaConsumerConfig.java</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">@Bean</span>
+<span class="hl-kw">public</span> DefaultErrorHandler errorHandler(KafkaTemplate&lt;String, Object&gt; template) {
+    <span class="hl-cmt">// Gửi message lỗi sang DLT sau 3 lần retry</span>
+    DeadLetterPublishingRecoverer recoverer =
+        <span class="hl-kw">new</span> <span class="hl-fn">DeadLetterPublishingRecoverer</span>(template,
+            (record, ex) -&gt; <span class="hl-kw">new</span> TopicPartition(
+                record.topic() + <span class="hl-str">".DLT"</span>, record.partition()));
+
+    <span class="hl-cmt">// Exponential backoff: 1s → 2s → 4s</span>
+    ExponentialBackOffWithMaxRetries backoff =
+        <span class="hl-kw">new</span> <span class="hl-fn">ExponentialBackOffWithMaxRetries</span>(<span class="hl-num">3</span>);
+    backoff.<span class="hl-fn">setInitialInterval</span>(<span class="hl-num">1000L</span>);
+    backoff.<span class="hl-fn">setMultiplier</span>(<span class="hl-num">2.0</span>);
+
+    DefaultErrorHandler handler = <span class="hl-kw">new</span> <span class="hl-fn">DefaultErrorHandler</span>(recoverer, backoff);
+    <span class="hl-cmt">// Không retry deserialization error</span>
+    handler.<span class="hl-fn">addNotRetryableExceptions</span>(DeserializationException.<span class="hl-kw">class</span>);
+    <span class="hl-kw">return</span> handler;
+}</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Consumer Group Naming</div>
+      Mỗi service dùng <strong>1 consumer group riêng</strong>. Không share consumer group giữa các service khác nhau. Nếu 2 instance của cùng service → cùng group → Kafka tự load balance partition giữa chúng.
+    </div>
+  </section>
+
+  <!-- API SECURITY -->
+  <section class="section" id="security">
+    <div class="section-tag">14 — Security</div>
+    <h2>🛡️ API Security</h2>
+    <p>JWT validation, OAuth2 resource server, rate limiting và CORS config cho Spring Boot 3.x.</p>
+
+    <h3>🔑 Spring Security — JWT Resource Server</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☕ SecurityConfig.java</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">@Configuration</span>
+<span class="hl-key">@EnableWebSecurity</span>
+<span class="hl-kw">public class</span> <span class="hl-fn">SecurityConfig</span> {
+
+  <span class="hl-key">@Bean</span>
+  <span class="hl-kw">public</span> SecurityFilterChain <span class="hl-fn">filterChain</span>(HttpSecurity http) <span class="hl-kw">throws</span> Exception {
+    <span class="hl-kw">return</span> http
+      .<span class="hl-fn">csrf</span>(AbstractHttpConfigurer::disable)
+      .<span class="hl-fn">sessionManagement</span>(s -&gt; s
+        .<span class="hl-fn">sessionCreationPolicy</span>(SessionCreationPolicy.STATELESS))
+      .<span class="hl-fn">authorizeHttpRequests</span>(auth -&gt; auth
+        .<span class="hl-fn">requestMatchers</span>(<span class="hl-str">"/actuator/health/**"</span>).permitAll()
+        .<span class="hl-fn">requestMatchers</span>(HttpMethod.GET, <span class="hl-str">"/api/public/**"</span>).permitAll()
+        .<span class="hl-fn">requestMatchers</span>(<span class="hl-str">"/api/admin/**"</span>).<span class="hl-fn">hasRole</span>(<span class="hl-str">"ADMIN"</span>)
+        .<span class="hl-fn">anyRequest</span>().authenticated())
+      .<span class="hl-fn">oauth2ResourceServer</span>(oauth2 -&gt; oauth2
+        .<span class="hl-fn">jwt</span>(jwt -&gt; jwt.<span class="hl-fn">jwtAuthenticationConverter</span>(<span class="hl-fn">jwtConverter</span>())))
+      .<span class="hl-fn">build</span>();
+  }
+
+  <span class="hl-key">@Bean</span>
+  <span class="hl-kw">public</span> JwtAuthenticationConverter <span class="hl-fn">jwtConverter</span>() {
+    JwtGrantedAuthoritiesConverter grantedConverter = <span class="hl-kw">new</span> <span class="hl-fn">JwtGrantedAuthoritiesConverter</span>();
+    grantedConverter.<span class="hl-fn">setAuthoritiesClaimName</span>(<span class="hl-str">"roles"</span>); <span class="hl-cmt">// custom claim</span>
+    grantedConverter.<span class="hl-fn">setAuthorityPrefix</span>(<span class="hl-str">"ROLE_"</span>);
+    JwtAuthenticationConverter converter = <span class="hl-kw">new</span> <span class="hl-fn">JwtAuthenticationConverter</span>();
+    converter.<span class="hl-fn">setJwtGrantedAuthoritiesConverter</span>(grantedConverter);
+    <span class="hl-kw">return</span> converter;
+  }
+}</code></pre>
+    </div>
+
+    <h3>⚡ Rate Limiting với Bucket4j + Redis</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 application.yml — Bucket4j config</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>bucket4j:
+  enabled: <span class="hl-kw">true</span>
+  cache-to-use: redis-lettuce
+  filters:
+    - cache-name: rate-limit-buckets
+      url: /api/.*
+      rate-limits:
+        - bandwidths:
+          <span class="hl-cmt"># 100 request / phút per IP</span>
+          - capacity: <span class="hl-num">100</span>
+            time: <span class="hl-num">1</span>
+            unit: minutes
+            refill-speed: intervally
+      filter-method: servlet
+      http-response-body: <span class="hl-str">'{"error":"Rate limit exceeded","retryAfter":"${rate-limit.retry-after}"}'</span></code></pre>
+    </div>
+
+    <h3>🌐 CORS Configuration</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☕ CorsConfig.java</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">@Bean</span>
+<span class="hl-kw">public</span> CorsConfigurationSource <span class="hl-fn">corsConfigurationSource</span>() {
+  CorsConfiguration config = <span class="hl-kw">new</span> <span class="hl-fn">CorsConfiguration</span>();
+
+  <span class="hl-cmt">// Chỉ cho phép domain cụ thể — KHÔNG dùng "*" ở prod</span>
+  config.<span class="hl-fn">setAllowedOriginPatterns</span>(List.of(
+    <span class="hl-str">"https://*.company.com"</span>,
+    <span class="hl-str">"http://localhost:[*]"</span>    <span class="hl-cmt">// chỉ local dev</span>
+  ));
+  config.<span class="hl-fn">setAllowedMethods</span>(List.of(<span class="hl-str">"GET"</span>, <span class="hl-str">"POST"</span>, <span class="hl-str">"PUT"</span>, <span class="hl-str">"DELETE"</span>, <span class="hl-str">"OPTIONS"</span>));
+  config.<span class="hl-fn">setAllowedHeaders</span>(List.of(<span class="hl-str">"Authorization"</span>, <span class="hl-str">"Content-Type"</span>, <span class="hl-str">"X-Request-ID"</span>));
+  config.<span class="hl-fn">setAllowCredentials</span>(<span class="hl-kw">true</span>);
+  config.<span class="hl-fn">setMaxAge</span>(<span class="hl-num">3600L</span>); <span class="hl-cmt">// cache preflight 1h</span>
+
+  UrlBasedCorsConfigurationSource source = <span class="hl-kw">new</span> <span class="hl-fn">UrlBasedCorsConfigurationSource</span>();
+  source.<span class="hl-fn">registerCorsConfiguration</span>(<span class="hl-str">"/api/**"</span>, config);
+  <span class="hl-kw">return</span> source;
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- HELM -->
+  <section class="section" id="helm">
+    <div class="section-tag">15 — Packaging</div>
+    <h2>📦 Helm Charts</h2>
+    <p>Package K8s manifests thành Helm chart — tái sử dụng, override values per environment, dễ rollback.</p>
+
+    <h3>📁 Chart Structure</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📂 helm/rider-service/</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>helm/rider-service/
+├── Chart.yaml
+├── values.yaml           <span class="hl-cmt"># default values</span>
+├── values-staging.yaml   <span class="hl-cmt"># override cho staging</span>
+├── values-prod.yaml      <span class="hl-cmt"># override cho production</span>
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── configmap.yaml
+    ├── hpa.yaml
+    └── _helpers.tpl      <span class="hl-cmt"># template helpers</span></code></pre>
+    </div>
+
+    <h3>📝 values.yaml — cấu hình chung</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 values.yaml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>replicaCount: <span class="hl-num">2</span>
+
+image:
+  repository: registry.gitlab.com/company/rider-service
+  tag: <span class="hl-str">"latest"</span>
+  pullPolicy: IfNotPresent
+
+service:
+  port: <span class="hl-num">80</span>
+  targetPort: <span class="hl-num">8080</span>
+
+ingress:
+  enabled: <span class="hl-kw">true</span>
+  host: api.company.com
+  path: /api/rider
+
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits:   { cpu: 500m, memory: 1Gi }
+
+autoscaling:
+  enabled: <span class="hl-kw">true</span>
+  minReplicas: <span class="hl-num">2</span>
+  maxReplicas: <span class="hl-num">10</span>
+  targetCPUUtilizationPercentage: <span class="hl-num">70</span>
+
+env:
+  SPRING_PROFILES_ACTIVE: prod
+  KAFKA_BOOTSTRAP_SERVERS: kafka.prod.internal:9092</code></pre>
+    </div>
+
+    <h3>📝 values-staging.yaml — override</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 values-staging.yaml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>replicaCount: <span class="hl-num">1</span>   <span class="hl-cmt"># tiết kiệm resource</span>
+
+ingress:
+  host: api.staging.company.com
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits:   { cpu: 250m, memory: 512Mi }
+
+autoscaling:
+  enabled: <span class="hl-kw">false</span>   <span class="hl-cmt"># không cần HPA cho staging</span>
+
+env:
+  SPRING_PROFILES_ACTIVE: staging
+  KAFKA_BOOTSTRAP_SERVERS: kafka.staging.internal:9092</code></pre>
+    </div>
+
+    <h3>🚀 Deploy command trong CI/CD</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🦊 .gitlab-ci.yml — helm deploy</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>deploy-staging:
+  image: alpine/helm:<span class="hl-str">3.14</span>
+  script:
+    - helm upgrade --install rider-service ./helm/rider-service
+        --namespace staging
+        --values helm/rider-service/values.yaml
+        --values helm/rider-service/values-staging.yaml
+        --set image.tag=$CI_COMMIT_SHA
+        --atomic        <span class="hl-cmt"># auto rollback nếu deploy fail</span>
+        --timeout 5m
+        --wait</code></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ --atomic flag</div>
+      <code class="inline">--atomic</code> tự động rollback về version trước nếu deployment không thành công trong timeout. Kết hợp <code class="inline">--wait</code> để Helm đợi readiness probe pass trước khi mark success.
+    </div>
+  </section>
+
+  <!-- DISTRIBUTED TRACING -->
+  <section class="section" id="tracing">
+    <div class="section-tag">16 — Observability</div>
+    <h2>🔎 Distributed Tracing</h2>
+    <p>Trace request xuyên suốt từ API Gateway → Service A → Service B → DB bằng OpenTelemetry + Micrometer Tracing.</p>
+
+    <h3>🏗️ Trace Flow qua Feign Calls</h3>
+    <div class="arch-box">
+      <div class="arch-label" style="color:var(--muted2);margin-bottom:12px">Trace ID propagate qua HTTP header <code style="color:var(--accent-lt)">traceparent</code></div>
+      <div class="arch-row">
+        <div class="arch-node cyan">Client Request<br><span style="font-size:10px">traceId=abc123</span></div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓ traceparent header</div></div>
+      <div class="arch-row">
+        <div class="arch-node accent">API Gateway<br><span style="font-size:10px">spanId=span-01</span></div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓ Feign Client</div></div>
+      <div class="arch-row">
+        <div class="arch-node green">Rider Service<br><span style="font-size:10px">spanId=span-02</span></div>
+        <div class="arch-arrow">→ Feign →</div>
+        <div class="arch-node green">Term Life Svc<br><span style="font-size:10px">spanId=span-03</span></div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓</div></div>
+      <div class="arch-row">
+        <div class="arch-node amber">PostgreSQL<br><span style="font-size:10px">spanId=span-04</span></div>
+        <div class="arch-arrow">·</div>
+        <div class="arch-node amber">Kafka Publish<br><span style="font-size:10px">spanId=span-05</span></div>
+      </div>
+      <div class="arch-label" style="margin-top:12px">→ Toàn bộ spans gửi về Tempo/Jaeger → Grafana hiển thị waterfall</div>
+    </div>
+
+    <h3>📦 Dependencies — pom.xml</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 pom.xml — tracing dependencies</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-cmt">&lt;!-- Micrometer Tracing (Spring Boot 3.x) --&gt;</span>
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-tracing-bridge-otel&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+  &lt;artifactId&gt;opentelemetry-exporter-otlp&lt;/artifactId&gt;
+&lt;/dependency&gt;
+<span class="hl-cmt">&lt;!-- Tự động instrument Feign, JDBC, Kafka --&gt;</span>
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-tracing&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+
+    <h3>📄 application.yml — OTel config</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 application.yml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>management:
+  tracing:
+    sampling:
+      probability: <span class="hl-num">0.1</span>   <span class="hl-cmt"># sample 10% traffic — tránh overhead</span>
+  otlp:
+    tracing:
+      endpoint: <span class="hl-str">${OTEL_EXPORTER_OTLP_ENDPOINT:http://tempo:4318}/v1/traces</span>
+
+<span class="hl-cmt"># Trace ID xuất hiện trong log</span>
+logging:
+  pattern:
+    level: <span class="hl-str">"%5p [${spring.application.name},%X{traceId},%X{spanId}]"</span></code></pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">ℹ️ Sampling Strategy</div>
+      Production: sample <strong>10%</strong> để giảm cost/overhead. Staging: <strong>100%</strong> để debug dễ. Với request lỗi, dùng <strong>Error Sampling</strong> — luôn sample 100% request có error dù tỉ lệ chung là 10%.
+    </div>
+  </section>
+
+  <!-- GITOPS -->
+  <section class="section" id="gitops">
+    <div class="section-tag">17 — GitOps</div>
+    <h2>⚙️ GitOps với ArgoCD</h2>
+    <p>Git là source of truth duy nhất — ArgoCD tự đồng bộ cluster với trạng thái trong repo.</p>
+
+    <h3>🔄 GitOps Flow</h3>
+    <div class="arch-box">
+      <div class="arch-row">
+        <div class="arch-node green">Developer push code</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node green">GitLab CI build &amp; push image</div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓ CI update image tag trong git-ops repo</div></div>
+      <div class="arch-row">
+        <div class="arch-node accent">git-ops repo<br><span style="font-size:10px">helm/values-prod.yaml: tag=abc123</span></div>
+      </div>
+      <div class="arch-row"><div class="arch-arrow">↓ ArgoCD poll mỗi 3 phút (hoặc webhook)</div></div>
+      <div class="arch-row">
+        <div class="arch-node cyan">ArgoCD detect diff → sync</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node cyan">EKS cluster updated</div>
+      </div>
+    </div>
+
+    <h3>📝 ArgoCD Application manifest</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☸️ argocd-app.yaml</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rider-service-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.company.com/infra/gitops-repo.git
+    targetRevision: main
+    path: helm/rider-service
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    automated:
+      prune: <span class="hl-kw">true</span>     <span class="hl-cmt"># xóa resource không còn trong git</span>
+      selfHeal: <span class="hl-kw">true</span>   <span class="hl-cmt"># revert manual change trên cluster</span>
+    syncOptions:
+      - CreateNamespace=true</code></pre>
+    </div>
+
+    <h3>🔧 CI job — update image tag trong gitops repo</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">🦊 .gitlab-ci.yml — update-gitops job</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>update-gitops:
+  stage: deploy
+  image: alpine/git
+  script:
+    - git clone https://oauth2:$GITOPS_TOKEN@gitlab.company.com/infra/gitops-repo.git
+    - cd gitops-repo
+    <span class="hl-cmt"># Dùng yq để update image tag trong values file</span>
+    - yq e <span class="hl-str">'.image.tag = "'$CI_COMMIT_SHA'"'</span> -i helm/rider-service/values-prod.yaml
+    - git config user.email <span class="hl-str">"ci@company.com"</span>
+    - git config user.name <span class="hl-str">"GitLab CI"</span>
+    - git commit -am <span class="hl-str">"ci: update rider-service to $CI_COMMIT_SHA"</span>
+    - git push
+  rules:
+    - if: <span class="hl-str">$CI_COMMIT_BRANCH == "main"</span></code></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-label">✅ Lợi ích GitOps</div>
+      <strong>Audit trail:</strong> Mọi thay đổi infrastructure đều có git commit, reviewer, timestamp.<br>
+      <strong>Rollback:</strong> <code class="inline">git revert</code> là đủ — ArgoCD tự sync lại.<br>
+      <strong>Drift detection:</strong> ArgoCD báo ngay khi cluster bị ai đó <code class="inline">kubectl apply</code> thủ công.
+    </div>
+  </section>
+
+  <!-- TESTING -->
+  <section class="section" id="testing">
+    <div class="section-tag">18 — Quality</div>
+    <h2>🧪 Testing Strategy</h2>
+    <p>Testing pyramid cho microservices: nhiều unit test, ít integration test, rất ít E2E.</p>
+
+    <div class="arch-box" style="text-align:center">
+      <div style="display:inline-block;width:100%;max-width:420px">
+        <div style="background:rgba(240,107,107,.15);border:1px solid var(--red);border-radius:8px 8px 0 0;padding:10px;font-size:13px;color:var(--red)">
+          🌐 E2E / Contract Tests — ít nhất, chậm nhất
+        </div>
+        <div style="background:rgba(245,166,35,.12);border:1px solid var(--amber);border-left:1px solid var(--amber);border-right:1px solid var(--amber);padding:12px;font-size:13px;color:var(--amber)">
+          🔗 Integration Tests — @SpringBootTest, Testcontainers
+        </div>
+        <div style="background:rgba(62,207,142,.1);border:1px solid var(--green);border-radius:0 0 8px 8px;padding:16px;font-size:13px;color:var(--green)">
+          ⚡ Unit Tests — JUnit 5 + Mockito — nhanh nhất, nhiều nhất
+        </div>
+      </div>
+    </div>
+
+    <h3>⚡ Unit Test — Mockito</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☕ RiderServiceTest.java</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">@ExtendWith</span>(MockitoExtension.<span class="hl-kw">class</span>)
+<span class="hl-kw">class</span> <span class="hl-fn">RiderServiceTest</span> {
+
+  <span class="hl-key">@Mock</span> RiderRepository repository;
+  <span class="hl-key">@Mock</span> EbaoFeignClient ebaoClient;
+  <span class="hl-key">@InjectMocks</span> RiderService riderService;
+
+  <span class="hl-key">@Test</span>
+  <span class="hl-kw">void</span> <span class="hl-fn">shouldSubmitExpiredRider</span>() {
+    <span class="hl-cmt">// Given</span>
+    RiderEkycRecord record = RiderEkycRecord.builder()
+      .policyNumber(<span class="hl-str">"POL-001"</span>)
+      .status(EkycStatus.EXPIRED)
+      .build();
+    given(repository.findByStatus(EkycStatus.EXPIRED)).willReturn(List.of(record));
+    given(ebaoClient.submitRider(any())).willReturn(EbaoResponse.success());
+
+    <span class="hl-cmt">// When</span>
+    riderService.processExpiredRiders();
+
+    <span class="hl-cmt">// Then</span>
+    verify(ebaoClient, times(<span class="hl-num">1</span>)).submitRider(any());
+    verify(repository).save(argThat(r -&gt;
+      r.getStatus() == EkycStatus.SUBMITTED));
+  }
+}</code></pre>
+    </div>
+
+    <h3>🔗 Integration Test — Testcontainers</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☕ RiderRepositoryIT.java</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">@SpringBootTest</span>
+<span class="hl-key">@Testcontainers</span>
+<span class="hl-kw">class</span> <span class="hl-fn">RiderRepositoryIT</span> {
+
+  <span class="hl-key">@Container</span>
+  <span class="hl-kw">static</span> PostgreSQLContainer&lt;?&gt; postgres =
+    <span class="hl-kw">new</span> <span class="hl-fn">PostgreSQLContainer</span>(<span class="hl-str">"postgres:16-alpine"</span>)
+      .withDatabaseName(<span class="hl-str">"rider_test"</span>);
+
+  <span class="hl-key">@DynamicPropertySource</span>
+  <span class="hl-kw">static void</span> <span class="hl-fn">configureProperties</span>(DynamicPropertyRegistry registry) {
+    registry.add(<span class="hl-str">"spring.datasource.url"</span>, postgres::getJdbcUrl);
+    registry.add(<span class="hl-str">"spring.datasource.username"</span>, postgres::getUsername);
+    registry.add(<span class="hl-str">"spring.datasource.password"</span>, postgres::getPassword);
+  }
+
+  <span class="hl-key">@Autowired</span> RiderRepository repository;
+
+  <span class="hl-key">@Test</span>
+  <span class="hl-kw">void</span> <span class="hl-fn">shouldFindExpiredRecordsWithSkipLocked</span>() {
+    <span class="hl-cmt">// Test query FOR UPDATE SKIP LOCKED</span>
+    List&lt;RiderEkycRecord&gt; results =
+      repository.findExpiredForUpdate(LocalDate.now(), PageRequest.of(<span class="hl-num">0</span>, <span class="hl-num">10</span>));
+    assertThat(results).isNotNull();
+  }
+}</code></pre>
+    </div>
+
+    <h3>📊 Coverage gate trong CI</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 pom.xml — JaCoCo coverage gate</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>&lt;plugin&gt;
+  &lt;groupId&gt;org.jacoco&lt;/groupId&gt;
+  &lt;artifactId&gt;jacoco-maven-plugin&lt;/artifactId&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;id&gt;check&lt;/id&gt;
+      &lt;goals&gt;&lt;goal&gt;check&lt;/goal&gt;&lt;/goals&gt;
+      &lt;configuration&gt;
+        &lt;rules&gt;
+          &lt;rule&gt;
+            &lt;limits&gt;
+              &lt;limit&gt;
+                &lt;counter&gt;LINE&lt;/counter&gt;
+                &lt;value&gt;COVEREDRATIO&lt;/value&gt;
+                &lt;minimum&gt;0.70&lt;/minimum&gt;  <span class="hl-cmt">&lt;!-- fail nếu &lt; 70% --&gt;</span>
+              &lt;/limit&gt;
+            &lt;/limits&gt;
+          &lt;/rule&gt;
+        &lt;/rules&gt;
+      &lt;/configuration&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- RESILIENCE -->
+  <section class="section" id="resilience">
+    <div class="section-tag">19 — Resilience</div>
+    <h2>💥 Resilience — Circuit Breaker, Retry, Timeout</h2>
+    <p>Hệ thống microservices phải thiết kế để <em>fail gracefully</em> — một service chết không kéo cả chain chết theo.</p>
+
+    <h3>🔌 Resilience4j — Spring Boot 3.x</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">📄 application.yml — Resilience4j config</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>resilience4j:
+  <span class="hl-cmt"># Circuit Breaker cho eBao external call</span>
+  circuitbreaker:
+    instances:
+      ebao-client:
+        slidingWindowSize: <span class="hl-num">20</span>
+        failureRateThreshold: <span class="hl-num">50</span>      <span class="hl-cmt"># OPEN khi 50% requests fail</span>
+        slowCallRateThreshold: <span class="hl-num">80</span>      <span class="hl-cmt"># OPEN khi 80% calls > slowCallDuration</span>
+        slowCallDurationThreshold: 3s
+        waitDurationInOpenState: 30s   <span class="hl-cmt"># đợi 30s trước khi thử lại</span>
+        permittedNumberOfCallsInHalfOpenState: <span class="hl-num">5</span>
+        automaticTransitionFromOpenToHalfOpenEnabled: <span class="hl-kw">true</span>
+
+  <span class="hl-cmt"># Retry cho Feign calls</span>
+  retry:
+    instances:
+      ebao-client:
+        maxAttempts: <span class="hl-num">3</span>
+        waitDuration: 500ms
+        enableExponentialBackoff: <span class="hl-kw">true</span>
+        exponentialBackoffMultiplier: <span class="hl-num">2</span>
+        retryExceptions:
+          - feign.RetryableException
+          - java.net.ConnectException
+
+  <span class="hl-cmt"># Timeout</span>
+  timelimiter:
+    instances:
+      ebao-client:
+        timeoutDuration: 5s
+        cancelRunningFuture: <span class="hl-kw">true</span></code></pre>
+    </div>
+
+    <h3>☕ Áp dụng annotations</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+        <div class="code-lang">☕ EbaoService.java</div>
+        <button class="code-copy" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="hl-key">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-fn">EbaoService</span> {
+
+  <span class="hl-cmt">// Thứ tự: TimeLimiter → CircuitBreaker → Retry → Bulkhead</span>
+  <span class="hl-key">@TimeLimiter</span>(name = <span class="hl-str">"ebao-client"</span>)
+  <span class="hl-key">@CircuitBreaker</span>(name = <span class="hl-str">"ebao-client"</span>, fallbackMethod = <span class="hl-str">"submitFallback"</span>)
+  <span class="hl-key">@Retry</span>(name = <span class="hl-str">"ebao-client"</span>)
+  <span class="hl-kw">public</span> CompletableFuture&lt;EbaoResponse&gt; <span class="hl-fn">submitRider</span>(RiderRequest request) {
+    <span class="hl-kw">return</span> CompletableFuture.supplyAsync(
+      () -&gt; ebaoFeignClient.submit(request));
+  }
+
+  <span class="hl-cmt">// Fallback khi Circuit Breaker OPEN</span>
+  <span class="hl-kw">public</span> CompletableFuture&lt;EbaoResponse&gt; <span class="hl-fn">submitFallback</span>(
+      RiderRequest req, Throwable ex) {
+    log.warn(<span class="hl-str">"eBao circuit open, queuing for retry: {}"</span>, ex.getMessage());
+    <span class="hl-cmt">// Lưu vào outbox table để retry sau</span>
+    outboxService.save(req);
+    <span class="hl-kw">return</span> CompletableFuture.completedFuture(EbaoResponse.queued());
+  }
+}</code></pre>
+    </div>
+
+    <h3>📊 Circuit Breaker States</h3>
+    <div class="arch-box">
+      <div class="arch-row">
+        <div class="arch-node green">CLOSED<br><span style="font-size:10px">bình thường</span></div>
+        <div class="arch-arrow">→ 50% fail →</div>
+        <div class="arch-node red">OPEN<br><span style="font-size:10px">fail fast</span></div>
+        <div class="arch-arrow">→ sau 30s →</div>
+        <div class="arch-node amber">HALF-OPEN<br><span style="font-size:10px">thử 5 req</span></div>
+      </div>
+      <div class="arch-label" style="margin-top:10px">HALF-OPEN: success → CLOSED &nbsp;|&nbsp; fail → OPEN lại</div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-ico">🏊</div>
+        <div class="card-title">Bulkhead Pattern</div>
+        <div class="card-desc">Giới hạn số concurrent calls đến một service. Nếu eBao chậm, chỉ tối đa N thread bị block — service còn lại vẫn healthy.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">📮</div>
+        <div class="card-title">Outbox Pattern</div>
+        <div class="card-desc">Khi Circuit OPEN, lưu request vào outbox table. Scheduler chạy lại khi service recover. Không mất data.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">🩺</div>
+        <div class="card-title">Health Indicator</div>
+        <div class="card-desc">Expose circuit breaker state qua <code class="inline">/actuator/health</code>. K8s có thể dùng để drain pod khi nhiều CBs đang OPEN.</div>
+      </div>
+      <div class="card">
+        <div class="card-ico">⏳</div>
+        <div class="card-title">Timeout Hierarchy</div>
+        <div class="card-desc">Feign timeout &lt; Resilience4j TimeLimiter &lt; Nginx proxy timeout. Nếu ngược lại → timeout ở tầng ngoài trước, tầng trong không có cơ hội retry.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p style="color:var(--muted);font-size:13px;text-align:center">
+      🏁 Infra Guide — Infrastructure & DevOps · Hanoi 2025 ·
+      <span style="font-family:var(--font-mono)">v2.0.0</span>
+    </p>
+  </section>
+
+</main>
+
+<script>
+  // Sidebar navigation
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // Copy code
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied!';
+      btn.style.color = 'var(--green)';
+      setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  // Highlight active section on scroll
+  const sections = ['hero','ip','domain','mapping','docker','compose','nginx','gitlab','runner','eks','secrets','monitoring','liquibase','kafka','security','helm','tracing','gitops','testing','resilience'];
+  const links = document.querySelectorAll('.sb-link');
+
+  function updateActive() {
+    let current = 'hero';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 100) current = id;
+    });
+    links.forEach(l => {
+      l.classList.remove('active');
+      if (l.getAttribute('onclick')?.includes(`'${current}'`)) l.classList.add('active');
+    });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+</script>
+</body>
+</html>
